@@ -1,0 +1,11 @@
+[package]
+name = "termimad"
+version = "0.1.0"
+authors = ["Canop <cano.petrole@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+lazy_static = "1.2"
+#minimad = { path = "../minimad" }
+minimad = { git = "https://github.com/Canop/minimad" }
+crossterm = "0.9.4"
