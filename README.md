@@ -1,13 +1,42 @@
+[![MIT][s2]][l2] [![Latest Version][s1]][l1] [![docs][s3]][l3] [![Chat on Miaou][s4]][l4]
 
-A simple tool to display static or dynamic Markdown snippets in the terminal, with custom styles.
+[s1]: https://img.shields.io/crates/v/termimad.svg
+[l1]: https://crates.io/crates/termimad
+
+[s2]: https://img.shields.io/badge/license-MIT-blue.svg
+[l2]: termimad/LICENSE
+
+[s3]: https://docs.rs/termimad/badge.svg
+[l3]: https://docs.rs/termimad/
+
+[s4]: https://miaou.dystroy.org/static/shields/room.svg
+[l4]: https://miaou.dystroy.org/3
+
+
+A simple tool to display static or dynamic Markdown snippets in the terminal, with skin isolation.
 
 Based on crossterm so works on most terminals (even on windows).
 
-##  Examples
+![text](doc/text.png)
+
+Note that termimad isn't a Terminal-UI toolkit and doesn't solve non markdown related problems.
+
+##  Usage
+
+```toml
+[dependencies]
+termimad = "0.2"
+```
 
 ### With the default skin:
 
-    termimad::println("**Some** *nested **style*** and `some(code)`");
+```rust
+termimad::print_line("**some** *nested **style*** and `some(code)`");
+```
+or
+```rust
+print!("{}", termimad.line("**some** *nested **style*** and `some(code)`"));
+```
 
 Result:
 
@@ -15,12 +44,14 @@ Result:
 
 ### With a custom skin:
 
-    let mut skin = MadSkin::new();
-    skin.bold = skin.bold.fg(Color::Yellow);
-    skin.println("*Hey* **World!** Here's `some(code)`");
-    skin.normal = skin.normal.bg(Color::Rgb{r:30, g:30, b:40}).fg(Color::Magenta);
-    skin.italic.add_attr(Attribute::Underlined);
-    println!("and now {}", skin.line("a little *too much* **style!** (and `some(code)` too)"));
+```rust
+let mut skin = MadSkin::new();
+skin.bold = skin.bold.fg(Yellow);
+skin.print_line_ln("*Hey* **World!** Here's `some(code)`");
+mad_colors!(skin.normal, Magenta, Rgb{r:30, g:30, b:40});
+skin.italic.add_attr(Underlined);
+println!("and now {}", skin.line("a little *too much* **style!** (and `some(code)` too)"));
+```
 
 Result:
 

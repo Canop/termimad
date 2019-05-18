@@ -1,11 +1,18 @@
 [package]
 name = "termimad"
 version = "0.1.0"
-authors = ["Canop <cano.petrole@gmail.com>"]
+authors = ["dystroy <denys.seguret@gmail.com>"]
+repository = "https://github.com/Canop/termimad"
+description = "Terminal Renderer for markdown snippets"
 edition = "2018"
+keywords = ["markdown", "terminal", "tui", "renderer", "parser"]
+license = "MIT"
+categories = ["Command-line interface"]
+readme = "README.md"
 
 [dependencies]
 lazy_static = "1.2"
+minimad = "0.2.2"
+#minimad = { git = "https://github.com/Canop/minimad" }
 #minimad = { path = "../minimad" }
-minimad = { git = "https://github.com/Canop/minimad" }
 crossterm = "0.9.4"
