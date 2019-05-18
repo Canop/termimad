@@ -1,13 +1,13 @@
 [package]
 name = "termimad"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 repository = "https://github.com/Canop/termimad"
 description = "Terminal Renderer for markdown snippets"
 edition = "2018"
 keywords = ["markdown", "terminal", "tui", "renderer", "parser"]
 license = "MIT"
-categories = ["Command-line interface"]
+categories = ["command-line-interface", "text-processing"]
 readme = "README.md"
 
 [dependencies]
