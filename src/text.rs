@@ -7,9 +7,7 @@ use crate::skin::MadSkin;
 static SPACES: &'static str = "                                                                ";
 
 /// a formatted text, implementing Display
-/// Can be indented by setting the value of `indent`
 pub struct FormattedText<'s, 't> {
-    pub indent: u8,
     pub skin: &'s MadSkin,
     pub text: Text<'t>,
 }
@@ -23,7 +21,6 @@ pub struct CodeBlock {
 impl<'s, 't> FormattedText<'s, 't> {
     pub fn new(skin: &'s MadSkin, text: &'t str) -> FormattedText<'s, 't> {
         FormattedText {
-            indent: 0,
             skin,
             text: Text::from(text),
         }
@@ -68,12 +65,17 @@ impl<'s, 't> FormattedText<'s, 't> {
             }
         }
     }
+    pub fn count_rows_per_line(&self, width: u16) -> Vec<usize> {
+        self.text.lines.iter().map(
+            |l| ((l.char_length() as u16 + width - 1) / width) as usize
+        ).collect()
+    }
 }
 
 impl fmt::Display for FormattedText<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for line in &self.text.lines {
-            self.skin.fmt_line(f, self.indent, line)?;
+            self.skin.fmt_line(f, line)?;
             writeln!(f)?;
         }
         Ok(())

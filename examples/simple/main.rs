@@ -30,5 +30,5 @@ fn main() {
     mad_colors!(skin.normal, Magenta, Rgb{r:30, g:30, b:40});
     skin.italic.add_attr(Underlined);
     skin.italic.add_attr(OverLined);
-    println!("and now {}", skin.line("a little *too much* **style!** (and `some(code)` too)"));
+    println!("and now {}\n", skin.line("a little *too much* **style!** (and `some(code)` too)"));
 }

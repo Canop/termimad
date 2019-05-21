@@ -3,13 +3,17 @@
 #[macro_use]
 extern crate lazy_static;
 
+mod area;
 mod line;
 mod skin;
 mod text;
+mod text_view;
 
+pub use area::Area;
 pub use skin::MadSkin;
-use line::FormattedLine;
-use text::FormattedText;
+pub use line::FormattedLine;
+pub use text::FormattedText;
+pub use text_view::TextView;
 
 fn get_default_skin<'s>() -> &'s MadSkin {
     lazy_static! {

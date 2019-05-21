@@ -33,7 +33,6 @@ fn main() {
     mad_fg!(skin.bold, Yellow);
     mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
     let mut text = skin.text(MD);
-    text.indent = 5;
     println!("{}", text);
     println!("\n");
 }

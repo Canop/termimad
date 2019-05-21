@@ -19,8 +19,6 @@ Based on crossterm so works on most terminals (even on windows).
 
 ![text](doc/text.png)
 
-Note that termimad isn't a Terminal-UI toolkit and doesn't solve non markdown related problems.
-
 ##  Usage
 
 ```toml

@@ -1,8 +1,24 @@
 use crate::line::FormattedLine;
+use crate::area::Area;
 use crate::text::FormattedText;
-use crossterm::{Attribute, Color, ObjectStyle};
-use minimad::{Compound, Line, LineStyle, MAX_HEADER_DEPTH};
+use crossterm::{Attribute, Color, ObjectStyle, StyledObject};
+use minimad::{Compound, Line, LineStyle, MAX_HEADER_DEPTH, Text};
 use std::fmt;
+
+pub struct ScrollBarStyle {
+    pub track: StyledObject<char>,
+    pub thumb: StyledObject<char>,
+}
+
+impl ScrollBarStyle {
+    pub fn new() -> ScrollBarStyle {
+        let char = '▐';
+        ScrollBarStyle {
+            track: ObjectStyle::new().fg(Color::DarkGrey).apply_to(char),
+            thumb: ObjectStyle::new().fg(Color::Grey).apply_to(char),
+        }
+    }
+}
 
 /// A skin defining how a parsed mardkown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
@@ -12,6 +28,7 @@ pub struct MadSkin {
     pub italic: ObjectStyle,
     pub code: ObjectStyle,
     pub headers: [ObjectStyle; MAX_HEADER_DEPTH],
+    pub scrollbar: ScrollBarStyle,
 }
 
 // overwrite style of a with b
@@ -50,6 +67,8 @@ macro_rules! mad_colors {
 }
 
 impl MadSkin {
+    /// build a customizable skin.
+    /// It's initialized with sensible monochrome settings.
     pub fn new() -> MadSkin {
         let mut skin = MadSkin {
             normal: ObjectStyle::new(),
@@ -57,6 +76,7 @@ impl MadSkin {
             italic: ObjectStyle::new(),
             code: ObjectStyle::new(),
             headers: Default::default(),
+            scrollbar: ScrollBarStyle::new(),
         };
         skin.bold.add_attr(Attribute::Bold);
         skin.italic.add_attr(Attribute::Italic);
@@ -119,6 +139,19 @@ impl MadSkin {
         text.right_pad_code_blocks();
         text
     }
+    // return a formatted text.
+    // Lines will be wrapped to fit in the width of the area (with
+    //  the space for the scrollbar)
+    // Code blocs will be right justified
+    pub fn wrapped_text<'s, 'l>(&'s self, src: &'l str, area: &Area) -> FormattedText<'s, 'l> {
+        let text = Text::from(src);
+        let mut text = FormattedText{
+            skin: self,
+            text: hard_wrap_text(&text, (area.width) as usize),
+        };
+        text.right_pad_code_blocks();
+        text
+    }
     pub fn print_line(&self, src: &str) {
         print!("{}", FormattedLine::new(self, src));
     }
@@ -128,10 +161,7 @@ impl MadSkin {
     pub fn print_text(&self, src: &str) {
         println!("{}", FormattedText::new(self, src));
     }
-    pub fn fmt_line(&self, f: &mut fmt::Formatter, indent: u8, line: &Line) -> fmt::Result {
-        if indent > 0 {
-            write!(f, "{}", " ".repeat(indent as usize))?;
-        }
+    pub fn fmt_line(&self, f: &mut fmt::Formatter, line: &Line) -> fmt::Result {
         let os = self.line_object_style(&line.style);
         if line.is_list_item() {
             write!(f, "• ")?;
@@ -143,3 +173,96 @@ impl MadSkin {
         Ok(())
     }
 }
+
+fn follow_up_line<'s>(line: &Line<'s>) -> Line<'s> {
+    Line {
+        style: match line.style {
+            LineStyle::ListItem => LineStyle::Normal,
+            _ => line.style,
+        },
+        compounds: Vec::new(),
+    }
+}
+
+fn hard_wrap_line<'s>(src_line: &Line<'s>, width: usize) -> Vec<Line<'s>> {
+    assert!(width > 4);
+    let mut lines = Vec::new();
+    let mut dst_line = Line {
+        style: src_line.style,
+        compounds: Vec::new(),
+    };
+    let mut ll = match src_line.style {
+        LineStyle::ListItem => 2, // space of the puce
+        _ => 0,
+    };
+    for sc in &src_line.compounds {
+        let s = sc.as_str();
+        let cl = s.chars().count();
+        if ll + cl <= width {
+            // we add the compound as is to the current line
+            dst_line.compounds.push(sc.clone());
+            ll += cl;
+            continue;
+        }
+        if ll + 2 >= width {
+            // we close the current line
+            let new_dst_line = follow_up_line(&dst_line);
+            lines.push(dst_line);
+            dst_line = new_dst_line;
+            ll = 0;
+        }
+        let mut c_start = 0;
+        for (idx, _char) in s.char_indices() {
+            ll += 1;
+            if ll == width {
+                dst_line.compounds.push(sc.sub(c_start, idx));
+                let new_dst_line = follow_up_line(&dst_line);
+                lines.push(dst_line);
+                dst_line = new_dst_line;
+                c_start = idx;
+                ll = 0;
+            }
+        }
+        if ll!=width {
+            dst_line.compounds.push(sc.tail(c_start));
+        }
+    }
+    lines.push(dst_line);
+    lines
+}
+fn hard_wrap_text<'s>(text: &Text<'s>, width: usize) -> Text<'s> {
+    assert!(width > 4);
+    let mut lines = Vec::new();
+    for src_line in &text.lines {
+        for line in hard_wrap_line(src_line, width) {
+            lines.push(line)
+        }
+    }
+    Text {
+        lines
+    }
+}
+
+#[test]
+pub fn hard_wrap() {
+    // build a text and check it
+    let src = "This is a *long* line which needs to be **broken**.\n\
+        And the text goes on with a list:\n\
+        * short item\n\
+        * a *somewhat longer item* (with a part in **bold**)";
+    println!("input text:\n{}", &src);
+    let src_text =  Text::from(&src);
+    assert_eq!(src_text.lines[0].char_length(), 45);
+    assert_eq!(src_text.lines[1].char_length(), 33);
+    assert_eq!(src_text.lines[2].char_length(), 10);
+    assert_eq!(src_text.lines[3].char_length(), 44);
+
+    // checking several wrapping widths
+    let text = hard_wrap_text(&src_text, 100);
+    assert_eq!(text.lines.len(), 4);
+    let text = hard_wrap_text(&src_text, 30);
+    assert_eq!(text.lines.len(), 7);
+    let text = hard_wrap_text(&src_text, 12);
+    assert_eq!(text.lines.len(), 12);
+}
+
