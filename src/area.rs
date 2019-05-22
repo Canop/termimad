@@ -44,4 +44,11 @@ impl Area {
     pub fn bottom(&self) -> u16 {
         return self.top + self.height - 1;
     }
+    pub fn pad(&mut self, dx: u16, dy: u16) {
+        // this will crash if padding is too big. feature?
+        self.left += dx;
+        self.top += dy;
+        self.width -= 2*dx;
+        self.height -= 2*dy;
+    }
 }

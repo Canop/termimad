@@ -1,5 +1,5 @@
 use std::fmt;
-use crossterm::{self, TerminalCursor};
+use crossterm::{self, TerminalCursor, Terminal, ClearType};
 use minimad::Line;
 
 use crate::skin::MadSkin;
@@ -46,12 +46,14 @@ impl<'a, 't> TextView<'a, 't> {
     }
     /// display the text in the area, taking the scroll into account.
     pub fn write(&self) {
+        let terminal = Terminal::new();
         let cursor = TerminalCursor::new();
         let scrollbar = self.scrollbar();
         let sx = self.area.left + self.area.width;
         let mut i = self.scroll as usize;
         for y in 0..=self.area.height {
             cursor.goto(self.area.left, self.area.top+y).unwrap();
+            terminal.clear(ClearType::UntilNewLine);
             if i < self.text.text.lines.len() {
                 let fl = DisplayableLine::new(
                     &self.text.skin,
@@ -72,11 +74,16 @@ impl<'a, 't> TextView<'a, 't> {
     }
     /// set the scroll amount.
     /// lines_count can be negative
-    pub fn try_scroll(&mut self, lines_count: i32) {
+    pub fn try_scroll_lines(&mut self, lines_count: i32) {
         self.scroll = (self.scroll + lines_count)
             .max(0)
             .min(self.content_height - (self.area.height as i32) + 1);
 
+    }
+    /// set the scroll amount.
+    /// lines_count can be negative
+    pub fn try_scroll_pages(&mut self, pages_count: i32) {
+        self.try_scroll_lines(pages_count * self.area.height as i32);
     }
 }
 

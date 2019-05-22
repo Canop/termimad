@@ -19,6 +19,8 @@ Based on crossterm so works on most terminals (even on windows).
 
 ![text](doc/text.png)
 
+Note that the goal isn't to display any markdown text with its various extensions (a terminal isn't really fit for that). The goal is rather to improve the display of texts in a terminal application when we want both the text and the skin to be easily configured.
+
 ##  Usage
 
 ```toml
@@ -54,4 +56,10 @@ println!("and now {}", skin.line("a little *too much* **style!** (and `some(code
 Result:
 
 ![too much style](doc/too_much.png)
+
+### Scrollable TextView in a raw terminal:
+
+![scrollable](doc/scrollable.png)
+
+The whole code for this example is in examples/scrollable.
 

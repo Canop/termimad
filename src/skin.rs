@@ -130,11 +130,11 @@ impl MadSkin {
         compound: &Compound,
     ) -> ObjectStyle {
         let mut os = line_object_style.clone();
-        if compound.bold {
-            add_style(&mut os, &self.bold);
-        }
         if compound.italic {
             add_style(&mut os, &self.italic);
+        }
+        if compound.bold {
+            add_style(&mut os, &self.bold);
         }
         if compound.code {
             add_style(&mut os, &self.code);
