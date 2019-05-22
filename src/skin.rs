@@ -5,6 +5,10 @@ use crossterm::{Attribute, Color, ObjectStyle, StyledObject};
 use minimad::{Compound, Line, LineStyle, MAX_HEADER_DEPTH, Text};
 use std::fmt;
 
+// The scrollbar style is defined by two styled chars, one
+//  for the track, and one for the thumb.
+// For the default styling only the fg color is defined
+//  and the char is ▐ but everything can be changed
 pub struct ScrollBarStyle {
     pub track: StyledObject<char>,
     pub thumb: StyledObject<char>,
@@ -149,10 +153,10 @@ impl MadSkin {
         text.right_pad_code_blocks();
         text
     }
-    // return a formatted text.
+    // return a formatted text adjusted for a specific area width.
     // Lines will be wrapped to fit in the width of the area (with
     //  the space for the scrollbar)
-    // Code blocs will be right justified
+    // Code blocs will be right justified.
     pub fn wrapped_text<'s, 'l>(&'s self, src: &'l str, area: &Area) -> FormattedText<'s, 'l> {
         let text = Text::from(src);
         let mut text = FormattedText{
@@ -194,9 +198,11 @@ fn follow_up_line<'s>(line: &Line<'s>) -> Line<'s> {
     }
 }
 
+/// cut the passed line in several lines fitting the given width
 fn hard_wrap_line<'s>(src_line: &Line<'s>, width: usize) -> Vec<Line<'s>> {
     assert!(width > 4);
     let mut lines = Vec::new();
+    let max_cut_back = width / 5;
     let mut dst_line = Line {
         style: src_line.style,
         compounds: Vec::new(),
@@ -222,15 +228,26 @@ fn hard_wrap_line<'s>(src_line: &Line<'s>, width: usize) -> Vec<Line<'s>> {
             ll = 0;
         }
         let mut c_start = 0;
-        for (idx, _char) in s.char_indices() {
+        let mut last_space: Option<usize> = None;
+        for (idx, char) in s.char_indices() {
             ll += 1;
+            if char.is_whitespace() {
+                last_space = Some(idx);
+            }
             if ll == width {
-                dst_line.compounds.push(sc.sub(c_start, idx));
+                let mut cut = idx;
+                if let Some(ls) = last_space {
+                    if ls + max_cut_back >= idx {
+                        cut = ls;
+                    }
+                }
+                dst_line.compounds.push(sc.sub(c_start, cut));
                 let new_dst_line = follow_up_line(&dst_line);
                 lines.push(dst_line);
                 dst_line = new_dst_line;
-                c_start = idx;
-                ll = 0;
+                c_start = cut;
+                last_space = None;
+                ll = idx - cut;
             }
         }
         if ll!=width {
