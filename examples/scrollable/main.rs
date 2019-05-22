@@ -81,7 +81,7 @@ It's just a text put in an area, tracking your **scroll** position (and whether 
 
 ## Really Scrolling
 
-Not two applications handle events in the same way. **Termimad** doesn't try to handle this but lets you write it yourself, which is fairly easily with **Crossterm** for example:
+Not two applications handle events in the same way. **Termimad** doesn't try to handle this but lets you write it yourself, which is fairly easily done with **Crossterm** for example:
 
     let mut events = TerminalInput::new().read_sync();
     loop {

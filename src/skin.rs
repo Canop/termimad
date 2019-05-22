@@ -208,7 +208,7 @@ fn hard_wrap_line<'s>(src_line: &Line<'s>, width: usize) -> Vec<Line<'s>> {
         compounds: Vec::new(),
     };
     let mut ll = match src_line.style {
-        LineStyle::ListItem => 2, // space of the puce
+        LineStyle::ListItem => 2, // space of the bullet
         _ => 0,
     };
     for sc in &src_line.compounds {
