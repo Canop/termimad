@@ -1,6 +1,6 @@
 extern crate termimad;
 
-use crossterm::{style, AlternateScreen, Terminal, TerminalCursor, TerminalInput, KeyEvent, InputEvent, ClearType, Color::*};
+use crossterm::{style, AlternateScreen, ObjectStyle, Terminal, TerminalCursor, TerminalInput, KeyEvent, InputEvent, ClearType, Color::*};
 use termimad::*;
 use std::{io, thread, time};
 
@@ -43,6 +43,8 @@ fn make_skin() -> MadSkin {
     skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
     mad_fg!(skin.bold, Yellow);
     mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
+    skin.scrollbar.set_track_fg(Rgb{r:30, g:30, b:40});
+    skin.scrollbar.set_thumb_fg(Rgb{r:67, g:51, b:0});
     skin
 }
 
