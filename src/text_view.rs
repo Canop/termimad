@@ -1,4 +1,5 @@
 use std::fmt;
+use std::io;
 use crossterm::{self, TerminalCursor, Terminal, ClearType};
 use minimad::Line;
 
@@ -45,15 +46,15 @@ impl<'a, 't> TextView<'a, 't> {
         Some((sc as u16, (sc + sbh + 1).min(i32::from(self.area.height+1)) as u16))
     }
     /// display the text in the area, taking the scroll into account.
-    pub fn write(&self) {
+    pub fn write(&self) -> io::Result<()> {
         let terminal = Terminal::new();
         let cursor = TerminalCursor::new();
         let scrollbar = self.scrollbar();
         let sx = self.area.left + self.area.width;
         let mut i = self.scroll as usize;
         for y in 0..=self.area.height {
-            cursor.goto(self.area.left, self.area.top+y).unwrap();
-            terminal.clear(ClearType::UntilNewLine);
+            cursor.goto(self.area.left, self.area.top+y)?;
+            terminal.clear(ClearType::UntilNewLine)?;
             if i < self.text.text.lines.len() {
                 let fl = DisplayableLine::new(
                     &self.text.skin,
@@ -63,7 +64,7 @@ impl<'a, 't> TextView<'a, 't> {
                 i += 1;
             }
             if let Some((sctop, scbottom)) = scrollbar {
-                cursor.goto(sx, self.area.top+y).unwrap();
+                cursor.goto(sx, self.area.top+y)?;
                 if sctop <= y && y <= scbottom {
                     println!("{}", self.text.skin.scrollbar.thumb);
                 } else {
@@ -71,6 +72,7 @@ impl<'a, 't> TextView<'a, 't> {
                 }
             }
         }
+        Ok(())
     }
     /// set the scroll amount.
     /// lines_count can be negative

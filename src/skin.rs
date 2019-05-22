@@ -228,7 +228,7 @@ fn hard_wrap_line<'s>(src_line: &Line<'s>, width: usize) -> Vec<Line<'s>> {
             ll = 0;
         }
         let mut c_start = 0;
-        let mut last_space: Option<usize> = None;
+        let mut last_space: Option<usize> = Some(0);
         for (idx, char) in s.char_indices() {
             ll += 1;
             if char.is_whitespace() {
@@ -241,7 +241,9 @@ fn hard_wrap_line<'s>(src_line: &Line<'s>, width: usize) -> Vec<Line<'s>> {
                         cut = ls;
                     }
                 }
-                dst_line.compounds.push(sc.sub(c_start, cut));
+                if cut > c_start {
+                    dst_line.compounds.push(sc.sub(c_start, cut));
+                }
                 let new_dst_line = follow_up_line(&dst_line);
                 lines.push(dst_line);
                 dst_line = new_dst_line;

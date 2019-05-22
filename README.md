@@ -61,5 +61,7 @@ Result:
 
 ![scrollable](doc/scrollable.png)
 
-The whole code for this example is in examples/scrollable.
+The code for this example is in examples/scrollable. To read the whole text just do
+
+    cargo run --example scrollable
 

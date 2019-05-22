@@ -8,13 +8,13 @@ fn show_scrollable(skin: &MadSkin, markdown: &str) -> io::Result<()> {
     let cursor = TerminalCursor::new();
     cursor.hide()?;
     let mut area = Area::full_screen();
-    area.pad(2, 2); // let's add some margin
+    area.pad(2, 1); // let's add some margin
     let text = skin.wrapped_text(markdown, &area);
     let mut text_view = TextView::from(&area, &text);
     text_view.show_scrollbar = true; // this is default anyway
     let mut events = TerminalInput::new().read_sync();
     loop {
-        text_view.write();
+        text_view.write()?;
         if let Some(Keyboard(key)) = events.next() {
             match key {
                 Up => text_view.try_scroll_lines(-1),
@@ -63,7 +63,7 @@ Use any other key to quit the application.
 The area specifies the part of the screen where we'll display our markdown. The margin in this example is just here to show that wrapping is handled:
 
     let mut area = Area::full_screen();
-    area.pad(2, 2); // let's add some margin
+    area.pad(2, 1); // let's add some margin
 
 ## Parsed Markdown
 
@@ -79,26 +79,13 @@ It's just a text put in an area, tracking your **scroll** position (and whether 
 
     let mut text_view = TextView::from(&area, &text);
 
-## Skin
-
-We want *shiny **colors***:
-
-    let mut skin = MadSkin::new();
-    skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
-    mad_fg!(skin.bold, Yellow);
-    mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
-    skin.scrollbar.set_track_fg(Rgb{r:30, g:30, b:40});
-    skin.scrollbar.set_thumb_fg(Rgb{r:67, g:51, b:0});
-
-The scrollbar's colors were also adjusted to be consistent.
-
 ## Really Scrolling
 
-Not two applications handle events in the same way. **Termimad** doesn't try to handle this but lets youwrite it yourself, which can be done fairly easily with **Crossterm** for example:
+Not two applications handle events in the same way. **Termimad** doesn't try to handle this but lets you write it yourself, which is fairly easily with **Crossterm** for example:
 
     let mut events = TerminalInput::new().read_sync();
     loop {
-        text_view.write();
+        text_view.write()?;
         if let Some(Keyboard(key)) = events.next() {
             match key {
                 Up => text_view.try_scroll_lines(-1),
@@ -109,6 +96,19 @@ Not two applications handle events in the same way. **Termimad** doesn't try to 
             }
         }
     }
+
+## Skin
+
+We want *shiny **colors***:
+
+    let mut skin = MadSkin::new();
+    skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
+    mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
+    mad_fg!(skin.bold, Yellow);
+    skin.scrollbar.set_track_fg(Rgb{r:30, g:30, b:40});
+    skin.scrollbar.set_thumb_fg(Rgb{r:67, g:51, b:0});
+
+The scrollbar's colors were also adjusted to be consistent.
 
 ## Usage
 

@@ -43,12 +43,12 @@ impl<'s, 't> FormattedText<'s, 't> {
                         });
                     }
                 }
-            } else if current.is_some() {
-                blocks.push(current.take().unwrap());
+            } else if let Some(c) = current.take() {
+                blocks.push(c);
             }
         }
-        if current.is_some() {
-            blocks.push(current.take().unwrap());
+        if let Some(c) = current.take() {
+            blocks.push(c);
         }
         blocks
     }
