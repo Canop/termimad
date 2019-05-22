@@ -14,9 +14,17 @@ impl ScrollBarStyle {
     pub fn new() -> ScrollBarStyle {
         let char = '▐';
         ScrollBarStyle {
-            track: ObjectStyle::new().fg(Color::DarkGrey).apply_to(char),
-            thumb: ObjectStyle::new().fg(Color::Grey).apply_to(char),
+            track: ObjectStyle::new().fg(Color::Rgb{r:35, g:35, b:35}).apply_to(char),
+            thumb: ObjectStyle::new().fg(Color::Rgb{r:140, g:140, b:140}).apply_to(char),
         }
+    }
+    pub fn set_thumb_fg(&mut self, c: Color) {
+        let os = ObjectStyle::new().fg(c);
+        self.thumb = os.apply_to(self.thumb.content);
+    }
+    pub fn set_track_fg(&mut self, c: Color) {
+        let os = ObjectStyle::new().fg(c);
+        self.track = os.apply_to(self.track.content);
     }
 }
 
@@ -72,7 +80,7 @@ impl MadSkin {
     pub fn new() -> MadSkin {
         let mut skin = MadSkin {
             normal: ObjectStyle::new(),
-            bold: ObjectStyle::new(),
+            bold: ObjectStyle::new().fg(Color::White),
             italic: ObjectStyle::new(),
             code: ObjectStyle::new(),
             headers: Default::default(),
@@ -89,6 +97,8 @@ impl MadSkin {
             h.add_attr(Attribute::Underlined);
         }
         skin.headers[0].add_attr(Attribute::Bold);
+        skin.headers[0].fg_color = Some(Color::Rgb{r:250, g:250, b:250});
+        skin.headers[1].fg_color = Some(Color::Rgb{r:240, g:240, b:240});
         skin
     }
     pub fn set_headers_fg_color(&mut self, c: Color) {
