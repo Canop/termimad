@@ -31,11 +31,11 @@ termimad = "0.2"
 ### With the default skin:
 
 ```rust
-termimad::print_line("**some** *nested **style*** and `some(code)`");
+termimad::print_inline("**some** *nested **style*** and `some(code)`");
 ```
 or
 ```rust
-print!("{}", termimad.line("**some** *nested **style*** and `some(code)`"));
+print!("{}", termimad.inline("**some** *nested **style*** and `some(code)`"));
 ```
 
 Result:

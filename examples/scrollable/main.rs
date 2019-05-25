@@ -2,14 +2,14 @@ extern crate termimad;
 
 use crossterm::{style, AlternateScreen, ObjectStyle, TerminalCursor, TerminalInput, KeyEvent::*, InputEvent::*, Color::*};
 use termimad::*;
-use std::{io, thread, time};
+use std::io;
 
 fn show_scrollable(skin: &MadSkin, markdown: &str) -> io::Result<()> {
     let cursor = TerminalCursor::new();
     cursor.hide()?;
     let mut area = Area::full_screen();
     area.pad(2, 1); // let's add some margin
-    let text = skin.wrapped_text(markdown, &area);
+    let text = skin.area_wrapped_text(markdown, &area);
     let mut text_view = TextView::from(&area, &text);
     text_view.show_scrollbar = true; // this is default anyway
     let mut events = TerminalInput::new().read_sync();
@@ -40,7 +40,7 @@ fn make_skin() -> MadSkin {
 }
 
 fn main() {
-    let alt_screen = AlternateScreen::to_alternate(true);
+    let _alt_screen = AlternateScreen::to_alternate(true);
     let skin = make_skin();
     show_scrollable(&skin, MD).unwrap();
 }
@@ -69,13 +69,13 @@ The area specifies the part of the screen where we'll display our markdown. The 
 
 The text is parsed from a string. In this example we directly wrap it for the width of the area:
 
-    let text = skin.wrapped_text(markdown, &area);
+    let text = skin.area_wrapped_text(markdown, &area);
 
 If we wanted to modify the parsed representation, or modify the area width, we could also have kept the parsed text (*but parsing is cheap*).
 
 ## The TextView
 
-It's just a text put in an area, tracking your **scroll** position (and whether you want the scrollbar to be displayed)
+It's just a text put in an area, tracking your **scroll** position (and whether you want the scrollbar to be displayed).
 
     let mut text_view = TextView::from(&area, &text);
 
@@ -115,5 +115,16 @@ The scrollbar's colors were also adjusted to be consistent.
 * **🡑** and **🡓** arrow keys : scroll this page
 * any other key : quit
 
+## And let's just finish by a table
+
+It's a little out of context but it shows how a wide table can be wrapped in a thin terminal.
+
+|feature|supported|details|
+| tables | yes | pipe based only, alignement not yet supported
+| italic, bold | yes | star based only|
+| inline code | yes |
+| code bloc | yes |with tabs. Fences not supported
+| crossed text |  not yet
+| phpbb like links | no | (because it's preferable to show an URL in a terminal)
 "#;
 

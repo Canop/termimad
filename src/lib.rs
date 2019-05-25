@@ -4,10 +4,14 @@
 extern crate lazy_static;
 
 mod area;
+mod code;
+mod displayable_line;
 mod line;
 mod skin;
+mod tbl;
 mod text;
 mod text_view;
+mod wrap;
 
 pub use area::Area;
 pub use skin::MadSkin;
@@ -25,8 +29,8 @@ fn get_default_skin<'s>() -> &'s MadSkin {
 /// return a formatted line, which implements Display
 /// This uses the default skin.
 /// Don't use if you expect your markdown to be several lines.
-pub fn line(src: &str) -> FormattedLine {
-    get_default_skin().line(src)
+pub fn inline(src: &str) -> FormattedLine {
+    get_default_skin().inline(src)
 }
 
 /// return a formatted text, which implements Display
@@ -35,8 +39,9 @@ pub fn text(src: &str) -> FormattedText {
     get_default_skin().text(src)
 }
 
-pub fn print_line(src: &str) {
-    get_default_skin().print_line(src);
+
+pub fn print_inline(src: &str) {
+    get_default_skin().print_inline(src);
 }
 
 pub fn print_text(src: &str) {

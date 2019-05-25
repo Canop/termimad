@@ -1,9 +1,7 @@
-use std::fmt;
 use std::io;
 use crossterm::{self, TerminalCursor, Terminal, ClearType};
-use minimad::Line;
 
-use crate::skin::MadSkin;
+use crate::displayable_line::DisplayableLine;
 use crate::area::Area;
 use crate::text::FormattedText;
 
@@ -86,28 +84,5 @@ impl<'a, 't> TextView<'a, 't> {
     /// lines_count can be negative
     pub fn try_scroll_pages(&mut self, pages_count: i32) {
         self.try_scroll_lines(pages_count * self.area.height as i32);
-    }
-}
-
-//------------------------
-//
-
-struct DisplayableLine<'s, 'l, 'p> {
-    skin: &'s MadSkin,
-    line: &'p Line<'l>,
-}
-
-impl<'s, 'l, 'p> DisplayableLine<'s, 'l, 'p> {
-    pub fn new(skin: &'s MadSkin, line: &'p Line<'l>) -> DisplayableLine<'s, 'l, 'p> {
-        DisplayableLine {
-            skin,
-            line
-        }
-    }
-}
-
-impl fmt::Display for DisplayableLine<'_, '_, '_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.skin.fmt_line(f, self.line)
     }
 }
