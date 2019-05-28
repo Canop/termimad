@@ -15,6 +15,11 @@ pub struct Area {
 }
 
 impl Area {
+    /// build a new area. You'll need to set the position and size
+    /// before you can use it
+    pub fn uninitialized() -> Area {
+        Area { left: 0, top:0, height:1, width:5 } // width can't be less than 5
+    }
     /// build a new area.
     pub fn new(
         left: u16,

@@ -11,7 +11,7 @@ Here's the code to print this markdown block in the terminal:
     skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
     mad_fg!(skin.bold, Yellow);
     mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
-    println!("{}", skin.text(my_markdown));
+    println!("{}", skin.term_text(my_markdown));
 
 **Termimad** is built over **Crossterm** and **Minimad**.
 
@@ -33,7 +33,6 @@ fn main() {
     skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
     mad_fg!(skin.bold, Yellow);
     mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
-    let text = skin.text(MD);
-    println!("{}", text);
+    println!("{}", skin.term_text(MD));
     println!("\n");
 }

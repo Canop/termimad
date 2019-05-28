@@ -1,26 +1,22 @@
-extern crate termimad;
-
 use crossterm::{style, AlternateScreen, ObjectStyle, TerminalCursor, TerminalInput, KeyEvent::*, InputEvent::*, Color::*};
 use termimad::*;
 use std::io;
 
-fn show_scrollable(skin: &MadSkin, markdown: &str) -> io::Result<()> {
+fn show_scrollable(skin: MadSkin, markdown: &str) -> io::Result<()> {
     let cursor = TerminalCursor::new();
     cursor.hide()?;
     let mut area = Area::full_screen();
     area.pad(2, 1); // let's add some margin
-    let text = skin.area_wrapped_text(markdown, &area);
-    let mut text_view = TextView::from(&area, &text);
-    text_view.show_scrollbar = true; // this is default anyway
+    let mut view = MadView::from(markdown.to_owned(), area, skin);
     let mut events = TerminalInput::new().read_sync();
     loop {
-        text_view.write()?;
+        view.write()?;
         if let Some(Keyboard(key)) = events.next() {
             match key {
-                Up => text_view.try_scroll_lines(-1),
-                Down => text_view.try_scroll_lines(1),
-                PageUp => text_view.try_scroll_pages(-1),
-                PageDown => text_view.try_scroll_pages(1),
+                Up => view.try_scroll_lines(-1),
+                Down => view.try_scroll_lines(1),
+                PageUp => view.try_scroll_pages(-1),
+                PageDown => view.try_scroll_pages(1),
                 _ => break,
             }
         }
@@ -42,7 +38,7 @@ fn make_skin() -> MadSkin {
 fn main() {
     let _alt_screen = AlternateScreen::to_alternate(true);
     let skin = make_skin();
-    show_scrollable(&skin, MD).unwrap();
+    show_scrollable(skin, MD).unwrap();
 }
 
 static MD: &str = r#"# Scrollable Markdown in Termimad

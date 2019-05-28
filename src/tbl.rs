@@ -1,11 +1,44 @@
-use crate::text::FormattedText;
+use minimad::{Alignment, Composite, Line, TableRow};
+
+use crate:: composite::*;
 use crate::wrap;
-use minimad::{Composite, Line, TableRow};
+use crate::skin::MadSkin;
+
+pub struct FmtTableRow<'s> {
+    pub cells: Vec<FmtComposite<'s>>,
+}
+
+pub enum RelativePosition {
+    Top,
+    Other, // or unknown
+    Bottom,
+}
+
+pub struct FmtTableRule {
+    pub position: RelativePosition, // position relative to the table
+    pub widths: Vec<usize>,
+    pub aligns: Vec<Alignment>,
+}
+
+impl<'s> FmtTableRow<'s> {
+    pub fn from(table_row: TableRow<'s>, skin: &MadSkin) -> FmtTableRow<'s> {
+        let mut table_row = table_row;
+        FmtTableRow {
+            cells: table_row.cells.drain(..).map(
+                |composite| FmtComposite::from(composite, skin)
+            ).collect()
+        }
+    }
+}
+
+
+/*
 
 /// tables are the sequences of lines whose line style is TableRow
 /// A table is just the indices, without the text
 /// This structure isn't public because the indices are invalid as
-///  soon as rows are inserted.
+///  soon as rows are inserted. It only serves during the formatting
+///  process.
 struct Table {
     start: usize,
     height: usize, // number of lines
@@ -195,3 +228,4 @@ pub fn fix_all_tables(text: &mut FormattedText, width: usize) {
     }
 }
 
+*/

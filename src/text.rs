@@ -1,36 +1,49 @@
 use std::fmt;
 
 use minimad::Text;
+use minimad::{Alignment, Line};
 
 use crate::skin::MadSkin;
 use crate::code;
+use crate::line::FmtLine;
+use crate::tbl::*;
+use crate::wrap;
+
 
 /// a formatted text, implementing Display
-pub struct FormattedText<'s, 't> {
-    pub skin: &'s MadSkin,
-    pub text: Text<'t>,
+pub struct FmtText<'k, 's> {
+    pub skin: &'k MadSkin,
+    pub lines: Vec<FmtLine<'s>>,
 }
 
-impl<'s, 't> FormattedText<'s, 't> {
-    pub fn new(skin: &'s MadSkin, text: &'t str) -> FormattedText<'s, 't> {
-        FormattedText {
+impl<'k, 's> FmtText<'k, 's> {
+    pub fn from(skin: &'k MadSkin, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
+        let mut mt = Text::from(src);
+        let mut lines = mt.lines.drain(..).map(
+            |mline| FmtLine::from(mline, skin)
+        ).collect();
+
+
+        // HERE fix tables
+
+        code::justify_blocks(&mut lines);
+        if let Some(width) = width {
+            lines = wrap::hard_wrap_lines(lines, width);
+        }
+
+        FmtText {
             skin,
-            text: Text::from(text),
-        }
-    }
-    pub fn right_pad_code_blocks(&mut self) {
-        for b in code::find_blocks(self) {
-            b.right_pad(self);
+            lines,
         }
     }
 }
 
-impl fmt::Display for FormattedText<'_, '_> {
+impl fmt::Display for FmtText<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for line in &self.text.lines {
-            self.skin.fmt_line(f, line)?;
-            writeln!(f)?;
+        for line in &self.lines {
+            self.skin.write_fmt_line(f, line)?;
         }
         Ok(())
     }
 }
+

@@ -25,7 +25,7 @@ Note that the goal isn't to display any markdown text with its various extension
 
 ```toml
 [dependencies]
-termimad = "0.2"
+termimad = "0.3"
 ```
 
 ### With the default skin:
