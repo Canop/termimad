@@ -1,7 +1,8 @@
 use crate::composite::FmtComposite;
 use crate::line::FmtLine;
-use minimad::{Composite, CompositeStyle, Line, Text};
+use minimad::{Composite, CompositeStyle};
 
+/// build a composite which can be a new line after wrapping.
 fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
     FmtComposite {
         composite: Composite {
@@ -43,7 +44,7 @@ pub fn hard_wrap_composite<'s>(src_composite: &FmtComposite<'s>, width: usize) -
         let cl = s.chars().count();
         if ll + cl <= width {
             // we add the compound as is to the current composite
-            dst_composite.composite.compounds.push(sc.clone());
+            dst_composite.add_compound(sc.clone());
             ll += cl;
             continue;
         }
@@ -130,7 +131,7 @@ mod wrap_tests {
     use crate::displayable_line::DisplayableLine;
     use crate::wrap::*;
 
-    fn visible_fmt_line_length(skin: &MadSkin, line: &FmtLine) -> usize {
+    fn visible_fmt_line_length(skin: &MadSkin, line: &FmtLine<'_>) -> usize {
         match line {
             FmtLine::Normal( fc ) => skin.visible_composite_length(&fc.composite),
             _ => 0, // FIXME implement

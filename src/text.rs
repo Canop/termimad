@@ -1,12 +1,11 @@
 use std::fmt;
 
 use minimad::Text;
-use minimad::{Alignment, Line};
 
 use crate::skin::MadSkin;
 use crate::code;
 use crate::line::FmtLine;
-use crate::tbl::*;
+use crate::tbl;
 use crate::wrap;
 
 
@@ -23,9 +22,7 @@ impl<'k, 's> FmtText<'k, 's> {
             |mline| FmtLine::from(mline, skin)
         ).collect();
 
-
-        // HERE fix tables
-
+        tbl::fix_all_tables(&mut lines, width.unwrap_or(std::usize::MAX));
         code::justify_blocks(&mut lines);
         if let Some(width) = width {
             lines = wrap::hard_wrap_lines(lines, width);
@@ -39,7 +36,7 @@ impl<'k, 's> FmtText<'k, 's> {
 }
 
 impl fmt::Display for FmtText<'_, '_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for line in &self.lines {
             self.skin.write_fmt_line(f, line)?;
         }

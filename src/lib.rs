@@ -35,7 +35,7 @@ fn get_default_skin<'s>() -> &'s MadSkin {
 /// return a formatted line, which implements Display
 /// This uses the default skin.
 /// Don't use if you expect your markdown to be several lines.
-pub fn inline(src: &str) -> FmtInline {
+pub fn inline(src: &str) -> FmtInline<'_, '_> {
     get_default_skin().inline(src)
 }
 
@@ -43,13 +43,13 @@ pub fn inline(src: &str) -> FmtInline {
 /// This uses the default skin and doesn't wrap the lines
 ///  at all. Most often you'll prefer to use `term_text`
 ///  which makes a text wrapped for the current terminal.
-pub fn text(src: &str) -> FmtText {
+pub fn text(src: &str) -> FmtText<'_, '_> {
     get_default_skin().text(src, None)
 }
 
 /// return a formatted text, which implements Display
 /// This uses the default skin and the terminal's width
-pub fn term_text(src: &str) -> FmtText {
+pub fn term_text(src: &str) -> FmtText<'_, '_> {
     get_default_skin().term_text(src)
 }
 

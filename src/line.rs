@@ -1,11 +1,11 @@
-use std::fmt;
-
-use minimad::{Alignment, Line, TableAlignments};
+use minimad::{Line, TableAlignments};
 
 use crate::skin::MadSkin;
 use crate::tbl::{FmtTableRow, FmtTableRule, RelativePosition};
 use crate::composite::FmtComposite;
 
+/// A line in a text. This structure should normally not be
+/// used outside of the lib.
 pub enum FmtLine<'s> {
     Normal(FmtComposite<'s>),
     TableRow(FmtTableRow<'s>),
@@ -13,6 +13,7 @@ pub enum FmtLine<'s> {
 }
 
 impl<'s> FmtLine<'s> {
+    /// build a fmtline from a minimad line.
     /// skin is passed because it might affect the visible size
     /// in the future
     pub fn from(mline: Line<'s>, skin: & MadSkin) -> FmtLine<'s> {

@@ -1,9 +1,11 @@
-use minimad::{Alignment, Composite, Line, TableRow};
+use minimad::{Alignment, TableRow};
 
 use crate:: composite::*;
 use crate::wrap;
 use crate::skin::MadSkin;
+use crate::line::FmtLine;
 
+/// wrap a standard table row
 pub struct FmtTableRow<'s> {
     pub cells: Vec<FmtComposite<'s>>,
 }
@@ -14,10 +16,27 @@ pub enum RelativePosition {
     Bottom,
 }
 
+/// represent this kind of lines in tables:
+///  |----|:-:|--
 pub struct FmtTableRule {
     pub position: RelativePosition, // position relative to the table
     pub widths: Vec<usize>,
     pub aligns: Vec<Alignment>,
+}
+
+impl FmtTableRule {
+    pub fn set_nbcols(&mut self, nbcols: usize) {
+        self.widths.truncate(nbcols);
+        self.aligns.truncate(nbcols);
+        for ic in 0..nbcols {
+            if ic >= self.widths.len() {
+                self.widths.push(0);
+            }
+            if ic >= self.aligns.len() {
+                self.aligns.push(Alignment::Unspecified);
+            }
+        }
+    }
 }
 
 impl<'s> FmtTableRow<'s> {
@@ -30,9 +49,6 @@ impl<'s> FmtTableRow<'s> {
         }
     }
 }
-
-
-/*
 
 /// tables are the sequences of lines whose line style is TableRow
 /// A table is just the indices, without the text
@@ -53,9 +69,11 @@ struct Col {
     to_remove: usize, // what should be removed
 }
 
-// no width can go below 3
+// Determine suitable columns width from the current one and the
+// overall sum goal.
+// No width can go below 3.
 // This function should be called only when the goal is attainable
-// and when there's reducion to be done
+// and when there's reducion to be done.
 fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
     let sum = widths.iter().fold(0, |s, w| s + w);
     let mut excess = sum - goal;
@@ -81,7 +99,7 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
 }
 
 impl Table {
-    pub fn fix_columns(&self, text: &mut FormattedText, width: usize) {
+    pub fn fix_columns(&mut self, lines: &mut Vec<FmtLine<'_>>, width: usize) {
         let mut nbcols = self.nbcols;
         assert!(width > 5);
         // let's first compute the initial widths of all columns
@@ -89,28 +107,25 @@ impl Table {
         // We also add the missing cells
         let mut widths: Vec<usize> = vec![0; nbcols];
         for ir in self.start..self.start + self.height {
-            let line = &mut text.text.lines[ir];
-            if let Line::TableRow(TableRow{cells}) = line {
+            let line = &mut lines[ir];
+            if let FmtLine::TableRow(FmtTableRow{cells}) = line {
                 for ic in 0..nbcols {
                     if cells.len() <= ic {
-                        cells.push(Composite::new());
+                        cells.push(FmtComposite::new());
                     } else {
-                        widths[ic] = widths[ic].max(cells[ic].char_length());
+                        widths[ic] = widths[ic].max(cells[ic].visible_length);
                     }
                 }
+            } else if let FmtLine::TableRule(rule) = line {
+                rule.set_nbcols(nbcols);
             } else {
                 println!("not a table row, should not happen"); // should we panic ?
             }
         }
         // let's find what we must do
-        let mut add_padding = false;
         let widths_sum = widths.iter().fold(0, |s, w| s+w);
-        // TODO propose a formatting without the external border ?
-        if widths_sum + nbcols*3 + 1 <= width {
-            // all is well, there's enough space for a 1 char padding
-            add_padding = true;
-        } else if widths_sum + nbcols + 1 <= width {
-            // it fits if we don't put a padding in cells
+        if widths_sum + nbcols + 1 <= width {
+            // it fits, all is well
         } else if nbcols*4 + 1 <= width {
             // we can keep all columns but we'll have to wrap them
             reduce_col_widths(&mut widths, width - nbcols - 1);
@@ -121,39 +136,23 @@ impl Table {
                 widths[ic] = 3;
             }
         }
-        // Now we resize all cells
-        //  and we insert new rows if necessary
+        // Now we resize all cells and we insert new rows if necessary.
         // We iterate in reverse order so that we can insert rows
-        //  without recomputing row indices
+        //  without recomputing row indices.
         for ir in (self.start..self.start + self.height).rev() {
-            let line = &mut text.text.lines[ir];
-            if let Line::TableRow(TableRow{cells}) = line {
-                let mut cells_to_add: Vec<Vec<Composite>> = Vec::new();
+            let line = &mut lines[ir];
+            if let FmtLine::TableRow(FmtTableRow{cells}) = line {
+                let mut cells_to_add: Vec<Vec<FmtComposite<'_>>> = Vec::new();
                 cells.truncate(nbcols);
                 for ic in 0..nbcols {
-                    if cells.len()<=ic {
-                        cells.push(Composite::new());
+                    if cells.len()<=ic { //FIXME isn't this already done ?
+                        cells.push(FmtComposite::new());
                         continue;
                     }
                     cells_to_add.push(Vec::new());
-                    let cl = cells[ic].char_length();
-                    let w = widths[ic];
-                    if cl <= w {
-                        // we add spaces around the content
-                        let (lp, rp) = if add_padding {
-                            (1, w - cl + 1)
-                        } else {
-                            (0, w - cl)
-                        };
-                        cells[ic].pad_left(lp);
-                        cells[ic].pad_right(rp);
-                    } else {
+                    if cells[ic].visible_length > widths[ic] {
                         // we must wrap the cell over several lines
-                        let mut composites = wrap::hard_wrap_composite(&cells[ic], w);
-                        for inc in 0..composites.len() {
-                            let winc = composites[inc].char_length();
-                            composites[inc].pad_right(w - winc);
-                        }
+                        let mut composites = wrap::hard_wrap_composite(&cells[ic], widths[ic]);
                         debug_assert!(composites.len()>1);
                         // the first composite replaces the cell, while the other
                         // ones go to cells_to_add
@@ -166,31 +165,77 @@ impl Table {
                 }
                 let nb_new_lines = cells_to_add.iter().fold(0, |m, cells| m.max(cells.len()));
                 for inl in (0..nb_new_lines).rev() {
-                    let mut new_cells: Vec<Composite> = Vec::new();
+                    let mut new_cells: Vec<FmtComposite<'_>> = Vec::new();
                     for ic in 0..nbcols {
                         new_cells.push(if cells_to_add[ic].len()>inl {
                             cells_to_add[ic].remove(inl)
                         } else {
-                            let mut c = Composite::new();
-                            c.pad_right(widths[ic]);
-                            c
+                            FmtComposite::new()
                         });
                     }
-                    let new_line = Line::new_table_row(new_cells);
-                    text.text.lines.insert(ir+1, new_line);
+                    let new_line = FmtLine::TableRow(FmtTableRow{ cells:new_cells });
+                    lines.insert(ir+1, new_line);
+                    self.height += 1;
                 }
             }
+        }
+        // Finally we iterate in normal order to specify alignment
+        // (the alignments of a row are the ones of the last rule line)
+        let mut current_aligns: Vec<Alignment> = vec![Alignment::Center; nbcols];
+        for ir in self.start..self.start + self.height {
+            let line = &mut lines[ir];
+            match line {
+                FmtLine::TableRow(FmtTableRow{cells}) => {
+                    for ic in 0..nbcols {
+                        cells[ic].spacing = Some(Spacing {
+                            width: widths[ic],
+                            align: current_aligns[ic],
+                        });
+                    }
+                }
+                FmtLine::TableRule(rule) => {
+                    if ir == self.start {
+                        rule.position = RelativePosition::Top;
+                    } else if ir == self.start + self.height - 1 {
+                        rule.position = RelativePosition::Bottom;
+                    }
+                    for ic in 0..nbcols {
+                        rule.widths[ic] = widths[ic];
+                        current_aligns[ic] = rule.aligns[ic];
+                    }
+                }
+                _ => {
+                    panic!("It should be a table part");
+                }
+            }
+
         }
     }
 }
 
 // find the positions of all tables
-fn find_tables(text: &FormattedText) -> Vec<Table> {
+fn find_tables(lines: &Vec<FmtLine<'_>>) -> Vec<Table> {
     let mut tables: Vec<Table> = Vec::new();
     let mut current: Option<Table> = None;
-    for (idx, line) in text.text.lines.iter().enumerate() {
+    for (idx, line) in lines.iter().enumerate() {
         match line {
-            Line::TableRow(TableRow{cells}) => {
+            FmtLine::TableRule(FmtTableRule{aligns, ..}) => {
+                match current.as_mut() {
+                    Some(b) => {
+                        b.height += 1;
+                        b.nbcols = b.nbcols.max(aligns.len());
+                    }
+                    None => {
+                        current = Some(Table {
+                            start: idx,
+                            height: 1,
+                            nbcols: aligns.len(),
+                        });
+                    }
+                }
+
+            }
+            FmtLine::TableRow(FmtTableRow{cells}) => {
                 match current.as_mut() {
                     Some(b) => {
                         b.height += 1;
@@ -222,10 +267,9 @@ fn find_tables(text: &FormattedText) -> Vec<Table> {
 // and all cells have the widths of their column.
 // Some lines may be added to the table in the process, which means any
 //  precedent indexing might be invalid.
-pub fn fix_all_tables(text: &mut FormattedText, width: usize) {
-    for tbl in find_tables(text).iter().rev() {
-        tbl.fix_columns(text, width);
+pub fn fix_all_tables(lines: &mut Vec<FmtLine<'_>>, width: usize) {
+    for tbl in find_tables(lines).iter_mut().rev() {
+        tbl.fix_columns(lines, width+1); // FIXME why do I need this +1 ? Where did I fail ?
     }
 }
 
-*/

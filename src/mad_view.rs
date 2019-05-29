@@ -1,8 +1,6 @@
 use std::io;
-use crossterm::{self, TerminalCursor, Terminal, ClearType};
 
 use crate::area::Area;
-use crate::text::FmtText;
 use crate::text_view::TextView;
 use crate::skin::MadSkin;
 
@@ -18,8 +16,6 @@ pub struct MadView {
 }
 
 impl MadView {
-    //pub fn new(src: String) -> MadView {
-    //}
     /// make a displayed text, that is a text in an area
     pub fn from(
         markdown: String,
@@ -34,8 +30,7 @@ impl MadView {
         }
     }
     pub fn write(&self) -> io::Result<()> {
-        let text = self.skin.text(&self.markdown, Some(self.area.width as usize));
-        //let text = self.skin.area_wrapped_text(&self.markdown, &self.area);
+        let text = self.skin.area_text(&self.markdown, &self.area);
         let mut text_view = TextView::from(&self.area, &text);
         text_view.scroll = self.scroll;
         text_view.write()
@@ -57,7 +52,7 @@ impl MadView {
     /// set the scroll amount.
     /// lines_count can be negative
     pub fn try_scroll_lines(&mut self, lines_count: i32) {
-        let text = self.skin.text(&self.markdown, Some(self.area.width as usize));
+        let text = self.skin.area_text(&self.markdown, &self.area);
         let mut text_view = TextView::from(&self.area, &text);
         text_view.scroll = self.scroll;
         text_view.try_scroll_lines(lines_count);

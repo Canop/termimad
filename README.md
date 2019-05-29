@@ -21,6 +21,33 @@ Based on crossterm so works on most terminals (even on windows).
 
 Note that the goal isn't to display any markdown text with its various extensions (a terminal isn't really fit for that). The goal is rather to improve the display of texts in a terminal application when we want both the text and the skin to be easily configured.
 
+**Wrapping**, table balancing, and **scrolling** are essential features of Termimad.
+
+A text or a table can be displayed in an *a priori* unknown part of the screen, scrollable if desired, with a dynamically discovered width.
+
+For example this markdown:
+
+	|:-:|:-:|-
+	|**feature**|**supported**|**details**|
+	|-:|:-:|-
+	| tables | yes | pipe based only, with alignments
+	| italic, bold | yes | star based |
+	| inline code | yes | `with backquotes` (it works in tables too)
+	| code bloc | yes |with tabs: Fences not supported
+	| horizontal rule |  not yet
+	| crossed text |  not yet | ---this isn't crossed---
+	| lists | yes|* unordered lists supported
+	|  | |* ordered lists *not* supported
+	| quotes |  not yet
+	| phpbb like links | no | (because it's preferable to show an URL in a terminal)
+	|-
+
+will give different results depending of the width:
+
+![table](doc/table-in-84.png)
+
+![table](doc/table-in-60.png)
+
 ##  Usage
 
 ```toml

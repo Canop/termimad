@@ -1,7 +1,7 @@
 
 use crate::composite::*;
 use crate::line::*;
-use minimad::{Alignment, CompositeStyle, Line};
+use minimad::{Alignment, CompositeStyle};
 
 /// a sequence of lines whose line-style is Code
 #[derive(Debug)]
@@ -64,6 +64,8 @@ pub fn find_blocks<'s>(lines: &Vec<FmtLine<'s>>) -> Vec<CodeBlock> {
     blocks
 }
 
+/// ensure the widths of all lines in a code block are
+/// the same line.
 pub fn justify_blocks<'s>(lines: &mut Vec<FmtLine<'s>>) {
     let blocks =find_blocks(lines);
     for b in blocks {

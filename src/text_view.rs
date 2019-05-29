@@ -5,6 +5,7 @@ use crate::area::Area;
 use crate::displayable_line::DisplayableLine;
 use crate::text::FmtText;
 
+/// a scrollable text, in a specific area.
 pub struct TextView<'a, 't> {
     area: &'a Area,
     text: &'t FmtText<'t, 't>,
@@ -16,7 +17,7 @@ impl<'a, 't> TextView<'a, 't> {
     /// make a displayed text, that is a text in an area
     pub fn from(
         area: &'a Area,
-        text: &'t FmtText,
+        text: &'t FmtText<'_, '_>,
     ) -> TextView<'a, 't> {
         TextView {
             area,

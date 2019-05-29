@@ -1,5 +1,3 @@
-extern crate termimad;
-
 use crossterm::{Attribute::*, Color::*, ObjectStyle};
 use termimad::*;
 

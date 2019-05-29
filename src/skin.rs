@@ -3,11 +3,10 @@ use crate::composite::FmtComposite;
 use crate::inline::FmtInline;
 use crate::line::FmtLine;
 use crate::text::FmtText;
-use crate::wrap;
 use crate::tbl::*;
 
 use crossterm::{Attribute, Color, ObjectStyle, StyledObject, Terminal};
-use minimad::{Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH, TableRow, Text};
+use minimad::{Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
 use std::{self, fmt};
 
 // The scrollbar style is defined by two styled chars, one
@@ -46,6 +45,7 @@ pub struct MadSkin {
     pub code: ObjectStyle,
     pub headers: [ObjectStyle; MAX_HEADER_DEPTH],
     pub scrollbar: ScrollBarStyle,
+    pub table_border: ObjectStyle,
 }
 
 // overwrite style of a with b
@@ -94,6 +94,11 @@ impl MadSkin {
             code: ObjectStyle::new(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
+            table_border: ObjectStyle::new().fg(Color::Rgb {
+                r: 110,
+                g: 110,
+                b: 110,
+            }),
         };
         skin.bold.add_attr(Attribute::Bold);
         skin.italic.add_attr(Attribute::Italic);
@@ -148,7 +153,7 @@ impl MadSkin {
     fn compound_object_style(
         &self,
         line_object_style: &ObjectStyle,
-        compound: &Compound,
+        compound: &Compound<'_>,
     ) -> ObjectStyle {
         let mut os = line_object_style.clone();
         if compound.italic {
@@ -163,7 +168,7 @@ impl MadSkin {
         os
     }
 
-    // return a formatted line or part of line
+    // return a formatted line or part of line.
     // Don't use this function if `src` is expected to be several lines.
     pub fn inline<'k, 's>(&'k self, src: &'s str) -> FmtInline<'k, 's> {
         let composite = FmtComposite::from(
@@ -175,77 +180,35 @@ impl MadSkin {
             composite,
         }
     }
-    //pub fn inline<'s, 'l>(&'s self, src: &'l str) -> FormattedLine<'s, 'l> {
-    //    let composite = Composite::from_inline(src);
-    //    let line = Line::Normal( composite );
-    //    FormattedLine{
-    //        skin: self,
-    //        line,
-    //    }
-    //}
     /// return a formatted text.
     /// Code blocs will be right justified
     pub fn text<'k, 's>(&'k self, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
         FmtText::from(self, src, width)
     }
     /// return a formatted text, with lines wrapped or justified for the current terminal
-    /// width
+    /// width.
     /// Code blocs will be right justified
     pub fn term_text<'k, 's>(&'k self, src: &'s str) -> FmtText<'k, 's> {
         let (width, _) = Terminal::new().terminal_size();
         FmtText::from(self, src, Some(width as usize))
     }
-    //pub fn text<'s, 'l>(&'s self, src: &'l str) -> FormattedText<'s, 'l> {
-    //    let mut text = FormattedText::new(self, src);
-    //    text.right_pad_code_blocks();
-    //    tbl::fix_all_tables(&mut text, std::usize::MAX);
-    //    text
-    //}
-    // return a formatted text adjusted for the current width of the terminal
-    // Lines will be wrapped to fit in the width of the area
-    // Code blocs will be right justified.
-    // FIXME remove
-    //pub fn wrapped_text<'s, 'l>(&'s self, src: &'l str, width: usize) -> FormattedText<'s, 'l> {
-    //    let width = width + 1; // FIXME there's something to clarify here...
-    //    let text = Text::from(src);
-    //    let mut text = FormattedText{
-    //        skin: self,
-    //        text: wrap::hard_wrap_text(&text, width),
-    //    };
-    //    text.right_pad_code_blocks();
-    //    tbl::fix_all_tables(&mut text, width);
-    //    text
-    //}
-    // return a formatted text adjusted for the current width of the terminal
-    // Lines will be wrapped to fit in the width of the area
-    // Code blocs will be right justified.
-    // No space is left for a scrollbar. Use area_wrapped_text
-    // if you want to use the text as scrollable in a raw terminal
-    // FIXME remove
-    //pub fn terminal_wrapped_text<'s, 'l>(&'s self, src: &'l str) -> FormattedText<'s, 'l> {
-    //    let (width, _) = Terminal::new().terminal_size();
-    //    self.wrapped_text(src, width as usize)
-    //}
-    // return a formatted text adjusted for a specific area width.
-    // Lines will be wrapped to fit in the width of the area (with
-    //  the space for the scrollbar)
-    // Code blocs will be right justified.
-    // FIXME remove
-    //pub fn area_wrapped_text<'s, 'l>(&'s self, src: &'l str, area: &Area) -> FormattedText<'s, 'l> {
-    //    self.wrapped_text(src, area.width as usize - 1)
-    //}
+    /// return a formatted text, with lines wrapped or justified for the
+    /// passed area width (with space for a scrollbar).
+    /// Code blocs will be right justified
+    pub fn area_text<'k, 's>(&'k self, src: &'s str, area: &Area) -> FmtText<'k, 's> {
+        FmtText::from(self, src, Some(area.width as usize-1))
+    }
     pub fn print_inline(&self, src: &str) {
         print!("{}", self.inline(src));
     }
     pub fn print_text(&self, src: &str) {
         println!("{}", self.term_text(src));
     }
-
-    pub fn write_fmt_composite(&self, f: &mut fmt::Formatter, fc: &FmtComposite) -> fmt::Result {
+    pub fn write_fmt_composite(&self, f: &mut fmt::Formatter<'_>, fc: &FmtComposite<'_>) -> fmt::Result {
         let os = self.composite_object_style(&fc.composite.style);
         let (lp, rp) = fc.completions();
         let space = os.apply_to(" ");
-        for i in 0..lp {
+        for _ in 0..lp {
             write!(f, "{}", &space)?;
         }
         if fc.composite.is_list_item() {
@@ -255,71 +218,51 @@ impl MadSkin {
             let os = self.compound_object_style(os, c);
             write!(f, "{}", os.apply_to(c.as_str()))?;
         }
-        for i in 0..rp {
+        for _ in 0..rp {
             write!(f, "{}", &space)?;
         }
         Ok(())
     }
-    pub fn write_fmt_line(&self, f: &mut fmt::Formatter, line: &FmtLine) -> fmt::Result {
+    pub fn write_fmt_line(&self, f: &mut fmt::Formatter<'_>, line: &FmtLine<'_>) -> fmt::Result {
         match line {
             FmtLine::Normal(fc) => {
                 self.write_fmt_composite(f, fc)?;
                 writeln!(f)?;
             }
             FmtLine::TableRow(FmtTableRow{cells}) => {
-                // FIXME tablerow
-                //for composite in cells {
-                //    write!(f, "│")?;
-                //    let os = self.composite_object_style(&composite.style);
-                //    if composite.is_list_item() {
-                //        write!(f, "• ")?;
-                //    }
-                //    for c in &composite.compounds {
-                //        let os = self.compound_object_style(os, c);
-                //        write!(f, "{}", os.apply_to(c.as_str()))?;
-                //    }
-                //}
-                writeln!(f, "│")?;
+                for cell in cells {
+                    write!(f, "{}", self.table_border.apply_to("│"))?;
+                    self.write_fmt_composite(f, &cell)?;
+                }
+                writeln!(f, "{}", self.table_border.apply_to("│"))?;
             }
-            _ => {
-                // FIXME table rule
+            FmtLine::TableRule(rule) => {
+                write!(f, "{}", self.table_border.apply_to(match rule.position {
+                    RelativePosition::Top => '┌',
+                    RelativePosition::Other => '├',
+                    RelativePosition::Bottom => '└',
+                }))?;
+                for (idx, width) in rule.widths.iter().enumerate() {
+                    if idx > 0 {
+                        write!(f, "{}", self.table_border.apply_to(match rule.position {
+                            RelativePosition::Top => '┬',
+                            RelativePosition::Other => '┼',
+                            RelativePosition::Bottom => '┴',
+                        }))?;
+                    }
+                    let c = self.table_border.apply_to("─");
+                    for _ in 0..*width {
+                        write!(f, "{}", c)?;
+                    }
+                }
+                writeln!(f, "{}", self.table_border.apply_to(match rule.position {
+                    RelativePosition::Top => '┐',
+                    RelativePosition::Other => '┤',
+                    RelativePosition::Bottom => '┘',
+                }))?;
             }
         }
         Ok(())
     }
-
-    // FIXME remove
-    // pub fn fmt_composite(&self, f: &mut fmt::Formatter, composite: &Composite) -> fmt::Result {
-    //     let os = self.composite_object_style(&composite.style);
-    //     if composite.is_list_item() {
-    //         write!(f, "• ")?;
-    //     }
-    //     for c in &composite.compounds {
-    //         let os = self.compound_object_style(os, c);
-    //         write!(f, "{}", os.apply_to(c.as_str()))?;
-    //     }
-    //     Ok(())
-    // }
-    // FIXME remove
-    // pub fn fmt_line(&self, f: &mut fmt::Formatter, line: &Line) -> fmt::Result {
-    //     match line {
-    //         Line::Normal(composite) => self.fmt_composite(f, composite),
-    //         Line::TableRow(TableRow{cells}) => {
-    //             for composite in cells {
-    //                 write!(f, "│")?;
-    //                 let os = self.composite_object_style(&composite.style);
-    //                 if composite.is_list_item() {
-    //                     write!(f, "• ")?;
-    //                 }
-    //                 for c in &composite.compounds {
-    //                     let os = self.compound_object_style(os, c);
-    //                     write!(f, "{}", os.apply_to(c.as_str()))?;
-    //                 }
-    //             }
-    //             write!(f, "│")?;
-    //             Ok(())
-    //         }
-    //     }
-    // }
 }
 

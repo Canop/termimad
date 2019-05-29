@@ -2,7 +2,7 @@
 use crate::skin::MadSkin;
 use minimad::{Alignment, Compound, Composite};
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Spacing {
     pub width: usize,
     pub align: Alignment,
@@ -10,6 +10,7 @@ pub struct Spacing {
 
 /// wrap a Minimad Composite, which is a list of Compounds,
 /// which are strings with an homogeneous style
+#[derive(Debug, Clone)]
 pub struct FmtComposite<'s> {
     pub composite: Composite<'s>,
     pub visible_length: usize, // to avoid recomputing it again and again
@@ -17,6 +18,13 @@ pub struct FmtComposite<'s> {
 }
 
 impl<'s> FmtComposite<'s> {
+    pub fn new() -> FmtComposite<'s> {
+        FmtComposite {
+            composite: Composite::new(),
+            visible_length: 0,
+            spacing: None,
+        }
+    }
     pub fn from(composite: Composite<'s>, skin: &MadSkin) -> FmtComposite<'s> {
         FmtComposite {
             visible_length: skin.visible_composite_length(&composite),
@@ -24,21 +32,22 @@ impl<'s> FmtComposite<'s> {
             spacing: None,
         }
     }
-    // return the number of characters (usually spaces) to insert both
-    // sides of the composite
+    /// return the number of characters (usually spaces) to insert both
+    /// sides of the composite
     pub fn completions(&self) -> (usize, usize) {
         match &self.spacing {
             Some(spacing) => match spacing.align {
                 Alignment::Left | Alignment::Unspecified => (0, spacing.width - self.visible_length),
                 Alignment::Center => {
                     let lp = (spacing.width - self.visible_length) / 2;
-                    (lp, spacing.width - lp)
+                    (lp, spacing.width - self.visible_length - lp)
                 },
                 Alignment::Right => (spacing.width - self.visible_length, 0),
             },
             None => (0, 0),
         }
     }
+    /// add a compound and modifies `visible_length` accordingly
     pub fn add_compound(&mut self, compound: Compound<'s>) {
         self.visible_length += compound.char_length();
         self.composite.compounds.push(compound);
