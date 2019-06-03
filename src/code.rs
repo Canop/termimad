@@ -1,6 +1,6 @@
 
-use crate::composite::*;
 use crate::line::*;
+use crate::spacing::Spacing;
 use minimad::{Alignment, CompositeStyle};
 
 /// a sequence of lines whose line-style is Code

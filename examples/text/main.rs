@@ -6,10 +6,10 @@ static MD: &str = r#"
 
 Here's the code to print this markdown block in the terminal:
 
-    let mut skin = MadSkin::new();
-    skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
-    mad_fg!(skin.bold, Yellow);
-    mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.bold.set_fg(Yellow);
+    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
     println!("{}", skin.term_text(my_markdown));
 
 **Termimad** is built over **Crossterm** and **Minimad**.
@@ -23,7 +23,8 @@ Here's the code to print this markdown block in the terminal:
 ## Real use cases
 
 * the help screen of a terminal application
-* small app output or small in app snippets
+* small snippets of rich text in a bigger application
+* terminal app output
 "#;
 
 fn print_direct(skin: &MadSkin) {
@@ -45,13 +46,13 @@ fn print_in_mad_view(skin: MadSkin) {
 /// Note that this doesn't use an alternate screen. Look
 /// at the "scrollable" example to see an alternate screen
 /// being used.
-const DIRECT: bool = true;
+const DIRECT: bool = false;
 
 fn main() {
-    let mut skin = MadSkin::new();
-    skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
-    mad_fg!(skin.bold, Yellow);
-    mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.bold.set_fg(Yellow);
+    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
     if DIRECT {
         print_direct(&skin);
     } else {

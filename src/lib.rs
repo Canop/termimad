@@ -1,4 +1,6 @@
-/// This crate lets you display simple markdown snippets in the terminal.
+/// This crate lets you display simple markdown snippets
+/// or scrollable wrapped markdown texts in the terminal.
+///
 ///
 #[macro_use]
 extern crate lazy_static;
@@ -8,7 +10,10 @@ mod area;
 mod code;
 mod line;
 mod inline;
+#[macro_use]
+mod style;
 mod skin;
+mod spacing;
 mod tbl;
 mod text;
 mod text_view;
@@ -24,10 +29,16 @@ pub use inline::FmtInline;
 pub use text::FmtText;
 pub use text_view::TextView;
 pub use mad_view::MadView;
+pub use style::{CompoundStyle, LineStyle};
+pub use minimad::Alignment;
 
-fn get_default_skin<'s>() -> &'s MadSkin {
+/// return a reference to the global skin (modifiable).
+/// If you want a new default skin without messing with
+/// the other default printings, get a separate instance
+/// with `Skin::default()` instead.
+pub fn get_default_skin<'s>() -> &'s MadSkin {
     lazy_static! {
-        static ref DEFAULT_SKIN: MadSkin = MadSkin::new();
+        static ref DEFAULT_SKIN: MadSkin = MadSkin::default();
     }
     &DEFAULT_SKIN
 }

@@ -4,6 +4,7 @@ use crate:: composite::*;
 use crate::wrap;
 use crate::skin::MadSkin;
 use crate::line::FmtLine;
+use crate::spacing::Spacing;
 
 /// wrap a standard table row
 pub struct FmtTableRow<'s> {

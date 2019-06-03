@@ -3,126 +3,61 @@ use crate::composite::FmtComposite;
 use crate::inline::FmtInline;
 use crate::line::FmtLine;
 use crate::text::FmtText;
+use crate::spacing::Spacing;
+use crate::style::*;
 use crate::tbl::*;
 
-use crossterm::{Attribute, Color, ObjectStyle, StyledObject, Terminal};
-use minimad::{Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
+use crossterm::{Attribute, Color, Terminal};
+use minimad::{Alignment, Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
 use std::{self, fmt};
 
-// The scrollbar style is defined by two styled chars, one
-//  for the track, and one for the thumb.
-// For the default styling only the fg color is defined
-//  and the char is ▐ but everything can be changed
-pub struct ScrollBarStyle {
-    pub track: StyledObject<char>,
-    pub thumb: StyledObject<char>,
-}
-
-impl ScrollBarStyle {
-    pub fn new() -> ScrollBarStyle {
-        let char = '▐';
-        ScrollBarStyle {
-            track: ObjectStyle::new().fg(Color::Rgb{r:35, g:35, b:35}).apply_to(char),
-            thumb: ObjectStyle::new().fg(Color::Rgb{r:140, g:140, b:140}).apply_to(char),
-        }
-    }
-    pub fn set_thumb_fg(&mut self, c: Color) {
-        let os = ObjectStyle::new().fg(c);
-        self.thumb = os.apply_to(self.thumb.content);
-    }
-    pub fn set_track_fg(&mut self, c: Color) {
-        let os = ObjectStyle::new().fg(c);
-        self.track = os.apply_to(self.track.content);
-    }
-}
 
 /// A skin defining how a parsed mardkown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
 pub struct MadSkin {
-    pub paragraph: ObjectStyle,
-    pub bold: ObjectStyle,
-    pub italic: ObjectStyle,
-    pub code: ObjectStyle,
-    pub headers: [ObjectStyle; MAX_HEADER_DEPTH],
+    pub paragraph: LineStyle,
+    pub bold: CompoundStyle,
+    pub italic: CompoundStyle,
+    pub code: LineStyle,
+    pub headers: [LineStyle; MAX_HEADER_DEPTH],
     pub scrollbar: ScrollBarStyle,
-    pub table_border: ObjectStyle,
+    pub table_border: CompoundStyle,
 }
 
-// overwrite style of a with b
-fn add_style(a: &mut ObjectStyle, b: &ObjectStyle) {
-    a.fg_color = b.fg_color.or(a.fg_color);
-    a.bg_color = b.bg_color.or(a.bg_color);
-    a.attrs.extend(&b.attrs);
-}
-
-#[macro_export]
-macro_rules! mad_fg {
-    (
-        $item:expr, $color:expr
-    ) => {
-        $item.fg_color = Some($color);
-    }
-}
-
-#[macro_export]
-macro_rules! mad_bg {
-    (
-        $item:expr, $color:expr
-    ) => {
-        $item.bg_color = Some($color);
-    }
-}
-
-#[macro_export]
-macro_rules! mad_colors {
-    (
-        $item:expr, $fg:expr, $bg:expr
-    ) => {
-        $item.fg_color = Some($fg);
-        $item.bg_color = Some($bg);
-    }
-}
-
-impl MadSkin {
+impl Default for MadSkin {
     /// build a customizable skin.
     /// It's initialized with sensible monochrome settings.
-    pub fn new() -> MadSkin {
+    fn default() -> MadSkin {
         let mut skin = MadSkin {
-            paragraph: ObjectStyle::new(),
-            bold: ObjectStyle::new().fg(Color::White),
-            italic: ObjectStyle::new(),
-            code: ObjectStyle::new(),
+            paragraph: LineStyle::default(),
+            bold: CompoundStyle::new(Some(Color::White), None, vec![Attribute::Bold]),
+            italic: CompoundStyle::with_attr(Attribute::Italic),
+            code: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
-            table_border: ObjectStyle::new().fg(Color::Rgb {
-                r: 110,
-                g: 110,
-                b: 110,
-            }),
+            table_border: CompoundStyle::with_fg(rgb!(110, 110, 110)),
         };
-        skin.bold.add_attr(Attribute::Bold);
-        skin.italic.add_attr(Attribute::Italic);
-        skin.code.bg_color = Some(Color::Rgb {
-            r: 40,
-            g: 40,
-            b: 40,
-        });
+        skin.code.set_bg(rgb!(40, 40, 40));
         for h in &mut skin.headers {
             h.add_attr(Attribute::Underlined);
         }
         skin.headers[0].add_attr(Attribute::Bold);
-        skin.headers[0].fg_color = Some(Color::Rgb{r:250, g:250, b:250});
-        skin.headers[1].fg_color = Some(Color::Rgb{r:240, g:240, b:240});
+        skin.headers[0].align = Alignment::Center;
+        skin.headers[0].set_fg(Color::Rgb{r:250, g:250, b:250});
+        skin.headers[1].set_fg(Color::Rgb{r:240, g:240, b:240});
         skin
     }
-    pub fn set_headers_fg_color(&mut self, c: Color) {
+}
+
+impl MadSkin {
+    pub fn set_headers_fg(&mut self, c: Color) {
         for h in &mut self.headers {
-            h.fg_color = Some(c);
+            h.set_fg(c);
         }
     }
-    pub fn set_headers_bg_color(&mut self, c: Color) {
+    pub fn set_headers_bg(&mut self, c: Color) {
         for h in &mut self.headers {
-            h.bg_color = Some(c);
+            h.set_bg(c);
         }
     }
 
@@ -140,7 +75,8 @@ impl MadSkin {
         }
     }
 
-    fn composite_object_style(&self, style: &CompositeStyle) -> &ObjectStyle {
+    /// return the style appliable to a given line
+    fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
         match style {
             CompositeStyle::Code => &self.code,
             CompositeStyle::Header(level) if *level <= MAX_HEADER_DEPTH as u8 => {
@@ -150,20 +86,22 @@ impl MadSkin {
         }
     }
 
-    fn compound_object_style(
+    /// return the style appliable to a given compound.
+    /// It's a composition of the various appliable base styles.
+    fn compound_style(
         &self,
-        line_object_style: &ObjectStyle,
+        line_style: &LineStyle,
         compound: &Compound<'_>,
-    ) -> ObjectStyle {
-        let mut os = line_object_style.clone();
+    ) -> CompoundStyle {
+        let mut os = line_style.compound_style.clone();
         if compound.italic {
-            add_style(&mut os, &self.italic);
+            os.overwrite_with(&self.italic);
         }
         if compound.bold {
-            add_style(&mut os, &self.bold);
+            os.overwrite_with(&self.bold);
         }
         if compound.code {
-            add_style(&mut os, &self.code);
+            os.overwrite_with(&self.code.compound_style);
         }
         os
     }
@@ -185,6 +123,7 @@ impl MadSkin {
     pub fn text<'k, 's>(&'k self, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
         FmtText::from(self, src, width)
     }
+
     /// return a formatted text, with lines wrapped or justified for the current terminal
     /// width.
     /// Code blocs will be right justified
@@ -198,41 +137,67 @@ impl MadSkin {
     pub fn area_text<'k, 's>(&'k self, src: &'s str, area: &Area) -> FmtText<'k, 's> {
         FmtText::from(self, src, Some(area.width as usize-1))
     }
+
     pub fn print_inline(&self, src: &str) {
         print!("{}", self.inline(src));
     }
     pub fn print_text(&self, src: &str) {
         println!("{}", self.term_text(src));
     }
-    pub fn write_fmt_composite(&self, f: &mut fmt::Formatter<'_>, fc: &FmtComposite<'_>) -> fmt::Result {
-        let os = self.composite_object_style(&fc.composite.style);
-        let (lp, rp) = fc.completions();
-        let space = os.apply_to(" ");
-        for _ in 0..lp {
-            write!(f, "{}", &space)?;
+
+    pub fn write_fmt_composite(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        fc: &FmtComposite<'_>,
+        outer_width: Option<usize>,
+    ) -> fmt::Result {
+        let ls = self.line_style(&fc.composite.style);
+        let (lpi, rpi) = fc.completions(); // inner completion
+        let inner_width = fc.spacing
+            .map_or(fc.visible_length, |sp| sp.width);
+        let (lpo, rpo) = match outer_width {
+            Some(outer_width) => Spacing::completions(ls.align, inner_width, outer_width),
+            None => (0, 0),
+        };
+        let ospace = self.paragraph.compound_style.apply_to(" ");
+        let ispace = ls.compound_style.apply_to(" ");
+        for _ in 0..lpo {
+            write!(f, "{}", &ospace)?;
+        }
+        for _ in 0..lpi {
+            write!(f, "{}", &ispace)?;
         }
         if fc.composite.is_list_item() {
             write!(f, "• ")?;
         }
         for c in &fc.composite.compounds {
-            let os = self.compound_object_style(os, c);
+            let os = self.compound_style(ls, c);
             write!(f, "{}", os.apply_to(c.as_str()))?;
         }
-        for _ in 0..rp {
-            write!(f, "{}", &space)?;
+        for _ in 0..rpi {
+            write!(f, "{}", &ispace)?;
+        }
+        for _ in 0..rpo {
+            write!(f, "{}", &ospace)?;
         }
         Ok(())
     }
-    pub fn write_fmt_line(&self, f: &mut fmt::Formatter<'_>, line: &FmtLine<'_>) -> fmt::Result {
+
+    pub fn write_fmt_line(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        line: &FmtLine<'_>,
+        width: Option<usize>,
+    ) -> fmt::Result {
         match line {
             FmtLine::Normal(fc) => {
-                self.write_fmt_composite(f, fc)?;
+                self.write_fmt_composite(f, fc, width)?;
                 writeln!(f)?;
             }
             FmtLine::TableRow(FmtTableRow{cells}) => {
                 for cell in cells {
                     write!(f, "{}", self.table_border.apply_to("│"))?;
-                    self.write_fmt_composite(f, &cell)?;
+                    self.write_fmt_composite(f, &cell, None)?;
                 }
                 writeln!(f, "{}", self.table_border.apply_to("│"))?;
             }

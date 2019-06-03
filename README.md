@@ -72,12 +72,12 @@ Result:
 ### With a custom skin:
 
 ```rust
-let mut skin = MadSkin::new();
-skin.bold = skin.bold.fg(Yellow);
-skin.print_line_ln("*Hey* **World!** Here's `some(code)`");
-mad_colors!(skin.normal, Magenta, Rgb{r:30, g:30, b:40});
-skin.italic.add_attr(Underlined);
-println!("and now {}", skin.line("a little *too much* **style!** (and `some(code)` too)"));
+    let mut skin = MadSkin::default();
+    skin.bold.set_fg(Yellow);
+    skin.print_inline("*Hey* **World!** Here's `some(code)`");
+    skin.paragraph.set_fgbg(Magenta, rgb!(30, 30, 40));
+    skin.italic.add_attr(Underlined);
+    println!("\nand now {}\n", skin.inline("a little *too much* **style!** (and `some(code)` too)"));
 ```
 
 Result:

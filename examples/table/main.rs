@@ -20,10 +20,10 @@ static MD_TABLE: &str = r#"
 
 fn main() {
     println!("\n");
-    let mut skin = MadSkin::new();
-    skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
-    mad_fg!(skin.bold, Yellow);
-    mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.bold.set_fg(Yellow);
+    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
     let (width, _) = Terminal::new().terminal_size();
     let mut markdown = format!(" Available width: *{}*", width);
     markdown.push_str(MD_TABLE);

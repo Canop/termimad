@@ -1,12 +1,8 @@
 
 use crate::skin::MadSkin;
-use minimad::{Alignment, Compound, Composite};
+use crate::spacing::Spacing;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Spacing {
-    pub width: usize,
-    pub align: Alignment,
-}
+use minimad::{Compound, Composite};
 
 /// wrap a Minimad Composite, which is a list of Compounds,
 /// which are strings with an homogeneous style
@@ -34,20 +30,15 @@ impl<'s> FmtComposite<'s> {
     }
     /// return the number of characters (usually spaces) to insert both
     /// sides of the composite
+    #[inline(always)]
     pub fn completions(&self) -> (usize, usize) {
         match &self.spacing {
-            Some(spacing) => match spacing.align {
-                Alignment::Left | Alignment::Unspecified => (0, spacing.width - self.visible_length),
-                Alignment::Center => {
-                    let lp = (spacing.width - self.visible_length) / 2;
-                    (lp, spacing.width - self.visible_length - lp)
-                },
-                Alignment::Right => (spacing.width - self.visible_length, 0),
-            },
+            Some(spacing) => spacing.completions_for(self.visible_length),
             None => (0, 0),
         }
     }
     /// add a compound and modifies `visible_length` accordingly
+    #[inline(always)]
     pub fn add_compound(&mut self, compound: Compound<'s>) {
         self.visible_length += compound.char_length();
         self.composite.compounds.push(compound);

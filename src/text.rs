@@ -13,6 +13,7 @@ use crate::wrap;
 pub struct FmtText<'k, 's> {
     pub skin: &'k MadSkin,
     pub lines: Vec<FmtLine<'s>>,
+    pub width: Option<usize>, // available width
 }
 
 impl<'k, 's> FmtText<'k, 's> {
@@ -31,6 +32,7 @@ impl<'k, 's> FmtText<'k, 's> {
         FmtText {
             skin,
             lines,
+            width,
         }
     }
 }
@@ -38,7 +40,7 @@ impl<'k, 's> FmtText<'k, 's> {
 impl fmt::Display for FmtText<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for line in &self.lines {
-            self.skin.write_fmt_line(f, line)?;
+            self.skin.write_fmt_line(f, line, self.width)?;
         }
         Ok(())
     }

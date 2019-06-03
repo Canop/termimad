@@ -26,12 +26,13 @@ fn show_scrollable(skin: MadSkin, markdown: &str) -> io::Result<()> {
 }
 
 fn make_skin() -> MadSkin {
-    let mut skin = MadSkin::new();
-    skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
-    mad_fg!(skin.bold, Yellow);
-    mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.bold.set_fg(Yellow);
+    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
     skin.scrollbar.set_track_fg(Rgb{r:30, g:30, b:40});
     skin.scrollbar.set_thumb_fg(Rgb{r:67, g:51, b:0});
+    skin.code.align = Alignment::Center;
     skin
 }
 
@@ -60,6 +61,8 @@ The area specifies the part of the screen where we'll display our markdown. The 
 
     let mut area = Area::full_screen();
     area.pad(2, 1); // let's add some margin
+
+*(yes the code block centering in this example is a little too much, it's just here to show what's possible)*
 
 ## Parsed Markdown
 
@@ -95,14 +98,15 @@ Not two applications handle events in the same way. **Termimad** doesn't try to 
 
 ## Skin
 
-We want *shiny **colors***:
+We want *shiny **colors*** (and unreasonnable centering):
 
-    let mut skin = MadSkin::new();
-    skin.set_headers_fg_color(Rgb{r:255, g:187, b:0});
-    mad_colors!(skin.italic, Magenta, Rgb{r:30, g:30, b:40});
-    mad_fg!(skin.bold, Yellow);
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.bold.set_fg(Yellow);
+    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
     skin.scrollbar.set_track_fg(Rgb{r:30, g:30, b:40});
     skin.scrollbar.set_thumb_fg(Rgb{r:67, g:51, b:0});
+    skin.code.align = Alignment::Center;
 
 The scrollbar's colors were also adjusted to be consistent.
 

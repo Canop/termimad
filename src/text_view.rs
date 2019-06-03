@@ -59,7 +59,8 @@ impl<'a, 't> TextView<'a, 't> {
             if i < self.text.lines.len() {
                 let dl = DisplayableLine::new(
                     self.text.skin,
-                    &self.text.lines[i]
+                    &self.text.lines[i],
+                    self.text.width,
                 );
                 print!("{}", &dl);
                 i += 1;

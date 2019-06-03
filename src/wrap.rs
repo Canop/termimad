@@ -148,7 +148,7 @@ mod wrap_tests {
         for line in &text.lines {
             let len = visible_fmt_line_length(skin, &line);
             print!("len:{: >4}  | {}", len, DisplayableLine {
-                skin: &skin, line
+                skin: &skin, line, width:None,
             });
             assert!(len <= width);
             assert!(len > 0);

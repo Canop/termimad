@@ -1,4 +1,4 @@
-use crossterm::{Attribute::*, Color::*, ObjectStyle};
+use crossterm::{Attribute::*, Color::*};
 use termimad::*;
 
 fn show(skin: &MadSkin, src: &str) {
@@ -14,18 +14,18 @@ fn show_some(skin: &MadSkin) {
 fn main() {
     println!();
     println!("\nWith the default skin:\n");
-    let mut skin = MadSkin::new();
+    let mut skin = MadSkin::default();
     show_some(&skin);
     println!("\nWith a customized skin:\n");
-    mad_fg!(skin.bold, Yellow);
-    skin.italic = ObjectStyle::new().bg(DarkBlue);
+    skin.bold.set_fg(Yellow);
+    skin.italic = CompoundStyle::with_bg(DarkBlue);
     skin.code.add_attr(Reverse);
     show_some(&skin);
 
-    let mut skin = MadSkin::new();
-    skin.bold = skin.bold.fg(Yellow);
+    let mut skin = MadSkin::default();
+    skin.bold.set_fg(Yellow);
     skin.print_inline("*Hey* **World!** Here's `some(code)`");
-    mad_colors!(skin.paragraph, Magenta, Rgb{r:30, g:30, b:40});
+    skin.paragraph.set_fgbg(Magenta, rgb!(30, 30, 40));
     skin.italic.add_attr(Underlined);
     skin.italic.add_attr(OverLined);
     println!("\nand now {}\n", skin.inline("a little *too much* **style!** (and `some(code)` too)"));
