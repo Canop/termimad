@@ -14,6 +14,7 @@ pub struct TextView<'a, 't> {
 }
 
 impl<'a, 't> TextView<'a, 't> {
+
     /// make a displayed text, that is a text in an area
     pub fn from(
         area: &'a Area,
@@ -26,26 +27,25 @@ impl<'a, 't> TextView<'a, 't> {
             show_scrollbar: true,
         }
     }
+
     #[inline(always)]
     pub fn content_height(&self) -> i32 {
         self.text.lines.len() as i32
     }
+
     // return an option which when filled contains
     //  a tupple with the top and bottom of the vertical
     //  scrollbar. Return none when the content fits
     //  the available space (or if show_scrollbar is false).
+    #[inline(always)]
     pub fn scrollbar(&self) -> Option<(u16, u16)> {
-        if !self.show_scrollbar {
-            return None;
+        if self.show_scrollbar {
+            self.area.scrollbar(self.scroll, self.content_height())
+        } else {
+            None
         }
-        let h = self.area.height as i32;
-        if self.content_height() <= h {
-            return None;
-        }
-        let sbh = h * h / self.content_height();
-        let sc = self.scroll * h / self.content_height();
-        Some((sc as u16, (sc + sbh + 1).min(i32::from(self.area.height+1)) as u16))
     }
+
     /// display the text in the area, taking the scroll into account.
     pub fn write(&self) -> io::Result<()> {
         let terminal = Terminal::new();
@@ -74,22 +74,6 @@ impl<'a, 't> TextView<'a, 't> {
                 }
             }
         }
-        //for y in 0..=self.area.height {
-        //    cursor.goto(self.area.left, self.area.top+y)?;
-        //    terminal.clear(ClearType::UntilNewLine)?;
-        //    if i < self.text.lines.len() {
-        //        print!("{}", &self.text.lines[i]);
-        //        i += 1;
-        //    }
-        //    if let Some((sctop, scbottom)) = scrollbar {
-        //        cursor.goto(sx, self.area.top+y)?;
-        //        if sctop <= y && y <= scbottom {
-        //            println!("{}", self.text.skin.scrollbar.thumb);
-        //        } else {
-        //            println!("{}", self.text.skin.scrollbar.track);
-        //        }
-        //    }
-        //}
         Ok(())
     }
     /// set the scroll amount.

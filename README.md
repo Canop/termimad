@@ -42,7 +42,7 @@ For example this markdown:
 	| phpbb like links | no | (because it's preferable to show an URL in a terminal)
 	|-
 
-will give different results depending of the width:
+will give different results depending on the width:
 
 ![table](doc/table-in-84.png)
 
@@ -72,12 +72,12 @@ Result:
 ### With a custom skin:
 
 ```rust
-    let mut skin = MadSkin::default();
-    skin.bold.set_fg(Yellow);
-    skin.print_inline("*Hey* **World!** Here's `some(code)`");
-    skin.paragraph.set_fgbg(Magenta, rgb!(30, 30, 40));
-    skin.italic.add_attr(Underlined);
-    println!("\nand now {}\n", skin.inline("a little *too much* **style!** (and `some(code)` too)"));
+let mut skin = MadSkin::default();
+skin.bold.set_fg(Yellow);
+skin.print_inline("*Hey* **World!** Here's `some(code)`");
+skin.paragraph.set_fgbg(Magenta, rgb!(30, 30, 40));
+skin.italic.add_attr(Underlined);
+println!("\nand now {}\n", skin.inline("a little *too much* **style!** (and `some(code)` too)"));
 ```
 
 Result:

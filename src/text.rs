@@ -8,7 +8,6 @@ use crate::line::FmtLine;
 use crate::tbl;
 use crate::wrap;
 
-
 /// a formatted text, implementing Display
 pub struct FmtText<'k, 's> {
     pub skin: &'k MadSkin,
