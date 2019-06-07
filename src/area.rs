@@ -1,5 +1,3 @@
-use std::io;
-
 use crossterm::Terminal;
 
 pub trait AreaContent {

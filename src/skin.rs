@@ -142,7 +142,7 @@ impl MadSkin {
         print!("{}", self.inline(src));
     }
     pub fn print_text(&self, src: &str) {
-        println!("{}", self.term_text(src));
+        print!("{}", self.term_text(src));
     }
 
     pub fn write_fmt_composite(

@@ -41,12 +41,12 @@ fn print_in_mad_view(skin: MadSkin) {
     view.write().unwrap();
 }
 
-/// Choose DIRECT = truefor a simple writting in stdout,
+/// Choose DIRECT = true for a simple writting in stdout,
 /// and DIRECT = false for a whole terminal display.
 /// Note that this doesn't use an alternate screen. Look
 /// at the "scrollable" example to see an alternate screen
 /// being used.
-const DIRECT: bool = false;
+const DIRECT: bool = true;
 
 fn main() {
     let mut skin = MadSkin::default();

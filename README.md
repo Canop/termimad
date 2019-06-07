@@ -69,7 +69,9 @@ Result:
 
 ![simple example](doc/default-skin-simple.png)
 
-### With a custom skin:
+### Inline snippets with a custom skin:
+
+*Inline snippets* are one line or less.
 
 ```rust
 let mut skin = MadSkin::default();
@@ -83,6 +85,14 @@ println!("\nand now {}\n", skin.inline("a little *too much* **style!** (and `som
 Result:
 
 ![too much style](doc/too_much.png)
+
+#### Texts
+
+*Texts* can be several lines. Tables and code blocks are automatically aligned, justified and consistently wrapped.
+
+```rust
+skin.print_text("# title\n* a list item\n* another item");
+```
 
 ### Scrollable TextView in a raw terminal:
 

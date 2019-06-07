@@ -24,7 +24,16 @@ pub struct CompoundStyle {
     pub object_style: ObjectStyle, // a crossterm object style
 }
 
+impl From<ObjectStyle> for CompoundStyle {
+    fn from(object_style: ObjectStyle) -> CompoundStyle {
+        CompoundStyle {
+            object_style
+        }
+    }
+}
+
 impl CompoundStyle {
+
     /// Apply an `StyledObject` to the passed displayable object.
     pub fn apply_to<D: Display>(&self, val: D) -> StyledObject<D> {
         self.object_style.apply_to(val)
@@ -159,5 +168,11 @@ impl ScrollBarStyle {
     pub fn set_track_fg(&mut self, c: Color) {
         let os = ObjectStyle::new().fg(c);
         self.track = os.apply_to(self.track.content);
+    }
+    pub fn set_track_object_style(&mut self, object_style: &ObjectStyle) {
+        self.track = object_style.apply_to(self.track.content);
+    }
+    pub fn set_thumb_object_style(&mut self, object_style: &ObjectStyle) {
+        self.thumb = object_style.apply_to(self.track.content);
     }
 }
