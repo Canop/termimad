@@ -11,7 +11,6 @@ use crossterm::{Attribute, Color, Terminal};
 use minimad::{Alignment, Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
 use std::{self, fmt};
 
-
 /// A skin defining how a parsed mardkown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
 pub struct MadSkin {
@@ -35,16 +34,17 @@ impl Default for MadSkin {
             code: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
-            table_border: CompoundStyle::with_fg(rgb!(110, 110, 110)),
+            table_border: CompoundStyle::with_fg(gray(7)),
         };
-        skin.code.set_bg(rgb!(40, 40, 40));
+        skin.code.set_bg(gray(4));
         for h in &mut skin.headers {
             h.add_attr(Attribute::Underlined);
         }
         skin.headers[0].add_attr(Attribute::Bold);
         skin.headers[0].align = Alignment::Center;
-        skin.headers[0].set_fg(Color::Rgb{r:250, g:250, b:250});
-        skin.headers[1].set_fg(Color::Rgb{r:240, g:240, b:240});
+        skin.headers[0].set_fg(gray(22));
+        skin.headers[1].set_fg(gray(21));
+        skin.headers[2].set_fg(gray(20));
         skin
     }
 }
@@ -192,21 +192,35 @@ impl MadSkin {
         match line {
             FmtLine::Normal(fc) => {
                 self.write_fmt_composite(f, fc, width)?;
-                writeln!(f)?;
             }
             FmtLine::TableRow(FmtTableRow{cells}) => {
+                let mut iw = 0;
                 for cell in cells {
                     write!(f, "{}", self.table_border.apply_to("│"))?;
                     self.write_fmt_composite(f, &cell, None)?;
+                    if let Some(spacing) = cell.spacing {
+                        iw += spacing.width;
+                    } else {
+                        iw += cell.visible_length;
+                    }
                 }
-                writeln!(f, "{}", self.table_border.apply_to("│"))?;
+                write!(f, "{}", self.table_border.apply_to("│"))?;
+                if let Some(width) = width {
+                    let ospace = self.paragraph.compound_style.apply_to(" ");
+                    iw += 1;
+                    for _ in iw..width {
+                        write!(f, "{}", &ospace)?;
+                    }
+                }
             }
             FmtLine::TableRule(rule) => {
+                // FIXME add right complement
                 write!(f, "{}", self.table_border.apply_to(match rule.position {
                     RelativePosition::Top => '┌',
                     RelativePosition::Other => '├',
                     RelativePosition::Bottom => '└',
                 }))?;
+                let mut iw = 1;
                 for (idx, width) in rule.widths.iter().enumerate() {
                     if idx > 0 {
                         write!(f, "{}", self.table_border.apply_to(match rule.position {
@@ -214,17 +228,26 @@ impl MadSkin {
                             RelativePosition::Other => '┼',
                             RelativePosition::Bottom => '┴',
                         }))?;
+                        iw += 1;
                     }
                     let c = self.table_border.apply_to("─");
                     for _ in 0..*width {
                         write!(f, "{}", c)?;
                     }
+                    iw += *width;
                 }
-                writeln!(f, "{}", self.table_border.apply_to(match rule.position {
+                write!(f, "{}", self.table_border.apply_to(match rule.position {
                     RelativePosition::Top => '┐',
                     RelativePosition::Other => '┤',
                     RelativePosition::Bottom => '┘',
                 }))?;
+                if let Some(width) = width {
+                    let ospace = self.paragraph.compound_style.apply_to(" ");
+                    iw += 1;
+                    for _ in iw..width {
+                        write!(f, "{}", &ospace)?;
+                    }
+                }
             }
         }
         Ok(())

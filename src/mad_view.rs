@@ -12,7 +12,7 @@ pub struct MadView {
     markdown: String,
     area: Area,
     pub skin: MadSkin,
-    scroll: i32,
+    pub scroll: i32,
 }
 
 impl MadView {
