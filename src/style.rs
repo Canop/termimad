@@ -17,6 +17,10 @@ macro_rules! rgb {
     }
 }
 
+pub fn gray(level: u8) -> Color {
+    Color::AnsiValue(0xE8 + level)
+}
+
 /// A style which may be applied to a compound
 /// Right now it's just a wrapper around a crossterm ObjectStyle
 #[derive(Default, Clone)]
@@ -157,8 +161,8 @@ impl ScrollBarStyle {
     pub fn new() -> ScrollBarStyle {
         let char = '▐';
         ScrollBarStyle {
-            track: ObjectStyle::new().fg(Color::Rgb{r:35, g:35, b:35}).apply_to(char),
-            thumb: ObjectStyle::new().fg(Color::Rgb{r:140, g:140, b:140}).apply_to(char),
+            track: ObjectStyle::new().fg(gray(5)).apply_to(char),
+            thumb: ObjectStyle::new().fg(gray(21)).apply_to(char),
         }
     }
     pub fn set_thumb_fg(&mut self, c: Color) {

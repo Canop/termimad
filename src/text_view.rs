@@ -6,6 +6,9 @@ use crate::displayable_line::DisplayableLine;
 use crate::text::FmtText;
 
 /// a scrollable text, in a specific area.
+/// The text is assumed to have been computed for the given area
+/// (it's generally recommended to use a MadView instead of a
+/// TextView to ensure the text is properly computed).
 pub struct TextView<'a, 't> {
     area: &'a Area,
     text: &'t FmtText<'t, 't>,
@@ -33,10 +36,10 @@ impl<'a, 't> TextView<'a, 't> {
         self.text.lines.len() as i32
     }
 
-    // return an option which when filled contains
-    //  a tupple with the top and bottom of the vertical
-    //  scrollbar. Return none when the content fits
-    //  the available space (or if show_scrollbar is false).
+    /// return an option which when filled contains
+    ///  a tupple with the top and bottom of the vertical
+    ///  scrollbar. Return none when the content fits
+    ///  the available space (or if show_scrollbar is false).
     #[inline(always)]
     pub fn scrollbar(&self) -> Option<(u16, u16)> {
         if self.show_scrollbar {
@@ -55,7 +58,6 @@ impl<'a, 't> TextView<'a, 't> {
         let mut i = self.scroll as usize;
         for y in 0..=self.area.height {
             cursor.goto(self.area.left, self.area.top+y)?;
-            terminal.clear(ClearType::UntilNewLine)?;
             if i < self.text.lines.len() {
                 let dl = DisplayableLine::new(
                     self.text.skin,
@@ -64,24 +66,27 @@ impl<'a, 't> TextView<'a, 't> {
                 );
                 print!("{}", &dl);
                 i += 1;
+            } else {
+                terminal.clear(ClearType::UntilNewLine)?;
             }
             if let Some((sctop, scbottom)) = scrollbar {
                 cursor.goto(sx, self.area.top+y)?;
                 if sctop <= y && y <= scbottom {
-                    println!("{}", self.text.skin.scrollbar.thumb);
+                    print!("{}", self.text.skin.scrollbar.thumb);
                 } else {
-                    println!("{}", self.text.skin.scrollbar.track);
+                    print!("{}", self.text.skin.scrollbar.track);
                 }
             }
         }
         Ok(())
     }
+
     /// set the scroll amount.
     /// lines_count can be negative
     pub fn try_scroll_lines(&mut self, lines_count: i32) {
         self.scroll = (self.scroll + lines_count)
-            .max(0)
-            .min(self.content_height() - (self.area.height as i32) + 1);
+            .min(self.content_height() - (self.area.height as i32) + 1)
+            .max(0);
 
     }
     /// set the scroll amount.

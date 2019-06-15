@@ -27,11 +27,10 @@ fn show_scrollable(skin: MadSkin, markdown: &str) -> io::Result<()> {
 
 fn make_skin() -> MadSkin {
     let mut skin = MadSkin::default();
-    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.set_headers_fg(AnsiValue(178));
     skin.bold.set_fg(Yellow);
-    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
-    skin.scrollbar.set_track_fg(Rgb{r:30, g:30, b:40});
-    skin.scrollbar.set_thumb_fg(Rgb{r:67, g:51, b:0});
+    skin.italic.set_fg(Magenta);
+    skin.scrollbar.set_thumb_fg(AnsiValue(178));
     skin.code.align = Alignment::Center;
     skin
 }
@@ -120,6 +119,7 @@ The scrollbar's colors were also adjusted to be consistent.
 It's a little out of context but it shows how a wide table can be wrapped in a thin terminal.
 
 |feature|supported|details|
+|-|:-:|-
 | tables | yes | pipe based only, alignement not yet supported
 | italic, bold | yes | star based only|
 | inline code | yes |
@@ -127,4 +127,3 @@ It's a little out of context but it shows how a wide table can be wrapped in a t
 | crossed text |  not yet
 | phpbb like links | no | (because it's preferable to show an URL in a terminal)
 "#;
-
