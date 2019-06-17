@@ -124,6 +124,6 @@ It's a little out of context but it shows how a wide table can be wrapped in a t
 | italic, bold | yes | star based only|
 | inline code | yes |
 | code bloc | yes |with tabs. Fences not supported
-| crossed text |  not yet
+| crossed text |  ~~not yet~~ | wait... now it works!
 | phpbb like links | no | (because it's preferable to show an URL in a terminal)
 "#;

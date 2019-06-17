@@ -1,4 +1,4 @@
-use crate::area::Area;
+use crate::area::{Area, terminal_size};
 use crate::composite::FmtComposite;
 use crate::inline::FmtInline;
 use crate::line::FmtLine;
@@ -17,6 +17,7 @@ pub struct MadSkin {
     pub paragraph: LineStyle,
     pub bold: CompoundStyle,
     pub italic: CompoundStyle,
+    pub strikeout: CompoundStyle,
     pub code: LineStyle,
     pub headers: [LineStyle; MAX_HEADER_DEPTH],
     pub scrollbar: ScrollBarStyle,
@@ -31,6 +32,7 @@ impl Default for MadSkin {
             paragraph: LineStyle::default(),
             bold: CompoundStyle::new(Some(Color::White), None, vec![Attribute::Bold]),
             italic: CompoundStyle::with_attr(Attribute::Italic),
+            strikeout: CompoundStyle::with_attr(Attribute::CrossedOut),
             code: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
@@ -97,6 +99,9 @@ impl MadSkin {
         if compound.italic {
             os.overwrite_with(&self.italic);
         }
+        if compound.strikeout {
+            os.overwrite_with(&self.strikeout);
+        }
         if compound.bold {
             os.overwrite_with(&self.bold);
         }
@@ -118,6 +123,7 @@ impl MadSkin {
             composite,
         }
     }
+
     /// return a formatted text.
     /// Code blocs will be right justified
     pub fn text<'k, 's>(&'k self, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
@@ -128,14 +134,15 @@ impl MadSkin {
     /// width.
     /// Code blocs will be right justified
     pub fn term_text<'k, 's>(&'k self, src: &'s str) -> FmtText<'k, 's> {
-        let (width, _) = Terminal::new().terminal_size();
+        let (width, _) = terminal_size();
         FmtText::from(self, src, Some(width as usize))
     }
+
     /// return a formatted text, with lines wrapped or justified for the
     /// passed area width (with space for a scrollbar).
     /// Code blocs will be right justified
     pub fn area_text<'k, 's>(&'k self, src: &'s str, area: &Area) -> FmtText<'k, 's> {
-        FmtText::from(self, src, Some(area.width as usize-1))
+        FmtText::from(self, src, Some(area.width as usize))
     }
 
     pub fn print_inline(&self, src: &str) {
@@ -150,6 +157,7 @@ impl MadSkin {
         f: &mut fmt::Formatter<'_>,
         fc: &FmtComposite<'_>,
         outer_width: Option<usize>,
+        with_right_completion: bool,
     ) -> fmt::Result {
         let ls = self.line_style(&fc.composite.style);
         let (lpi, rpi) = fc.completions(); // inner completion
@@ -177,44 +185,52 @@ impl MadSkin {
         for _ in 0..rpi {
             write!(f, "{}", &ispace)?;
         }
-        for _ in 0..rpo {
-            write!(f, "{}", &ospace)?;
+        if with_right_completion {
+            for _ in 0..rpo {
+                write!(f, "{}", &ospace)?;
+            }
         }
         Ok(())
     }
 
+    /// write a line in the passed formatter, with completions.
+    /// Right completion is optional (if a text isn't right completed
+    /// it shrinks better when you reduce the width of the terminal)
     pub fn write_fmt_line(
         &self,
         f: &mut fmt::Formatter<'_>,
         line: &FmtLine<'_>,
         width: Option<usize>,
+        with_right_completion: bool,
     ) -> fmt::Result {
         match line {
             FmtLine::Normal(fc) => {
-                self.write_fmt_composite(f, fc, width)?;
+                self.write_fmt_composite(f, fc, width, with_right_completion)?;
             }
             FmtLine::TableRow(FmtTableRow{cells}) => {
                 let mut iw = 0;
                 for cell in cells {
                     write!(f, "{}", self.table_border.apply_to("│"))?;
-                    self.write_fmt_composite(f, &cell, None)?;
+                    self.write_fmt_composite(f, &cell, None, false)?;
                     if let Some(spacing) = cell.spacing {
                         iw += spacing.width;
                     } else {
                         iw += cell.visible_length;
                     }
+                    iw += 1;
                 }
                 write!(f, "{}", self.table_border.apply_to("│"))?;
-                if let Some(width) = width {
-                    let ospace = self.paragraph.compound_style.apply_to(" ");
-                    iw += 1;
-                    for _ in iw..width {
-                        write!(f, "{}", &ospace)?;
+                if with_right_completion {
+                    if let Some(width) = width {
+                        let ospace = self.paragraph.compound_style.apply_to(" ");
+                        iw += 1;
+                        for _ in iw..width {
+                            write!(f, "{}", &ospace)?;
+                        }
                     }
                 }
             }
             FmtLine::TableRule(rule) => {
-                // FIXME add right complement
                 write!(f, "{}", self.table_border.apply_to(match rule.position {
                     RelativePosition::Top => '┌',
                     RelativePosition::Other => '├',
@@ -241,11 +257,13 @@ impl MadSkin {
                     RelativePosition::Other => '┤',
                     RelativePosition::Bottom => '┘',
                 }))?;
-                if let Some(width) = width {
-                    let ospace = self.paragraph.compound_style.apply_to(" ");
-                    iw += 1;
-                    for _ in iw..width {
-                        write!(f, "{}", &ospace)?;
+                if with_right_completion {
+                    if let Some(width) = width {
+                        let ospace = self.paragraph.compound_style.apply_to(" ");
+                        iw += 1;
+                        for _ in iw..width {
+                            write!(f, "{}", &ospace)?;
+                        }
                     }
                 }
             }

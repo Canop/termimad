@@ -10,7 +10,7 @@ static MD_TABLE: &str = r#"
 | inline code | yes | `with backquotes` (it works in tables too)
 | code bloc | yes |with tabs: Fences not supported
 | horizontal rule |  not yet
-| crossed text |  not yet | ---this isn't crossed---
+| crossed text |  ~~not yet~~ | wait... now it works (`~~like this~~`)
 | lists | yes|* unordered lists supported
 |  | |* ordered lists *not* supported
 | quotes |  not yet
@@ -24,7 +24,7 @@ fn main() {
     skin.set_headers_fg(rgb!(255, 187, 0));
     skin.bold.set_fg(Yellow);
     skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
-    let (width, _) = Terminal::new().terminal_size();
+    let (width, _) = terminal_size();
     let mut markdown = format!(" Available width: *{}*", width);
     markdown.push_str(MD_TABLE);
     println!("{}", skin.term_text(&markdown));

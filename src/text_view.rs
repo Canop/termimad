@@ -56,7 +56,7 @@ impl<'a, 't> TextView<'a, 't> {
         let scrollbar = self.scrollbar();
         let sx = self.area.left + self.area.width;
         let mut i = self.scroll as usize;
-        for y in 0..=self.area.height {
+        for y in 0..self.area.height {
             cursor.goto(self.area.left, self.area.top+y)?;
             if i < self.text.lines.len() {
                 let dl = DisplayableLine::new(

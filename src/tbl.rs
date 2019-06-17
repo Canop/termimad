@@ -270,7 +270,7 @@ fn find_tables(lines: &Vec<FmtLine<'_>>) -> Vec<Table> {
 //  precedent indexing might be invalid.
 pub fn fix_all_tables(lines: &mut Vec<FmtLine<'_>>, width: usize) {
     for tbl in find_tables(lines).iter_mut().rev() {
-        tbl.fix_columns(lines, width+1); // FIXME why do I need this +1 ? Where did I fail ?
+        tbl.fix_columns(lines, width);
     }
 }
 

@@ -23,7 +23,7 @@ impl<'s, 'l, 'p> DisplayableLine<'s, 'l, 'p> {
 
 impl fmt::Display for DisplayableLine<'_, '_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.skin.write_fmt_line(f, self.line, self.width)?;
+        self.skin.write_fmt_line(f, self.line, self.width, true)?;
         writeln!(f)
     }
 }

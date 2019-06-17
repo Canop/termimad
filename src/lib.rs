@@ -31,6 +31,7 @@ pub use text_view::TextView;
 pub use mad_view::MadView;
 pub use style::{CompoundStyle, LineStyle};
 pub use minimad::Alignment;
+pub use area::terminal_size;
 
 /// return a reference to the global skin (modifiable).
 /// If you want a new default skin without messing with

@@ -39,7 +39,7 @@ impl<'k, 's> FmtText<'k, 's> {
 impl fmt::Display for FmtText<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for line in &self.lines {
-            self.skin.write_fmt_line(f, line, self.width)?;
+            self.skin.write_fmt_line(f, line, self.width, false)?;
             writeln!(f)?;
         }
         Ok(())

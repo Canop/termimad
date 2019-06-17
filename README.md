@@ -35,7 +35,7 @@ For example this markdown:
 	| inline code | yes | `with backquotes` (it works in tables too)
 	| code bloc | yes |with tabs: Fences not supported
 	| horizontal rule |  not yet
-	| crossed text |  not yet | ---this isn't crossed---
+	| crossed text |  ~~not yet~~ | wait... now it works (`~~like this~~`)
 	| lists | yes|* unordered lists supported
 	|  | |* ordered lists *not* supported
 	| quotes |  not yet
@@ -46,7 +46,7 @@ will give different results depending on the width:
 
 ![table](doc/table-in-84.png)
 
-![table](doc/table-in-60.png)
+![table](doc/table-in-62.png)
 
 ##  Usage
 

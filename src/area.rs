@@ -39,18 +39,13 @@ impl Area {
 
     /// build an area covering the whole terminal
     pub fn full_screen() -> Area {
-        let (width, height) = Terminal::new().terminal_size();
+        let (width, height) = terminal_size();
         Area {
             left: 0,
             top: 0,
             width,
             height,
         }
-    }
-
-    /// return the last line of the area (included)
-    pub fn bottom(&self) -> u16 {
-        return self.top + self.height - 1;
     }
 
     pub fn pad(&mut self, dx: u16, dy: u16) {
@@ -78,4 +73,11 @@ impl Area {
         let sc = scroll * h / content_height;
         Some((sc as u16, (sc + sbh + 1).min(h+1) as u16))
     }
+}
+
+pub fn terminal_size() -> (u16, u16) {
+    let (w, h) = Terminal::new().terminal_size();
+    // there's a bug in crossterm 0.9.6. It reports a size smaller by
+    //  one in both directions
+    (w + 1, h + 1)
 }
