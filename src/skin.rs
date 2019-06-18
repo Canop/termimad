@@ -7,7 +7,7 @@ use crate::spacing::Spacing;
 use crate::style::*;
 use crate::tbl::*;
 
-use crossterm::{Attribute, Color, Terminal};
+use crossterm::{Attribute, Color};
 use minimad::{Alignment, Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
 use std::{self, fmt};
 
@@ -194,8 +194,11 @@ impl MadSkin {
     }
 
     /// write a line in the passed formatter, with completions.
-    /// Right completion is optional (if a text isn't right completed
-    /// it shrinks better when you reduce the width of the terminal)
+    /// Right completion is optional because:
+    /// - if a text isn't right completed it shrinks better when you reduce the width
+    ///   of the terminal
+    /// - right completion is useful to overwrite previous rendering without
+    ///   flickering (in scrollable views)
     pub fn write_fmt_line(
         &self,
         f: &mut fmt::Formatter<'_>,

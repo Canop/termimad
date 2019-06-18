@@ -15,7 +15,7 @@
 
 A simple tool to display static or dynamic Markdown snippets in the terminal, with skin isolation.
 
-Based on crossterm so works on most terminals (even on windows).
+Based on [crossterm](https://github.com/TimonPost/crossterm) so works on most terminals (even on windows).
 
 ![text](doc/text.png)
 
