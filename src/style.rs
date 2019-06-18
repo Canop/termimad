@@ -1,6 +1,6 @@
 /// elementary bricks of a skin
 
-use std::fmt::Display;
+use std::fmt::{self, Display};
 use crossterm::{self, Attribute, Color, ObjectStyle, StyledObject};
 use minimad::Alignment;
 
@@ -111,8 +111,36 @@ impl CompoundStyle {
         self.object_style.attrs.extend(&other.object_style.attrs);
     }
 
+    /// write a string several times with the line compound style
+    // TODO optimize. This is called often
+    #[inline(always)]
+    pub fn repeat_string(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        s: &str,
+        count: usize,
+    ) -> fmt::Result {
+        if count > 0 {
+            write!(f, "{}", self.apply_to(s.repeat(count)))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// write 0 or more spaces with the line's compound style
+    #[inline(always)]
+    pub fn repeat_space(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        count: usize,
+    ) -> fmt::Result {
+        self.repeat_string(f, " ", count)
+    }
 }
 
+/// A style applicable to a type of line:
+///  - the base style of the compounds
+///  - the alignment
 #[derive(Default)]
 pub struct LineStyle {
     pub compound_style: CompoundStyle,
@@ -145,6 +173,32 @@ impl LineStyle {
     #[inline(always)]
     pub fn add_attr(&mut self, attr: Attribute) {
         self.compound_style.add_attr(attr);
+    }
+
+    /// write a string several times with the line compound style
+    // TODO optimize. This is called often
+    #[inline(always)]
+    pub fn repeat_string(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        s: &str,
+        count: usize,
+    ) -> fmt::Result {
+        if count > 0 {
+            write!(f, "{}", self.compound_style.apply_to(s.repeat(count)))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// write 0 or more spaces with the line's compound style
+    #[inline(always)]
+    pub fn repeat_space(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        count: usize,
+    ) -> fmt::Result {
+        self.repeat_string(f, " ", count)
     }
 }
 

@@ -29,6 +29,8 @@ impl MadView {
             scroll: 0,
         }
     }
+    /// render the markdown in the area, taking the scroll into
+    /// account
     pub fn write(&self) -> io::Result<()> {
         let text = self.skin.area_text(&self.markdown, &self.area);
         let mut text_view = TextView::from(&self.area, &text);

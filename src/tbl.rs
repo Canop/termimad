@@ -70,15 +70,15 @@ struct Col {
     to_remove: usize, // what should be removed
 }
 
-// Determine suitable columns width from the current one and the
-// overall sum goal.
-// No width can go below 3.
-// This function should be called only when the goal is attainable
-// and when there's reducion to be done.
+/// Determine suitable columns width from the current one and the
+/// overall sum goal.
+/// No width can go below 3.
+/// This function should be called only when the goal is attainable
+/// and when there's reducion to be done.
 fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
-    let sum = widths.iter().fold(0, |s, w| s + w);
+    let sum:usize = widths.iter().sum();
+    assert!(sum > goal);
     let mut excess = sum - goal;
-    assert!(excess > 0);
     let mut cols: Vec<Col> = widths.iter().enumerate().map(|(idx, width)| {
         let to_remove = (width * excess / sum).min(width-3);
         excess -= to_remove;
@@ -124,10 +124,10 @@ impl Table {
             }
         }
         // let's find what we must do
-        let widths_sum = widths.iter().fold(0, |s, w| s+w);
-        if widths_sum + nbcols + 1 <= width {
+        let widths_sum: usize = widths.iter().sum();
+        if widths_sum + nbcols < width {
             // it fits, all is well
-        } else if nbcols*4 + 1 <= width {
+        } else if nbcols*4 < width {
             // we can keep all columns but we'll have to wrap them
             reduce_col_widths(&mut widths, width - nbcols - 1);
         } else {
@@ -214,8 +214,8 @@ impl Table {
     }
 }
 
-// find the positions of all tables
-fn find_tables(lines: &Vec<FmtLine<'_>>) -> Vec<Table> {
+/// find the positions of all tables
+fn find_tables(lines: &[FmtLine<'_>]) -> Vec<Table> {
     let mut tables: Vec<Table> = Vec::new();
     let mut current: Option<Table> = None;
     for (idx, line) in lines.iter().enumerate() {
@@ -264,10 +264,10 @@ fn find_tables(lines: &Vec<FmtLine<'_>>) -> Vec<Table> {
     tables
 }
 
-// modify the rows of all tables in order to ensure it fits the widths
-// and all cells have the widths of their column.
-// Some lines may be added to the table in the process, which means any
-//  precedent indexing might be invalid.
+/// modify the rows of all tables in order to ensure it fits the widths
+/// and all cells have the widths of their column.
+/// Some lines may be added to the table in the process, which means any
+///  precedent indexing might be invalid.
 pub fn fix_all_tables(lines: &mut Vec<FmtLine<'_>>, width: usize) {
     for tbl in find_tables(lines).iter_mut().rev() {
         tbl.fix_columns(lines, width);

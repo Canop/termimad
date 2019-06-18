@@ -36,7 +36,7 @@ impl<'s> FmtLine<'s> {
     pub fn visible_length(&self) -> usize {
         match self {
             FmtLine::Normal(composite) => composite.visible_length,
-            FmtLine::TableRow(row) => row.cells.iter().fold(0, |s, c| s + c.visible_length),
+            FmtLine::TableRow(row) => row.cells.iter().fold(0, |s, c| s + c.visible_length), // Is that right ? no spacing ?
             FmtLine::TableRule(rule) => 1 + rule.widths.iter().fold(0, |s, w| s + w + 1),
         }
     }

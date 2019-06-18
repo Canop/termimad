@@ -75,6 +75,8 @@ impl Area {
     }
 }
 
+/// return a (width, height) with the dimensions of the available
+/// terminal in characters.
 pub fn terminal_size() -> (u16, u16) {
     let (w, h) = Terminal::new().terminal_size();
     // there's a bug in crossterm 0.9.6. It reports a size smaller by

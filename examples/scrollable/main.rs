@@ -27,6 +27,7 @@ fn show_scrollable(skin: MadSkin, markdown: &str) -> io::Result<()> {
 
 fn make_skin() -> MadSkin {
     let mut skin = MadSkin::default();
+    skin.table.align = Alignment::Center;
     skin.set_headers_fg(AnsiValue(178));
     skin.bold.set_fg(Yellow);
     skin.italic.set_fg(Magenta);

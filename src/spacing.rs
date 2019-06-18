@@ -24,6 +24,13 @@ impl Spacing {
         }
     }
     #[inline(always)]
+    pub fn optional_completions(align: Alignment, inner_width: usize, outer_width: Option<usize>) -> (usize, usize) {
+        match outer_width {
+            Some(outer_width) => Spacing::completions(align, inner_width, outer_width),
+            None => (0, 0),
+        }
+    }
+    #[inline(always)]
     pub fn completions_for(&self, inner_width: usize) -> (usize, usize) {
         Spacing::completions(self.align, inner_width, self.width)
     }

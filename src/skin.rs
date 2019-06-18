@@ -21,7 +21,7 @@ pub struct MadSkin {
     pub code: LineStyle,
     pub headers: [LineStyle; MAX_HEADER_DEPTH],
     pub scrollbar: ScrollBarStyle,
-    pub table_border: CompoundStyle,
+    pub table: LineStyle, // the compound style is for border chars
 }
 
 impl Default for MadSkin {
@@ -36,7 +36,10 @@ impl Default for MadSkin {
             code: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
-            table_border: CompoundStyle::with_fg(gray(7)),
+            table: LineStyle {
+                compound_style: CompoundStyle::with_fg(gray(7)),
+                align: Alignment::Unspecified,
+            },
         };
         skin.code.set_bg(gray(4));
         for h in &mut skin.headers {
@@ -163,18 +166,9 @@ impl MadSkin {
         let (lpi, rpi) = fc.completions(); // inner completion
         let inner_width = fc.spacing
             .map_or(fc.visible_length, |sp| sp.width);
-        let (lpo, rpo) = match outer_width {
-            Some(outer_width) => Spacing::completions(ls.align, inner_width, outer_width),
-            None => (0, 0),
-        };
-        let ospace = self.paragraph.compound_style.apply_to(" ");
-        let ispace = ls.compound_style.apply_to(" ");
-        for _ in 0..lpo {
-            write!(f, "{}", &ospace)?;
-        }
-        for _ in 0..lpi {
-            write!(f, "{}", &ispace)?;
-        }
+        let (lpo, rpo) = Spacing::optional_completions(ls.align, inner_width, outer_width);
+        self.paragraph.repeat_space(f, lpo)?;
+        ls.compound_style.repeat_space(f, lpi)?;
         if fc.composite.is_list_item() {
             write!(f, "• ")?;
         }
@@ -182,13 +176,9 @@ impl MadSkin {
             let os = self.compound_style(ls, c);
             write!(f, "{}", os.apply_to(c.as_str()))?;
         }
-        for _ in 0..rpi {
-            write!(f, "{}", &ispace)?;
-        }
+        ls.compound_style.repeat_space(f, rpi)?;
         if with_right_completion {
-            for _ in 0..rpo {
-                write!(f, "{}", &ospace)?;
-            }
+            self.paragraph.repeat_space(f, rpo)?;
         }
         Ok(())
     }
@@ -211,63 +201,50 @@ impl MadSkin {
                 self.write_fmt_composite(f, fc, width, with_right_completion)?;
             }
             FmtLine::TableRow(FmtTableRow{cells}) => {
-                let mut iw = 0;
-                for cell in cells {
-                    write!(f, "{}", self.table_border.apply_to("│"))?;
-                    self.write_fmt_composite(f, &cell, None, false)?;
+                let tbl_width = 1 + cells.iter().fold(0, |sum, cell| {
                     if let Some(spacing) = cell.spacing {
-                        iw += spacing.width;
+                        sum + spacing.width + 1
                     } else {
-                        iw += cell.visible_length;
+                        sum + cell.visible_length + 1
                     }
-                    iw += 1;
+                });
+                let (lpo, rpo) = Spacing::optional_completions(self.table.align, tbl_width, width);
+                self.paragraph.repeat_space(f, lpo)?;
+                for cell in cells {
+                    write!(f, "{}", self.table.compound_style.apply_to("│"))?;
+                    self.write_fmt_composite(f, &cell, None, false)?;
                 }
-                write!(f, "{}", self.table_border.apply_to("│"))?;
+                write!(f, "{}", self.table.compound_style.apply_to("│"))?;
                 if with_right_completion {
-                    if let Some(width) = width {
-                        let ospace = self.paragraph.compound_style.apply_to(" ");
-                        iw += 1;
-                        for _ in iw..width {
-                            write!(f, "{}", &ospace)?;
-                        }
-                    }
+                    self.paragraph.repeat_space(f, rpo)?;
                 }
             }
             FmtLine::TableRule(rule) => {
-                write!(f, "{}", self.table_border.apply_to(match rule.position {
+                let tbl_width = 1 + rule.widths.iter().fold(0, |sum, w| sum + w + 1);
+                let (lpo, rpo) = Spacing::optional_completions(self.table.align, tbl_width, width);
+                self.paragraph.repeat_space(f, lpo)?;
+                write!(f, "{}", self.table.compound_style.apply_to(match rule.position {
                     RelativePosition::Top => '┌',
                     RelativePosition::Other => '├',
                     RelativePosition::Bottom => '└',
                 }))?;
-                let mut iw = 1;
                 for (idx, width) in rule.widths.iter().enumerate() {
                     if idx > 0 {
-                        write!(f, "{}", self.table_border.apply_to(match rule.position {
+                        write!(f, "{}", self.table.compound_style.apply_to(match rule.position {
                             RelativePosition::Top => '┬',
                             RelativePosition::Other => '┼',
                             RelativePosition::Bottom => '┴',
                         }))?;
-                        iw += 1;
                     }
-                    let c = self.table_border.apply_to("─");
-                    for _ in 0..*width {
-                        write!(f, "{}", c)?;
-                    }
-                    iw += *width;
+                    self.table.repeat_string(f, "─", *width)?;
                 }
-                write!(f, "{}", self.table_border.apply_to(match rule.position {
+                write!(f, "{}", self.table.compound_style.apply_to(match rule.position {
                     RelativePosition::Top => '┐',
                     RelativePosition::Other => '┤',
                     RelativePosition::Bottom => '┘',
                 }))?;
                 if with_right_completion {
-                    if let Some(width) = width {
-                        let ospace = self.paragraph.compound_style.apply_to(" ");
-                        iw += 1;
-                        for _ in iw..width {
-                            write!(f, "{}", &ospace)?;
-                        }
-                    }
+                    self.paragraph.repeat_space(f, rpo)?;
                 }
             }
         }

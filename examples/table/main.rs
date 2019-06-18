@@ -1,4 +1,4 @@
-use crossterm::{Color::*, Terminal};
+use crossterm::{Color::*};
 use termimad::*;
 
 static MD_TABLE: &str = r#"
@@ -24,8 +24,10 @@ fn main() {
     skin.set_headers_fg(rgb!(255, 187, 0));
     skin.bold.set_fg(Yellow);
     skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
+    skin.paragraph.align = Alignment::Center;
+    skin.table.align = Alignment::Center;
     let (width, _) = terminal_size();
-    let mut markdown = format!(" Available width: *{}*", width);
+    let mut markdown = format!("Available width: *{}*", width);
     markdown.push_str(MD_TABLE);
     println!("{}", skin.term_text(&markdown));
     println!("\n");
