@@ -13,6 +13,10 @@ pub struct Area {
     pub height: u16,
 }
 
+fn div_ceil(a: i32, b: i32) -> i32 {
+    a / b + if a % b != 0 { 1 } else { 0 }
+}
+
 impl Area {
 
     /// build a new area. You'll need to set the position and size
@@ -56,6 +60,15 @@ impl Area {
         self.height -= 2*dy;
     }
 
+    pub fn pad_for_max_width(&mut self, max_width: u16) {
+        if max_width >= self.width {
+            return;
+        }
+        let pw = self.width - max_width;
+        self.left += pw / 2;
+        self.width -= pw;
+    }
+
     // return an option which when filled contains
     //  a tupple with the top and bottom of the vertical
     //  scrollbar. Return none when the content fits
@@ -69,9 +82,17 @@ impl Area {
         if content_height <= h {
             return None;
         }
-        let sbh = h * h / content_height;
-        let sc = scroll * h / content_height;
-        Some((sc as u16, (sc + sbh + 1).min(h+1) as u16))
+        let sc = div_ceil(scroll * h, content_height);
+        let hidden_tail = content_height - scroll - h;
+        let se = div_ceil(hidden_tail * h, content_height);
+        Some((
+            sc as u16,
+            if h > sc + se {
+                (h - se) as u16
+            } else {
+                sc as u16 + 1
+            }
+        ))
     }
 }
 

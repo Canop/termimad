@@ -112,7 +112,7 @@ impl CompoundStyle {
     }
 
     /// write a string several times with the line compound style
-    // TODO optimize. This is called often
+    // Note: performances here are critical
     #[inline(always)]
     pub fn repeat_string(
         &self,
@@ -137,6 +137,7 @@ impl CompoundStyle {
         self.repeat_string(f, " ", count)
     }
 }
+
 
 /// A style applicable to a type of line:
 ///  - the base style of the compounds
@@ -176,7 +177,6 @@ impl LineStyle {
     }
 
     /// write a string several times with the line compound style
-    // TODO optimize. This is called often
     #[inline(always)]
     pub fn repeat_string(
         &self,
@@ -184,11 +184,7 @@ impl LineStyle {
         s: &str,
         count: usize,
     ) -> fmt::Result {
-        if count > 0 {
-            write!(f, "{}", self.compound_style.apply_to(s.repeat(count)))
-        } else {
-            Ok(())
-        }
+        self.compound_style.repeat_string(f, s, count)
     }
 
     /// write 0 or more spaces with the line's compound style

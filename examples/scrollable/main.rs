@@ -6,7 +6,8 @@ fn show_scrollable(skin: MadSkin, markdown: &str) -> io::Result<()> {
     let cursor = TerminalCursor::new();
     cursor.hide()?;
     let mut area = Area::full_screen();
-    area.pad(2, 1); // let's add some margin
+    area.pad(1, 1); // let's add some margin
+    area.pad_for_max_width(120); // we don't want a too wide text column
     let mut view = MadView::from(markdown.to_owned(), area, skin);
     let mut events = TerminalInput::new().read_sync();
     loop {
