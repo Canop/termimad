@@ -14,14 +14,14 @@ pub struct FmtComposite<'s> {
 }
 
 impl<'s> FmtComposite<'s> {
-    pub fn new() -> FmtComposite<'s> {
+    pub fn new() -> Self {
         FmtComposite {
             composite: Composite::new(),
             visible_length: 0,
             spacing: None,
         }
     }
-    pub fn from(composite: Composite<'s>, skin: &MadSkin) -> FmtComposite<'s> {
+    pub fn from(composite: Composite<'s>, skin: &MadSkin) -> Self {
         FmtComposite {
             visible_length: skin.visible_composite_length(&composite),
             composite,

@@ -16,7 +16,7 @@ impl<'s> FmtLine<'s> {
     /// build a fmtline from a minimad line.
     /// skin is passed because it might affect the visible size
     /// in the future
-    pub fn from(mline: Line<'s>, skin: & MadSkin) -> FmtLine<'s> {
+    pub fn from(mline: Line<'s>, skin: & MadSkin) -> Self {
         match mline {
             Line::Normal(composite) => FmtLine::Normal(
                 FmtComposite::from(composite, skin)
@@ -41,5 +41,3 @@ impl<'s> FmtLine<'s> {
         }
     }
 }
-
-

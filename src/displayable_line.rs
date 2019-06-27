@@ -12,7 +12,7 @@ pub struct DisplayableLine<'s, 'l, 'p> {
 }
 
 impl<'s, 'l, 'p> DisplayableLine<'s, 'l, 'p> {
-    pub fn new(skin: &'s MadSkin, line: &'p FmtLine<'l>, width: Option<usize>) -> DisplayableLine<'s, 'l, 'p> {
+    pub fn new(skin: &'s MadSkin, line: &'p FmtLine<'l>, width: Option<usize>) -> Self {
         DisplayableLine {
             skin,
             line,

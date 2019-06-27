@@ -10,8 +10,8 @@ pub struct CodeBlock {
     pub height: usize, // number of lines
     pub width: usize,  // length in chars of the widest line
 }
-impl<'s> CodeBlock {
-    pub fn justify(&self, lines: &mut Vec<FmtLine<'s>>) {
+impl CodeBlock {
+    pub fn justify(&self, lines: &mut Vec<FmtLine<'_>>) {
         for idx in self.start..self.start + self.height {
             if let FmtLine::Normal(ref mut fc) = lines[idx] {
                 fc.spacing = Some(Spacing {
@@ -36,7 +36,7 @@ fn code_line_length(line: &FmtLine<'_>) -> Option<usize> {
 /// Warning: the indices in a codeblock are invalid as
 /// soon as lines are inserted or removed. This function
 /// should normally not be used from another module or lib
-pub fn find_blocks<'s>(lines: &Vec<FmtLine<'s>>) -> Vec<CodeBlock> {
+pub fn find_blocks(lines: &Vec<FmtLine<'_>>) -> Vec<CodeBlock> {
     let mut blocks: Vec<CodeBlock> = Vec::new();
     let mut current: Option<CodeBlock> = None;
     for (idx, line) in lines.iter().enumerate() {
@@ -66,7 +66,7 @@ pub fn find_blocks<'s>(lines: &Vec<FmtLine<'s>>) -> Vec<CodeBlock> {
 
 /// ensure the widths of all lines in a code block are
 /// the same line.
-pub fn justify_blocks<'s>(lines: &mut Vec<FmtLine<'s>>) {
+pub fn justify_blocks(lines: &mut Vec<FmtLine<'_>>) {
     let blocks =find_blocks(lines);
     for b in blocks {
         b.justify(lines);
