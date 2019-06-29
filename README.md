@@ -102,3 +102,9 @@ The code for this example is in examples/scrollable. To read the whole text just
 
     cargo run --example scrollable
 
+
+## Test it
+
+If you want to see how some file would look with Termimad, you may try the cli [Clima](https://github.com/Canop/clima).
+
+[broot](https://github.com/Canop/broot) is a real application using Termimad to handle its help screen (if you're the author of another one, please tell me).
