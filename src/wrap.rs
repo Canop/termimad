@@ -4,15 +4,20 @@ use minimad::{Composite, CompositeStyle};
 
 /// build a composite which can be a new line after wrapping.
 fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
+    let style = match fc.composite.style {
+        CompositeStyle::ListItem => CompositeStyle::Paragraph,
+        _ => fc.composite.style,
+    };
+    let visible_length = match style {
+        CompositeStyle::Quote => 2,
+        _ => 0,
+    };
     FmtComposite {
         composite: Composite {
-            style: match fc.composite.style {
-                CompositeStyle::ListItem => CompositeStyle::Paragraph,
-                _ => fc.composite.style,
-            },
+            style,
             compounds: Vec::new(),
         },
-        visible_length: 0,
+        visible_length,
         spacing: fc.spacing,
     }
 }
@@ -29,17 +34,21 @@ pub fn hard_wrap_composite<'s>(src_composite: &FmtComposite<'s>, width: usize) -
             style: src_composite.composite.style,
             compounds: Vec::new(),
         },
-        visible_length: match src_composite.composite.style { // FIXME hack : should be computed using the skin
+        visible_length: match src_composite.composite.style {
             CompositeStyle::ListItem => 2,
+            CompositeStyle::Quote => 2,
             _ => 0,
         },
         spacing: src_composite.spacing,
     };
     let mut ll = match src_composite.composite.style {
         CompositeStyle::ListItem => 2, // space of the bullet
+        CompositeStyle::Quote => 2, // space of the bullet
         _ => 0,
     };
+    let mut ignored_cut_back: Option<usize> = None;
     for sc in &src_composite.composite.compounds {
+        ignored_cut_back = None;
         let s = sc.as_str();
         let cl = s.chars().count();
         if ll + cl <= width {
@@ -58,37 +67,53 @@ pub fn hard_wrap_composite<'s>(src_composite: &FmtComposite<'s>, width: usize) -
         let mut c_start = 0;
         let mut last_space: Option<usize> = Some(0);
         for (idx, char) in s.char_indices() {
+            let char_len = char.len_utf8();
             ll += 1;
             if char.is_whitespace() {
                 last_space = Some(idx);
             }
-            if ll == width {
+            if ll >= width {
                 let mut cut = idx;
-                if idx+1<s.len() {
+                ignored_cut_back = None;
+                if idx + char_len < s.len() {
                     if let Some(ls) = last_space {
                         if ls + max_cut_back >= idx {
                             cut = ls;
+                        } else {
+                            ignored_cut_back = Some(idx - ls);
                         }
                     }
                 }
-                if cut > c_start {
-                    dst_composite.add_compound(sc.sub(c_start, cut+1));
-                }
+                dst_composite.add_compound(sc.sub(c_start, cut));
                 let new_dst_composite = follow_up_composite(&dst_composite);
                 composites.push(dst_composite);
                 dst_composite = new_dst_composite;
-                c_start = cut+1;
                 last_space = None;
+                c_start = cut; // + char_len;
                 ll = idx - cut;
+                if dst_composite.composite.is_quote() {
+                    ll += 2;
+                }
             }
         }
         if c_start<s.len() {
             let sc = sc.tail(c_start);
             ll = sc.as_str().chars().count();
             dst_composite.add_compound(sc);
+        } else {
+            ignored_cut_back = None;
         }
     }
     if dst_composite.visible_length > 0 {
+        // now we try to see if we can move back the cut to the last space
+        if let Some(diff) = ignored_cut_back {
+            if diff + dst_composite.visible_length < width {
+                composites.last_mut().unwrap().composite.compounds.last_mut().unwrap().end -= diff;
+                composites.last_mut().unwrap().visible_length -= diff;
+                dst_composite.composite.compounds[0].start -= diff;
+                dst_composite.visible_length += diff;
+            }
+        }
         composites.push(dst_composite);
     }
     composites
@@ -182,7 +207,7 @@ mod wrap_tests {
         for width in 3..50 {
             check_no_overflow(skin, &src, width);
         }
-        check_line_lengths(skin, &src, 24, vec![20, 24, 1, 21, 12, 12, 24, 22]);
+        check_line_lengths(skin, &src, 24, vec![19, 19, 7, 20, 13, 12, 24, 22]);
     }
 
 }

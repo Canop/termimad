@@ -1,13 +1,17 @@
 use crate::area::{Area, terminal_size};
+use crate::color::*;
 use crate::composite::FmtComposite;
 use crate::inline::FmtInline;
 use crate::line::FmtLine;
 use crate::text::FmtText;
 use crate::spacing::Spacing;
-use crate::style::*;
+use crate::compound_style::CompoundStyle;
+use crate::styled_char::StyledChar;
+use crate::line_style::LineStyle;
+use crate::scrollbar_style::ScrollBarStyle;
 use crate::tbl::*;
 
-use crossterm::{Attribute, Color};
+use crossterm::{self, Attribute, Color};
 use minimad::{Alignment, Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
 use std::{self, fmt};
 
@@ -22,6 +26,9 @@ pub struct MadSkin {
     pub headers: [LineStyle; MAX_HEADER_DEPTH],
     pub scrollbar: ScrollBarStyle,
     pub table: LineStyle, // the compound style is for border chars
+    pub bullet: StyledChar,
+    pub quote_mark: StyledChar,
+    pub horizontal_rule: StyledChar,
 }
 
 impl Default for MadSkin {
@@ -40,6 +47,12 @@ impl Default for MadSkin {
                 compound_style: CompoundStyle::with_fg(gray(7)),
                 align: Alignment::Unspecified,
             },
+            bullet: StyledChar::from_fg_char(gray(8), '•'),
+            quote_mark: StyledChar::new(
+                CompoundStyle::new(Some(gray(12)), None, vec![Attribute::Bold]),
+                '▐',
+            ),
+            horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
         };
         skin.code.set_bg(gray(4));
         for h in &mut skin.headers {
@@ -69,6 +82,7 @@ impl MadSkin {
     pub fn visible_composite_length(&self, composite: &Composite<'_>) -> usize {
         (match composite.style {
             CompositeStyle::ListItem => 2, // space of the bullet
+            CompositeStyle::Quote => 2,    // space of the quoting char
             _ => 0,
         }) + composite.char_length()
     }
@@ -80,7 +94,7 @@ impl MadSkin {
         }
     }
 
-    /// return the style appliable to a given line
+    /// return the style to apply to a given line
     fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
         match style {
             CompositeStyle::Code => &self.code,
@@ -170,7 +184,10 @@ impl MadSkin {
         self.paragraph.repeat_space(f, lpo)?;
         ls.compound_style.repeat_space(f, lpi)?;
         if fc.composite.is_list_item() {
-            write!(f, "• ")?;
+            write!(f, "{} ", self.bullet)?;
+        }
+        if fc.composite.is_quote() {
+            write!(f, "{} ", self.quote_mark)?;
         }
         for c in &fc.composite.compounds {
             let os = self.compound_style(ls, c);
@@ -245,6 +262,11 @@ impl MadSkin {
                 }))?;
                 if with_right_completion {
                     self.paragraph.repeat_space(f, rpo)?;
+                }
+            }
+            FmtLine::HorizontalRule => {
+                if let Some(w) = width {
+                    write!(f, "{}", self.horizontal_rule.repeated(w))?;
                 }
             }
         }

@@ -32,7 +32,7 @@ fn make_skin() -> MadSkin {
     skin.set_headers_fg(AnsiValue(178));
     skin.bold.set_fg(Yellow);
     skin.italic.set_fg(Magenta);
-    skin.scrollbar.set_thumb_fg(AnsiValue(178));
+    skin.scrollbar.thumb.set_fg(AnsiValue(178));
     skin.code.align = Alignment::Center;
     skin
 }
@@ -105,8 +105,8 @@ We want *shiny **colors*** (and unreasonnable centering):
     skin.set_headers_fg(rgb!(255, 187, 0));
     skin.bold.set_fg(Yellow);
     skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
-    skin.scrollbar.set_track_fg(Rgb{r:30, g:30, b:40});
-    skin.scrollbar.set_thumb_fg(Rgb{r:67, g:51, b:0});
+    skin.scrollbar.track.set_fg(Rgb{r:30, g:30, b:40});
+    skin.scrollbar.thumb.set_fg(Rgb{r:67, g:51, b:0});
     skin.code.align = Alignment::Center;
 
 The scrollbar's colors were also adjusted to be consistent.

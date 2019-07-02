@@ -5,13 +5,18 @@
 #[macro_use]
 extern crate lazy_static;
 
+#[macro_use]
+mod color;
+
 mod composite;
 mod area;
 mod code;
 mod line;
 mod inline;
-#[macro_use]
-mod style;
+mod compound_style;
+mod line_style;
+mod scrollbar_style;
+mod styled_char;
 mod skin;
 mod spacing;
 mod tbl;
@@ -29,9 +34,12 @@ pub use inline::FmtInline;
 pub use text::FmtText;
 pub use text_view::TextView;
 pub use mad_view::MadView;
-pub use style::{CompoundStyle, LineStyle};
+pub use compound_style::CompoundStyle;
+pub use line_style::LineStyle;
+pub use scrollbar_style::ScrollBarStyle;
 pub use minimad::Alignment;
 pub use area::terminal_size;
+pub use styled_char::StyledChar;
 
 /// return a reference to the global skin (modifiable).
 /// If you want a new default skin without messing with

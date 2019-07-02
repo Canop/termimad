@@ -30,29 +30,32 @@ For example this markdown:
 	|:-:|:-:|-
 	|**feature**|**supported**|**details**|
 	|-:|:-:|-
-	| tables | yes | pipe based only, with alignments
+	| tables | yes | pipe based, with or without alignments
 	| italic, bold | yes | star based |
 	| inline code | yes | `with backquotes` (it works in tables too)
-	| code bloc | yes |with tabs: Fences not supported
-	| horizontal rule |  not yet
-	| crossed text |  ~~not yet~~ | wait... now it works (`~~like this~~`)
+	| code bloc | yes |with tabs; fences *not* supported
+	| syntax coloring | no |
+	| crossed text |  ~~not yet~~ | wait... now it works `~~like this~~`
+	| horizontal rule | yes | Use 3 or more dashes (`---`)
 	| lists | yes|* unordered lists supported
 	|  | |* ordered lists *not* supported
-	| quotes |  not yet
-	| phpbb like links | no | (because it's preferable to show an URL in a terminal)
+	| quotes |  yes |> What a wonderful time to be alive!
+	| links | no | (but your terminal already handles raw URLs)
 	|-
 
 will give different results depending on the width:
 
-![table](doc/table-in-84.png)
+![table](doc/table-in-80.png)
 
-![table](doc/table-in-62.png)
+![table](doc/table-in-60.png)
+
+![table](doc/table-in-50.png)
 
 ##  Usage
 
 ```toml
 [dependencies]
-termimad = "0.3"
+termimad = "0.4"
 ```
 
 ### With the default skin:
@@ -103,8 +106,11 @@ The code for this example is in examples/scrollable. To read the whole text just
     cargo run --example scrollable
 
 
-## Test it
+## Advices to get started
 
-If you want to see how some file would look with Termimad, you may try the cli [Clima](https://github.com/Canop/clima).
+* Start by reading the examples (in `/examples`): they cover the whole API and especially all the skin definition functions. They also show how you can use the alternate screen and scroll a page.
+* If you want to see how some file would look with Termimad, you may try the cli [Clima](https://github.com/Canop/clima).
+* Be careful that some colors aren't displayable on all terminals. The default color set of your application should not include arbitrary RGB colors.
+* If a feature is missing, or you don't know how to use some part, come and ping me on my chat during West European hours.
 
-[broot](https://github.com/Canop/broot) is a real application using Termimad to handle its help screen (if you're the author of another one, please tell me).
+[broot](https://github.com/Canop/broot) is a real application using Termimad to handle its help screen (if you're the author of another one, please tell me), you might want to see how it does it.

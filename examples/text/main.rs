@@ -2,6 +2,8 @@ use crossterm::{Color::*, Terminal, ClearType};
 use termimad::*;
 
 static MD: &str = r#"
+----
+
 # Markdown Rendering on Terminal
 
 Here's the code to print this markdown block in the terminal:
@@ -10,11 +12,17 @@ Here's the code to print this markdown block in the terminal:
     skin.set_headers_fg(rgb!(255, 187, 0));
     skin.bold.set_fg(Yellow);
     skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
+    skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
+    skin.quote_mark = StyledChar::from_fg_char(Yellow, '▐');
+    skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
+    skin.quote_mark.set_fg(Yellow);
     println!("{}", skin.term_text(my_markdown));
 
 **Termimad** is built over **Crossterm** and **Minimad**.
 
-## Why use termimad
+----
+
+## Why use Termimad
 
 * *display* static or dynamic *rich* texts
 * *separate* your text building code or resources from its styling
@@ -25,6 +33,12 @@ Here's the code to print this markdown block in the terminal:
 * the help screen of a terminal application
 * small snippets of rich text in a bigger application
 * terminal app output
+
+## What people say about Termimad
+
+> I find it convenient *[Termimad's author]*
+
+----
 "#;
 
 fn print_direct(skin: &MadSkin) {
@@ -53,6 +67,8 @@ fn main() {
     skin.set_headers_fg(rgb!(255, 187, 0));
     skin.bold.set_fg(Yellow);
     skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
+    skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
+    skin.quote_mark.set_fg(Yellow);
     if DIRECT {
         print_direct(&skin);
     } else {

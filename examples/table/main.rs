@@ -5,16 +5,17 @@ static MD_TABLE: &str = r#"
 |:-:|:-:|-
 |**feature**|**supported**|**details**|
 |-:|:-:|-
-| tables | yes | pipe based only, with alignments
+| tables | yes | pipe based, with or without alignments
 | italic, bold | yes | star based |
 | inline code | yes | `with backquotes` (it works in tables too)
-| code bloc | yes |with tabs: Fences not supported
-| horizontal rule |  not yet
-| crossed text |  ~~not yet~~ | wait... now it works (`~~like this~~`)
+| code bloc | yes |with tabs; fences *not* supported
+| syntax coloring | no |
+| crossed text |  ~~not yet~~ | wait... now it works `~~like this~~`
+| horizontal rule | yes | Use 3 or more dashes (`---`)
 | lists | yes|* unordered lists supported
 |  | |* ordered lists *not* supported
-| quotes |  not yet
-| phpbb like links | no | (because it's preferable to show an URL in a terminal)
+| quotes |  yes |> What a wonderful time to be alive!
+| links | no | (but your terminal already handles raw URLs)
 |-
 "#;
 

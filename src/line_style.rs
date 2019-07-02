@@ -1,0 +1,66 @@
+use std::fmt;
+use crossterm::{self, Attribute, Color};
+use minimad::Alignment;
+
+use crate::compound_style::CompoundStyle;
+
+/// A style applicable to a type of line:
+///  - the base style of the compounds
+///  - the alignment
+#[derive(Default)]
+pub struct LineStyle {
+    pub compound_style: CompoundStyle,
+    pub align: Alignment,
+    // add a bool to tell whether the background covers the whole line ?
+    //      or is it the case as soon as align isn't unspecified ?
+    // add a padding: usize ?
+}
+
+impl LineStyle {
+
+    /// Set the foreground color to the passed color.
+    #[inline(always)]
+    pub fn set_fg(&mut self, color: Color) {
+        self.compound_style.set_fg(color);
+    }
+
+    /// Set the background color to the passed color.
+    #[inline(always)]
+    pub fn set_bg(&mut self, color: Color) {
+        self.compound_style.set_bg(color);
+    }
+
+    /// Set the colors to the passed ones
+    pub fn set_fgbg(&mut self, fg: Color, bg: Color) {
+        self.compound_style.set_fgbg(fg, bg);
+    }
+
+    /// Add an `Attribute`. Like italic, underlined or bold.
+    #[inline(always)]
+    pub fn add_attr(&mut self, attr: Attribute) {
+        self.compound_style.add_attr(attr);
+    }
+
+    /// write a string several times with the line compound style
+    #[inline(always)]
+    pub fn repeat_string(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        s: &str,
+        count: usize,
+    ) -> fmt::Result {
+        self.compound_style.repeat_string(f, s, count)
+    }
+
+    /// write 0 or more spaces with the line's compound style
+    #[inline(always)]
+    pub fn repeat_space(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        count: usize,
+    ) -> fmt::Result {
+        self.repeat_string(f, " ", count)
+    }
+}
+
+
