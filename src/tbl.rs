@@ -91,8 +91,21 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
             col.to_remove = 0;
         }
     }
-    if excess > 0 {
-        cols[0].to_remove += excess;
+    while excess > 0 {
+        let mut nb_changed = 0;
+        for col in &mut cols {
+            if col.width - col.to_remove > 3 {
+                col.to_remove += 1;
+                excess -= 1;
+                nb_changed += 1;
+                if excess == 0 {
+                    break;
+                }
+            }
+        }
+        if nb_changed == 0 {
+            break;
+        }
     }
     for c in cols {
         widths[c.idx] -= c.to_remove;

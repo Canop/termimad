@@ -245,7 +245,7 @@ impl MadSkin {
                     RelativePosition::Other => '├',
                     RelativePosition::Bottom => '└',
                 }))?;
-                for (idx, width) in rule.widths.iter().enumerate() {
+                for (idx, &width) in rule.widths.iter().enumerate() {
                     if idx > 0 {
                         write!(f, "{}", self.table.compound_style.apply_to(match rule.position {
                             RelativePosition::Top => '┬',
@@ -253,7 +253,7 @@ impl MadSkin {
                             RelativePosition::Bottom => '┴',
                         }))?;
                     }
-                    self.table.repeat_string(f, "─", *width)?;
+                    self.table.repeat_string(f, "─", width)?;
                 }
                 write!(f, "{}", self.table.compound_style.apply_to(match rule.position {
                     RelativePosition::Top => '┐',
