@@ -4,16 +4,15 @@ use minimad::Alignment;
 
 use crate::compound_style::CompoundStyle;
 
-/// A style applicable to a type of line:
+/// A style applicable to a type of line.
+///
+/// It's made of
 ///  - the base style of the compounds
 ///  - the alignment
 #[derive(Default)]
 pub struct LineStyle {
     pub compound_style: CompoundStyle,
     pub align: Alignment,
-    // add a bool to tell whether the background covers the whole line ?
-    //      or is it the case as soon as align isn't unspecified ?
-    // add a padding: usize ?
 }
 
 impl LineStyle {
@@ -41,7 +40,7 @@ impl LineStyle {
         self.compound_style.add_attr(attr);
     }
 
-    /// write a string several times with the line compound style
+    /// Write a string several times with the line compound style
     #[inline(always)]
     pub fn repeat_string(
         &self,
@@ -52,7 +51,7 @@ impl LineStyle {
         self.compound_style.repeat_string(f, s, count)
     }
 
-    /// write 0 or more spaces with the line's compound style
+    /// Write 0 or more spaces with the line's compound style
     #[inline(always)]
     pub fn repeat_space(
         &self,

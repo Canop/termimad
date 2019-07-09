@@ -22,9 +22,9 @@ static MD_TABLE: &str = r#"
 fn main() {
     println!("\n");
     let mut skin = MadSkin::default();
-    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.set_headers_fg(rgb(255, 187, 0));
     skin.bold.set_fg(Yellow);
-    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
+    skin.italic.set_fgbg(Magenta, rgb(30, 30, 40));
     skin.paragraph.align = Alignment::Center;
     skin.table.align = Alignment::Center;
     let (width, _) = terminal_size();

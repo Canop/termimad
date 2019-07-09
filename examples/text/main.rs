@@ -9,9 +9,9 @@ static MD: &str = r#"
 Here's the code to print this markdown block in the terminal:
 
     let mut skin = MadSkin::default();
-    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.set_headers_fg(rgb(255, 187, 0));
     skin.bold.set_fg(Yellow);
-    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
+    skin.italic.set_fgbg(Magenta, rgb(30, 30, 40));
     skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
     skin.quote_mark = StyledChar::from_fg_char(Yellow, '▐');
     skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
@@ -46,12 +46,13 @@ fn print_direct(skin: &MadSkin) {
     println!("{}", skin.term_text(MD));
 }
 
-fn print_in_mad_view(skin: MadSkin) {
+fn print_in_text_view(skin: MadSkin) {
     let terminal = Terminal::new();
     terminal.clear(ClearType::All).unwrap();
     let mut area = Area::full_screen();
     area.pad(2, 1); // let's add some margin
-    let view = MadView::from(MD.to_owned(), area, skin);
+    let text = skin.area_text(MD, &area);
+    let view = TextView::from(&area, &text);
     view.write().unwrap();
 }
 
@@ -64,14 +65,14 @@ const DIRECT: bool = true;
 
 fn main() {
     let mut skin = MadSkin::default();
-    skin.set_headers_fg(rgb!(255, 187, 0));
+    skin.set_headers_fg(rgb(255, 187, 0));
     skin.bold.set_fg(Yellow);
-    skin.italic.set_fgbg(Magenta, rgb!(30, 30, 40));
+    skin.italic.set_fgbg(Magenta, rgb(30, 30, 40));
     skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
     skin.quote_mark.set_fg(Yellow);
     if DIRECT {
         print_direct(&skin);
     } else {
-        print_in_mad_view(skin);
+        print_in_text_view(skin);
     }
 }

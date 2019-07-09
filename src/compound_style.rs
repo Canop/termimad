@@ -3,7 +3,6 @@ use crossterm::{self, Attribute, Color, ObjectStyle, StyledObject};
 
 
 /// A style which may be applied to a compound
-/// Right now it's just a wrapper around a crossterm ObjectStyle
 #[derive(Default, Clone)]
 pub struct CompoundStyle {
     pub object_style: ObjectStyle, // a crossterm object style
@@ -84,7 +83,7 @@ impl CompoundStyle {
         self.object_style.attrs.push(attr);
     }
 
-    /// add the defined characteristics of `other` to self, overwriting
+    /// Add the defined characteristics of `other` to self, overwriting
     ///  its own one when defined
     pub fn overwrite_with(&mut self, other: &CompoundStyle) {
         self.object_style.fg_color = other.object_style.fg_color.or(self.object_style.fg_color);
@@ -92,8 +91,9 @@ impl CompoundStyle {
         self.object_style.attrs.extend(&other.object_style.attrs);
     }
 
-    /// write a string several times with the line compound style
-    // Note: performances here are critical
+    /// Write a string several times with the line compound style
+    ///
+    /// Implementation Note: performances here are critical
     #[inline(always)]
     pub fn repeat_string(
         &self,
@@ -108,7 +108,7 @@ impl CompoundStyle {
         }
     }
 
-    /// write 0 or more spaces with the line's compound style
+    /// Write 0 or more spaces with the line's compound style
     #[inline(always)]
     pub fn repeat_space(
         &self,

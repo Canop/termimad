@@ -1,11 +1,10 @@
+use minimad::{Compound, Composite};
 
 use crate::skin::MadSkin;
 use crate::spacing::Spacing;
 
-use minimad::{Compound, Composite};
-
-/// wrap a Minimad Composite, which is a list of Compounds,
-/// which are strings with an homogeneous style
+/// Wrap a Minimad Composite, which is a list of Compounds
+/// (which are strings with an homogeneous style)
 #[derive(Debug, Clone)]
 pub struct FmtComposite<'s> {
     pub composite: Composite<'s>,
@@ -28,7 +27,7 @@ impl<'s> FmtComposite<'s> {
             spacing: None,
         }
     }
-    /// return the number of characters (usually spaces) to insert both
+    /// Return the number of characters (usually spaces) to insert both
     /// sides of the composite
     #[inline(always)]
     pub fn completions(&self) -> (usize, usize) {
@@ -37,7 +36,7 @@ impl<'s> FmtComposite<'s> {
             None => (0, 0),
         }
     }
-    /// add a compound and modifies `visible_length` accordingly
+    /// Add a compound and modifies `visible_length` accordingly
     #[inline(always)]
     pub fn add_compound(&mut self, compound: Compound<'s>) {
         self.visible_length += compound.char_length();

@@ -4,7 +4,7 @@ pub trait AreaContent {
     fn height() -> u16;
 }
 
-/// a part of a screen
+/// A rectangular part of the screen
 #[derive(Debug, PartialEq, Eq)]
 pub struct Area {
     pub left: u16,
@@ -19,7 +19,7 @@ fn div_ceil(a: i32, b: i32) -> i32 {
 
 impl Area {
 
-    /// build a new area. You'll need to set the position and size
+    /// Build a new area. You'll need to set the position and size
     /// before you can use it
     pub fn uninitialized() -> Area {
         Area { left: 0, top:0, height:1, width:5 } // width can't be less than 5
@@ -41,7 +41,7 @@ impl Area {
         }
     }
 
-    /// build an area covering the whole terminal
+    /// Build an area covering the whole terminal
     pub fn full_screen() -> Area {
         let (width, height) = terminal_size();
         Area {
@@ -52,6 +52,7 @@ impl Area {
         }
     }
 
+    /// shrink the area
     pub fn pad(&mut self, dx: u16, dy: u16) {
         // this will crash if padding is too big. feature?
         self.left += dx;
@@ -60,6 +61,7 @@ impl Area {
         self.height -= 2*dy;
     }
 
+    /// symmetrically shrink the area if its width is bigger than `max_width`
     pub fn pad_for_max_width(&mut self, max_width: u16) {
         if max_width >= self.width {
             return;
@@ -69,10 +71,10 @@ impl Area {
         self.width -= pw;
     }
 
-    // return an option which when filled contains
-    //  a tupple with the top and bottom of the vertical
-    //  scrollbar. Return none when the content fits
-    //  the available space.
+    /// Return an option which when filled contains
+    ///  a tupple with the top and bottom of the vertical
+    ///  scrollbar. Return none when the content fits
+    ///  the available space.
     pub fn scrollbar(
         &self,
         scroll: i32, // 0 for no scroll, positive if scrolled
@@ -96,7 +98,7 @@ impl Area {
     }
 }
 
-/// return a (width, height) with the dimensions of the available
+/// Return a (width, height) with the dimensions of the available
 /// terminal in characters.
 pub fn terminal_size() -> (u16, u16) {
     let (w, h) = Terminal::new().terminal_size();

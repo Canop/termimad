@@ -11,6 +11,7 @@ pub struct CodeBlock {
     pub width: usize,  // length in chars of the widest line
 }
 impl CodeBlock {
+    /// ensure all lines of the block have the same width
     pub fn justify(&self, lines: &mut Vec<FmtLine<'_>>) {
         for idx in self.start..self.start + self.height {
             if let FmtLine::Normal(ref mut fc) = lines[idx] {
@@ -33,6 +34,8 @@ fn code_line_length(line: &FmtLine<'_>) -> Option<usize> {
     }
 }
 
+/// find ranges of code lines in a text.
+///
 /// Warning: the indices in a codeblock are invalid as
 /// soon as lines are inserted or removed. This function
 /// should normally not be used from another module or lib

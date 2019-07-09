@@ -14,8 +14,8 @@ pub enum FmtLine<'s> {
 }
 
 impl<'s> FmtLine<'s> {
-    /// build a fmtline from a minimad line.
-    /// skin is passed because it might affect the visible size
+    /// Build a fmtline from a minimad line.
+    /// Skin is passed because it might affect the visible size
     /// in the future
     pub fn from(mline: Line<'s>, skin: & MadSkin) -> Self {
         match mline {

@@ -22,7 +22,8 @@ pub struct MadSkin {
     pub bold: CompoundStyle,
     pub italic: CompoundStyle,
     pub strikeout: CompoundStyle,
-    pub code: LineStyle,
+    pub inline_code: CompoundStyle,
+    pub code_block: LineStyle,
     pub headers: [LineStyle; MAX_HEADER_DEPTH],
     pub scrollbar: ScrollBarStyle,
     pub table: LineStyle, // the compound style is for border chars
@@ -32,7 +33,8 @@ pub struct MadSkin {
 }
 
 impl Default for MadSkin {
-    /// build a customizable skin.
+    /// Build a customizable skin.
+    ///
     /// It's initialized with sensible monochrome settings.
     fn default() -> MadSkin {
         let mut skin = MadSkin {
@@ -40,7 +42,8 @@ impl Default for MadSkin {
             bold: CompoundStyle::new(Some(Color::White), None, vec![Attribute::Bold]),
             italic: CompoundStyle::with_attr(Attribute::Italic),
             strikeout: CompoundStyle::with_attr(Attribute::CrossedOut),
-            code: LineStyle::default(),
+            inline_code: CompoundStyle::with_bg(gray(4)),
+            code_block: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
             table: LineStyle {
@@ -54,7 +57,7 @@ impl Default for MadSkin {
             ),
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
         };
-        skin.code.set_bg(gray(4));
+        skin.code_block.set_bg(gray(4));
         for h in &mut skin.headers {
             h.add_attr(Attribute::Underlined);
         }
@@ -68,17 +71,28 @@ impl Default for MadSkin {
 }
 
 impl MadSkin {
+
+    /// Set a common foregreound color for all header levels
+    ///
+    /// (it's still possible to change them individually with
+    /// skin.headers[i])
     pub fn set_headers_fg(&mut self, c: Color) {
         for h in &mut self.headers {
             h.set_fg(c);
         }
     }
+
+    /// Set a common background color for all header levels
+    ///
+    /// (it's still possible to change them individually with
+    /// skin.headers[i])
     pub fn set_headers_bg(&mut self, c: Color) {
         for h in &mut self.headers {
             h.set_bg(c);
         }
     }
 
+    /// Return the number of visible chars in a composite
     pub fn visible_composite_length(&self, composite: &Composite<'_>) -> usize {
         (match composite.style {
             CompositeStyle::ListItem => 2, // space of the bullet
@@ -97,7 +111,7 @@ impl MadSkin {
     /// return the style to apply to a given line
     fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
         match style {
-            CompositeStyle::Code => &self.code,
+            CompositeStyle::Code => &self.code_block,
             CompositeStyle::Header(level) if *level <= MAX_HEADER_DEPTH as u8 => {
                 &self.headers[*level as usize - 1]
             }
@@ -123,12 +137,13 @@ impl MadSkin {
             os.overwrite_with(&self.bold);
         }
         if compound.code {
-            os.overwrite_with(&self.code.compound_style);
+            os.overwrite_with(&self.inline_code);
         }
         os
     }
 
     // return a formatted line or part of line.
+    //
     // Don't use this function if `src` is expected to be several lines.
     pub fn inline<'k, 's>(&'k self, src: &'s str) -> FmtInline<'k, 's> {
         let composite = FmtComposite::from(
@@ -142,6 +157,7 @@ impl MadSkin {
     }
 
     /// return a formatted text.
+    ///
     /// Code blocs will be right justified
     pub fn text<'k, 's>(&'k self, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
         FmtText::from(self, src, width)
@@ -149,6 +165,7 @@ impl MadSkin {
 
     /// return a formatted text, with lines wrapped or justified for the current terminal
     /// width.
+    ///
     /// Code blocs will be right justified
     pub fn term_text<'k, 's>(&'k self, src: &'s str) -> FmtText<'k, 's> {
         let (width, _) = terminal_size();
@@ -157,6 +174,7 @@ impl MadSkin {
 
     /// return a formatted text, with lines wrapped or justified for the
     /// passed area width (with space for a scrollbar).
+    ///
     /// Code blocs will be right justified
     pub fn area_text<'k, 's>(&'k self, src: &'s str, area: &Area) -> FmtText<'k, 's> {
         FmtText::from(self, src, Some(area.width as usize))
@@ -169,6 +187,10 @@ impl MadSkin {
         print!("{}", self.term_text(src));
     }
 
+    /// Write a composite.
+    ///
+    /// This function is internally used and normally not needed outside
+    ///  of Termimad's implementation.
     pub fn write_fmt_composite(
         &self,
         f: &mut fmt::Formatter<'_>,
@@ -200,7 +222,8 @@ impl MadSkin {
         Ok(())
     }
 
-    /// write a line in the passed formatter, with completions.
+    /// Write a line in the passed formatter, with completions.
+    ///
     /// Right completion is optional because:
     /// - if a text isn't right completed it shrinks better when you reduce the width
     ///   of the terminal

@@ -1,5 +1,6 @@
 use minimad::Alignment;
 
+
 #[derive(Debug, Clone, Copy)]
 pub struct Spacing {
     pub width: usize,

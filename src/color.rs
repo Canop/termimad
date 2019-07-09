@@ -1,22 +1,23 @@
 use crossterm::{self, Color};
 
-#[macro_export]
-macro_rules! rgb {
-    (
-        $r:expr, $g:expr, $b:expr
-    ) => {
-        crossterm::Color::Rgb {
-            r: $r,
-            g: $g,
-            b: $b,
-        }
-    }
+/// Build a RGB color
+///
+/// ```
+/// let gold = termimad::rgb(255, 187, 0);
+/// ```
+pub fn rgb(r: u8, g: u8, b: u8) -> Color {
+    Color::Rgb { r, g, b }
 }
 
-/// build a gray-level color, from 0:dark to 23:light.
+/// Build a gray-level color, from 0 (dark) to 23 (light).
 pub fn gray(level: u8) -> Color {
     assert!(level<24, "invalid gray level (must be in 0..24)");
     Color::AnsiValue(0xE8 + level)
+}
+
+/// Build an [ANSI color](https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit)
+pub fn ansi(level: u8) -> Color {
+    Color::AnsiValue(level)
 }
 
 #[cfg(test)]

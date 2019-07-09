@@ -2,10 +2,11 @@
 use crate::color::*;
 use crate::styled_char::StyledChar;
 
-/// The scrollbar style is defined by two styled chars, one
+/// A scrollbar style defined by two styled chars, one
 ///  for the track, and one for the thumb.
+///
 /// For the default styling only the fg color is defined
-///  and the char is ▐ but everything can be changed
+///  and the char is ▐ but everything can be changed.
 pub struct ScrollBarStyle {
     pub track: StyledChar,
     pub thumb: StyledChar,

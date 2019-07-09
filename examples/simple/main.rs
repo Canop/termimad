@@ -19,13 +19,13 @@ fn main() {
     println!("\nWith a customized skin:\n");
     skin.bold.set_fg(Yellow);
     skin.italic = CompoundStyle::with_bg(DarkBlue);
-    skin.code.add_attr(Reverse);
+    skin.inline_code.add_attr(Reverse);
     show_some(&skin);
 
     let mut skin = MadSkin::default();
     skin.bold.set_fg(Yellow);
     skin.print_inline("*Hey* **World!** Here's `some(code)`");
-    skin.paragraph.set_fgbg(Magenta, rgb!(30, 30, 40));
+    skin.paragraph.set_fgbg(Magenta, rgb(30, 30, 40));
     skin.italic.add_attr(Underlined);
     skin.italic.add_attr(OverLined);
     println!("\nand now {}\n", skin.inline("a little *too much* **style!** (and `some(code)` too)"));

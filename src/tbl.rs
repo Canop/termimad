@@ -6,18 +6,21 @@ use crate::skin::MadSkin;
 use crate::line::FmtLine;
 use crate::spacing::Spacing;
 
-/// wrap a standard table row
+/// Wrap a standard table row
 pub struct FmtTableRow<'s> {
     pub cells: Vec<FmtComposite<'s>>,
 }
 
+/// Top, Bottom, or other
 pub enum RelativePosition {
     Top,
     Other, // or unknown
     Bottom,
 }
 
-/// represent this kind of lines in tables:
+/// A separator or alignment rule in a table.
+///
+/// Represent this kind of lines in tables:
 ///  |----|:-:|--
 pub struct FmtTableRule {
     pub position: RelativePosition, // position relative to the table
@@ -51,7 +54,8 @@ impl<'s> FmtTableRow<'s> {
     }
 }
 
-/// tables are the sequences of lines whose line style is TableRow
+/// Tables are the sequences of lines whose line style is TableRow.
+///
 /// A table is just the indices, without the text
 /// This structure isn't public because the indices are invalid as
 ///  soon as rows are inserted. It only serves during the formatting
@@ -277,8 +281,9 @@ fn find_tables(lines: &[FmtLine<'_>]) -> Vec<Table> {
     tables
 }
 
-/// modify the rows of all tables in order to ensure it fits the widths
+/// Modify the rows of all tables in order to ensure it fits the widths
 /// and all cells have the widths of their column.
+///
 /// Some lines may be added to the table in the process, which means any
 ///  precedent indexing might be invalid.
 pub fn fix_all_tables(lines: &mut Vec<FmtLine<'_>>, width: usize) {

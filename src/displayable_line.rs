@@ -4,7 +4,10 @@ use crate::skin::MadSkin;
 use crate::line::FmtLine;
 
 
-/// an internal facility to write just a line of a text
+/// A facility to write just a line of a text.
+///
+/// It's normally not necessary to use this: it's more an internal
+///  tool utility.
 pub struct DisplayableLine<'s, 'l, 'p> {
     pub skin: &'s MadSkin,
     pub line: &'p FmtLine<'l>,

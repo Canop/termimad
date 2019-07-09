@@ -3,9 +3,10 @@ use std::fmt;
 use crate::composite::FmtComposite;
 use crate::skin::MadSkin;
 
-/// a directly printable markdown snippet, complete
+/// A directly printable markdown snippet, complete
 ///  with the reference to a skin so that it can
 ///  implement the Display trait.
+///
 /// Use this when you don't have a text but just
 ///  part of a line
 pub struct FmtInline<'k, 's> {

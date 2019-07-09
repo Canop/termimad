@@ -5,10 +5,30 @@ use crate::area::Area;
 use crate::displayable_line::DisplayableLine;
 use crate::text::FmtText;
 
-/// a scrollable text, in a specific area.
-/// The text is assumed to have been computed for the given area
-/// (it's generally recommended to use a MadView instead of a
-/// TextView to ensure the text is properly computed).
+/// A scrollable text, in a specific area.
+///
+/// The text is assumed to have been computed for the given area.
+///
+/// For example:
+///
+/// ```
+/// use termimad::*;
+///
+/// // You typically borrow those 3 vars from elsewhere
+/// let markdown = "#title\n* item 1\n* item 2";
+/// let area = Area::new(0, 0, 10, 12);
+/// let skin = MadSkin::default();
+///
+/// // displaying
+/// let text = skin.area_text(markdown, &area);
+/// let view = TextView::from(&area, &text);
+/// view.write().unwrap();
+/// ```
+///
+/// If the text and skin are constant, you might prefer to
+/// use a MadView instead of a TextView: the MadView owns
+/// the mardkown string and ensures the formatted text
+/// is computed accordingly to the area.
 pub struct TextView<'a, 't> {
     area: &'a Area,
     text: &'t FmtText<'t, 't>,
@@ -90,7 +110,7 @@ impl<'a, 't> TextView<'a, 't> {
 
     }
     /// set the scroll amount.
-    /// lines_count can be negative
+    /// pages_count can be negative
     pub fn try_scroll_pages(&mut self, pages_count: i32) {
         self.try_scroll_lines(pages_count * self.area.height as i32);
     }
