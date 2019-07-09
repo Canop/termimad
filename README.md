@@ -55,7 +55,7 @@ will give different results depending on the width:
 
 ```toml
 [dependencies]
-termimad = "0.4"
+termimad = "0.5"
 ```
 
 ### With the default skin:
@@ -80,7 +80,7 @@ Result:
 let mut skin = MadSkin::default();
 skin.bold.set_fg(Yellow);
 skin.print_inline("*Hey* **World!** Here's `some(code)`");
-skin.paragraph.set_fgbg(Magenta, rgb!(30, 30, 40));
+skin.paragraph.set_fgbg(Magenta, rgb(30, 30, 40));
 skin.italic.add_attr(Underlined);
 println!("\nand now {}\n", skin.inline("a little *too much* **style!** (and `some(code)` too)"));
 ```
