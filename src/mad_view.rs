@@ -1,8 +1,8 @@
 use std::io;
 
 use crate::area::Area;
-use crate::text_view::TextView;
 use crate::skin::MadSkin;
+use crate::text_view::TextView;
 
 /// A MadView is like a textview but it owns everything, from the
 ///  source markdown to the area and the skin, which often makes it more convenient
@@ -17,11 +17,7 @@ pub struct MadView {
 
 impl MadView {
     /// make a displayed text, that is a text in an area
-    pub fn from(
-        markdown: String,
-        area: Area,
-        skin: MadSkin,
-    ) -> MadView {
+    pub fn from(markdown: String, area: Area, skin: MadSkin) -> MadView {
         MadView {
             markdown,
             area,
@@ -66,4 +62,3 @@ impl MadView {
         self.try_scroll_lines(pages_count * self.area.height as i32);
     }
 }
-

@@ -1,5 +1,5 @@
+use crossterm::{self, ClearType, Terminal, TerminalCursor};
 use std::io;
-use crossterm::{self, TerminalCursor, Terminal, ClearType};
 
 use crate::area::Area;
 use crate::displayable_line::DisplayableLine;
@@ -37,12 +37,8 @@ pub struct TextView<'a, 't> {
 }
 
 impl<'a, 't> TextView<'a, 't> {
-
     /// make a displayed text, that is a text in an area
-    pub fn from(
-        area: &'a Area,
-        text: &'t FmtText<'_, '_>,
-    ) -> TextView<'a, 't> {
+    pub fn from(area: &'a Area, text: &'t FmtText<'_, '_>) -> TextView<'a, 't> {
         TextView {
             area,
             text,
@@ -77,20 +73,16 @@ impl<'a, 't> TextView<'a, 't> {
         let sx = self.area.left + self.area.width;
         let mut i = self.scroll as usize;
         for y in 0..self.area.height {
-            cursor.goto(self.area.left, self.area.top+y)?;
+            cursor.goto(self.area.left, self.area.top + y)?;
             if i < self.text.lines.len() {
-                let dl = DisplayableLine::new(
-                    self.text.skin,
-                    &self.text.lines[i],
-                    self.text.width,
-                );
+                let dl = DisplayableLine::new(self.text.skin, &self.text.lines[i], self.text.width);
                 print!("{}", &dl);
                 i += 1;
             } else {
                 terminal.clear(ClearType::UntilNewLine)?;
             }
             if let Some((sctop, scbottom)) = scrollbar {
-                cursor.goto(sx, self.area.top+y)?;
+                cursor.goto(sx, self.area.top + y)?;
                 if sctop <= y && y <= scbottom {
                     print!("{}", self.text.skin.scrollbar.thumb);
                 } else {
@@ -107,7 +99,6 @@ impl<'a, 't> TextView<'a, 't> {
         self.scroll = (self.scroll + lines_count)
             .min(self.content_height() - (self.area.height as i32) + 1)
             .max(0);
-
     }
     /// set the scroll amount.
     /// pages_count can be negative

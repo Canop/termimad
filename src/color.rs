@@ -11,7 +11,7 @@ pub fn rgb(r: u8, g: u8, b: u8) -> Color {
 
 /// Build a gray-level color, from 0 (dark) to 23 (light).
 pub fn gray(level: u8) -> Color {
-    assert!(level<24, "invalid gray level (must be in 0..24)");
+    assert!(level < 24, "invalid gray level (must be in 0..24)");
     Color::AnsiValue(0xE8 + level)
 }
 

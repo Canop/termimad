@@ -18,20 +18,19 @@ fn div_ceil(a: i32, b: i32) -> i32 {
 }
 
 impl Area {
-
     /// Build a new area. You'll need to set the position and size
     /// before you can use it
     pub fn uninitialized() -> Area {
-        Area { left: 0, top:0, height:1, width:5 } // width can't be less than 5
+        Area {
+            left: 0,
+            top: 0,
+            height: 1,
+            width: 5,
+        } // width can't be less than 5
     }
 
     /// build a new area.
-    pub fn new(
-        left: u16,
-        top: u16,
-        width: u16,
-        height: u16,
-    ) -> Area {
+    pub fn new(left: u16, top: u16, width: u16, height: u16) -> Area {
         assert!(width > 4);
         Area {
             left,
@@ -57,8 +56,8 @@ impl Area {
         // this will crash if padding is too big. feature?
         self.left += dx;
         self.top += dy;
-        self.width -= 2*dx;
-        self.height -= 2*dy;
+        self.width -= 2 * dx;
+        self.height -= 2 * dy;
     }
 
     /// symmetrically shrink the area if its width is bigger than `max_width`
@@ -93,7 +92,7 @@ impl Area {
                 (h - se) as u16
             } else {
                 sc as u16 + 1
-            }
+            },
         ))
     }
 }

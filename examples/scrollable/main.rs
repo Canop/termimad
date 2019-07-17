@@ -1,6 +1,8 @@
-use crossterm::{AlternateScreen, TerminalCursor, TerminalInput, KeyEvent::*, InputEvent::*, Color::*};
-use termimad::*;
+use crossterm::{
+    AlternateScreen, Color::*, InputEvent::*, KeyEvent::*, TerminalCursor, TerminalInput,
+};
 use std::io;
+use termimad::*;
 
 fn show_scrollable(skin: MadSkin, markdown: &str) -> io::Result<()> {
     let cursor = TerminalCursor::new();

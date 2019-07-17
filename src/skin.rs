@@ -1,18 +1,18 @@
-use crate::area::{Area, terminal_size};
+use crate::area::{terminal_size, Area};
 use crate::color::*;
 use crate::composite::FmtComposite;
+use crate::compound_style::CompoundStyle;
 use crate::inline::FmtInline;
 use crate::line::FmtLine;
-use crate::text::FmtText;
-use crate::spacing::Spacing;
-use crate::compound_style::CompoundStyle;
-use crate::styled_char::StyledChar;
 use crate::line_style::LineStyle;
 use crate::scrollbar_style::ScrollBarStyle;
+use crate::spacing::Spacing;
+use crate::styled_char::StyledChar;
 use crate::tbl::*;
+use crate::text::FmtText;
 
 use crossterm::{self, Attribute, Color};
-use minimad::{Alignment, Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
+use minimad::{Alignment, Composite, CompositeStyle, Compound, Line, MAX_HEADER_DEPTH};
 use std::{self, fmt};
 
 /// A skin defining how a parsed mardkown appears on the terminal
@@ -71,7 +71,6 @@ impl Default for MadSkin {
 }
 
 impl MadSkin {
-
     /// Set a common foregreound color for all header levels
     ///
     /// (it's still possible to change them individually with
@@ -103,7 +102,7 @@ impl MadSkin {
 
     pub fn visible_line_length(&self, line: &Line<'_>) -> usize {
         match line {
-            Line::Normal( composite ) => self.visible_composite_length(composite),
+            Line::Normal(composite) => self.visible_composite_length(composite),
             _ => 0, // FIXME implement
         }
     }
@@ -121,11 +120,7 @@ impl MadSkin {
 
     /// return the style appliable to a given compound.
     /// It's a composition of the various appliable base styles.
-    fn compound_style(
-        &self,
-        line_style: &LineStyle,
-        compound: &Compound<'_>,
-    ) -> CompoundStyle {
+    fn compound_style(&self, line_style: &LineStyle, compound: &Compound<'_>) -> CompoundStyle {
         let mut os = line_style.compound_style.clone();
         if compound.italic {
             os.overwrite_with(&self.italic);
@@ -146,10 +141,7 @@ impl MadSkin {
     //
     // Don't use this function if `src` is expected to be several lines.
     pub fn inline<'k, 's>(&'k self, src: &'s str) -> FmtInline<'k, 's> {
-        let composite = FmtComposite::from(
-            Composite::from_inline(src),
-            self
-        );
+        let composite = FmtComposite::from(Composite::from_inline(src), self);
         FmtInline {
             skin: self,
             composite,
@@ -200,8 +192,7 @@ impl MadSkin {
     ) -> fmt::Result {
         let ls = self.line_style(&fc.composite.style);
         let (lpi, rpi) = fc.completions(); // inner completion
-        let inner_width = fc.spacing
-            .map_or(fc.visible_length, |sp| sp.width);
+        let inner_width = fc.spacing.map_or(fc.visible_length, |sp| sp.width);
         let (lpo, rpo) = Spacing::optional_completions(ls.align, inner_width, outer_width);
         self.paragraph.repeat_space(f, lpo)?;
         ls.compound_style.repeat_space(f, lpi)?;
@@ -240,7 +231,7 @@ impl MadSkin {
             FmtLine::Normal(fc) => {
                 self.write_fmt_composite(f, fc, width, with_right_completion)?;
             }
-            FmtLine::TableRow(FmtTableRow{cells}) => {
+            FmtLine::TableRow(FmtTableRow { cells }) => {
                 let tbl_width = 1 + cells.iter().fold(0, |sum, cell| {
                     if let Some(spacing) = cell.spacing {
                         sum + spacing.width + 1
@@ -263,26 +254,38 @@ impl MadSkin {
                 let tbl_width = 1 + rule.widths.iter().fold(0, |sum, w| sum + w + 1);
                 let (lpo, rpo) = Spacing::optional_completions(self.table.align, tbl_width, width);
                 self.paragraph.repeat_space(f, lpo)?;
-                write!(f, "{}", self.table.compound_style.apply_to(match rule.position {
-                    RelativePosition::Top => '┌',
-                    RelativePosition::Other => '├',
-                    RelativePosition::Bottom => '└',
-                }))?;
+                write!(
+                    f,
+                    "{}",
+                    self.table.compound_style.apply_to(match rule.position {
+                        RelativePosition::Top => '┌',
+                        RelativePosition::Other => '├',
+                        RelativePosition::Bottom => '└',
+                    })
+                )?;
                 for (idx, &width) in rule.widths.iter().enumerate() {
                     if idx > 0 {
-                        write!(f, "{}", self.table.compound_style.apply_to(match rule.position {
-                            RelativePosition::Top => '┬',
-                            RelativePosition::Other => '┼',
-                            RelativePosition::Bottom => '┴',
-                        }))?;
+                        write!(
+                            f,
+                            "{}",
+                            self.table.compound_style.apply_to(match rule.position {
+                                RelativePosition::Top => '┬',
+                                RelativePosition::Other => '┼',
+                                RelativePosition::Bottom => '┴',
+                            })
+                        )?;
                     }
                     self.table.repeat_string(f, "─", width)?;
                 }
-                write!(f, "{}", self.table.compound_style.apply_to(match rule.position {
-                    RelativePosition::Top => '┐',
-                    RelativePosition::Other => '┤',
-                    RelativePosition::Bottom => '┘',
-                }))?;
+                write!(
+                    f,
+                    "{}",
+                    self.table.compound_style.apply_to(match rule.position {
+                        RelativePosition::Top => '┐',
+                        RelativePosition::Other => '┤',
+                        RelativePosition::Bottom => '┘',
+                    })
+                )?;
                 if with_right_completion {
                     self.paragraph.repeat_space(f, rpo)?;
                 }
@@ -296,4 +299,3 @@ impl MadSkin {
         Ok(())
     }
 }
-

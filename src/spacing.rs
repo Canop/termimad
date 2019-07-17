@@ -1,6 +1,5 @@
 use minimad::Alignment;
 
-
 #[derive(Debug, Clone, Copy)]
 pub struct Spacing {
     pub width: usize,
@@ -20,12 +19,16 @@ impl Spacing {
             Alignment::Center => {
                 let lp = (outer_width - inner_width) / 2;
                 (lp, outer_width - inner_width - lp)
-            },
+            }
             Alignment::Right => (outer_width - inner_width, 0),
         }
     }
     #[inline(always)]
-    pub fn optional_completions(align: Alignment, inner_width: usize, outer_width: Option<usize>) -> (usize, usize) {
+    pub fn optional_completions(
+        align: Alignment,
+        inner_width: usize,
+        outer_width: Option<usize>,
+    ) -> (usize, usize) {
         match outer_width {
             Some(outer_width) => Spacing::completions(align, inner_width, outer_width),
             None => (0, 0),
@@ -36,5 +39,3 @@ impl Spacing {
         Spacing::completions(self.align, inner_width, self.width)
     }
 }
-
-

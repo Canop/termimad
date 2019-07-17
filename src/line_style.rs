@@ -1,6 +1,6 @@
-use std::fmt;
 use crossterm::{self, Attribute, Color};
 use minimad::Alignment;
+use std::fmt;
 
 use crate::compound_style::CompoundStyle;
 
@@ -16,7 +16,6 @@ pub struct LineStyle {
 }
 
 impl LineStyle {
-
     /// Set the foreground color to the passed color.
     #[inline(always)]
     pub fn set_fg(&mut self, color: Color) {
@@ -42,24 +41,13 @@ impl LineStyle {
 
     /// Write a string several times with the line compound style
     #[inline(always)]
-    pub fn repeat_string(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-        s: &str,
-        count: usize,
-    ) -> fmt::Result {
+    pub fn repeat_string(&self, f: &mut fmt::Formatter<'_>, s: &str, count: usize) -> fmt::Result {
         self.compound_style.repeat_string(f, s, count)
     }
 
     /// Write 0 or more spaces with the line's compound style
     #[inline(always)]
-    pub fn repeat_space(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-        count: usize,
-    ) -> fmt::Result {
+    pub fn repeat_space(&self, f: &mut fmt::Formatter<'_>, count: usize) -> fmt::Result {
         self.repeat_string(f, " ", count)
     }
 }
-
-

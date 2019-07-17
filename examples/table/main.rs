@@ -1,4 +1,4 @@
-use crossterm::{Color::*};
+use crossterm::Color::*;
 use termimad::*;
 
 static MD_TABLE: &str = r#"
@@ -33,4 +33,3 @@ fn main() {
     println!("{}", skin.term_text(&markdown));
     println!("\n");
 }
-
