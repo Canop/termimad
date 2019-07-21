@@ -80,22 +80,35 @@ impl Area {
         scroll: i32, // 0 for no scroll, positive if scrolled
         content_height: i32,
     ) -> Option<(u16, u16)> {
-        let h = self.height as i32;
-        if content_height <= h {
-            return None;
-        }
-        let sc = div_ceil(scroll * h, content_height);
-        let hidden_tail = content_height - scroll - h;
-        let se = div_ceil(hidden_tail * h, content_height);
-        Some((
-            sc as u16,
-            if h > sc + se {
-                (h - se) as u16
-            } else {
-                sc as u16 + 1
-            }
-        ))
+        compute_scrollbar(
+            scroll,
+            content_height,
+            self.height as i32,
+        )
     }
+}
+
+pub fn compute_scrollbar(
+    scroll: i32, // 0 for no scroll, positive if scrolled
+    content_height: i32, // number of lines of the content
+    available_height: i32, // for an area it's usually its height
+) -> Option<(u16, u16)> {
+    let h = available_height;
+    if content_height <= h {
+        return None;
+    }
+    let sc = div_ceil(scroll * h, content_height);
+    let hidden_tail = content_height - scroll - h;
+    let se = div_ceil(hidden_tail * h, content_height);
+    Some((
+        sc as u16,
+        if h > sc + se {
+            (h - se) as u16
+        } else {
+            sc as u16 + 1
+        }
+    ))
+
 }
 
 /// Return a (width, height) with the dimensions of the available

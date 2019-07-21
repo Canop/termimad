@@ -1,3 +1,7 @@
+<a name="v0.5.1"></a>
+### v0.5.1 - 2019-07-21
+- a few utilies exported for apps with specific usages (compute_scrollbar, spacing.print_str, etc.)
+
 <a name="v0.5.0"></a>
 ### v0.5.0 - 2019-07-09
 - different styles for inline_code and code_block

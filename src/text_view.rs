@@ -107,7 +107,6 @@ impl<'a, 't> TextView<'a, 't> {
         self.scroll = (self.scroll + lines_count)
             .min(self.content_height() - (self.area.height as i32) + 1)
             .max(0);
-
     }
     /// set the scroll amount.
     /// pages_count can be negative

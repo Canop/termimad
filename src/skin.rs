@@ -9,11 +9,12 @@ use crate::compound_style::CompoundStyle;
 use crate::styled_char::StyledChar;
 use crate::line_style::LineStyle;
 use crate::scrollbar_style::ScrollBarStyle;
+use crate::text_view::TextView;
 use crate::tbl::*;
 
 use crossterm::{self, Attribute, Color};
 use minimad::{Alignment, Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
-use std::{self, fmt};
+use std::{self, fmt, io};
 
 /// A skin defining how a parsed mardkown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
@@ -178,6 +179,13 @@ impl MadSkin {
     /// Code blocs will be right justified
     pub fn area_text<'k, 's>(&'k self, src: &'s str, area: &Area) -> FmtText<'k, 's> {
         FmtText::from(self, src, Some(area.width as usize))
+    }
+
+    pub fn write_in_area(&self, markdown: &str, area: &Area) -> io::Result<()> {
+        let text = self.area_text(markdown, area);
+        let mut view = TextView::from(&area, &text);
+        view.show_scrollbar = false;
+        view.write()
     }
 
     pub fn print_inline(&self, src: &str) {

@@ -109,21 +109,21 @@ mod wrap;
 mod mad_view;
 mod displayable_line;
 
-pub use area::Area;
-pub use skin::MadSkin;
+pub use area::{Area, compute_scrollbar, terminal_size};
+pub use color::{gray, ansi, rgb};
 pub use composite::FmtComposite;
-pub use line::FmtLine;
+pub use compound_style::CompoundStyle;
 pub use inline::FmtInline;
+pub use line::FmtLine;
+pub use line_style::LineStyle;
+pub use mad_view::MadView;
+pub use minimad::Alignment;
+pub use scrollbar_style::ScrollBarStyle;
+pub use skin::MadSkin;
+pub use styled_char::StyledChar;
+pub use spacing::Spacing;
 pub use text::FmtText;
 pub use text_view::TextView;
-pub use mad_view::MadView;
-pub use compound_style::CompoundStyle;
-pub use line_style::LineStyle;
-pub use scrollbar_style::ScrollBarStyle;
-pub use minimad::Alignment;
-pub use area::terminal_size;
-pub use styled_char::StyledChar;
-pub use color::{gray, ansi, rgb};
 
 /// Return a reference to the global skin (modifiable).
 ///
