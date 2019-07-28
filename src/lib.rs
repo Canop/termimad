@@ -94,9 +94,11 @@ mod area;
 mod code;
 mod color;
 mod composite;
-mod line;
-mod inline;
 mod compound_style;
+mod displayable_line;
+mod events;
+mod inline;
+mod line;
 mod line_style;
 mod scrollbar_style;
 mod styled_char;
@@ -104,26 +106,24 @@ mod skin;
 mod spacing;
 mod tbl;
 mod text;
-mod text_view;
+mod views;
 mod wrap;
-mod mad_view;
-mod displayable_line;
 
 pub use area::{Area, compute_scrollbar, terminal_size};
 pub use color::{gray, ansi, rgb};
 pub use composite::FmtComposite;
 pub use compound_style::CompoundStyle;
+pub use events::{Event, EventSource};
 pub use inline::FmtInline;
 pub use line::FmtLine;
 pub use line_style::LineStyle;
-pub use mad_view::MadView;
 pub use minimad::Alignment;
 pub use scrollbar_style::ScrollBarStyle;
 pub use skin::MadSkin;
 pub use styled_char::StyledChar;
 pub use spacing::Spacing;
 pub use text::FmtText;
-pub use text_view::TextView;
+pub use views::{InputField, ListView, ListViewCell, ListViewColumn, MadView, TextView};
 
 /// Return a reference to the global skin (modifiable).
 ///

@@ -19,7 +19,9 @@ Based on [crossterm](https://github.com/TimonPost/crossterm) so works on most te
 
 ![text](doc/text.png)
 
-Note that the goal isn't to display any markdown text with its various extensions (a terminal isn't really fit for that). The goal is rather to improve the display of texts in a terminal application when we want both the text and the skin to be easily configured.
+The goal isn't to display any markdown text with its various extensions (a terminal isn't really fit for that). The goal is rather to improve the display of texts in a terminal application when we want both the text and the skin to be easily configured.
+
+Termimad also includes a few utilities helping efficient managing of events and user input in a multithread application.
 
 **Wrapping**, table balancing, and **scrolling** are essential features of Termimad.
 

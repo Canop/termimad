@@ -9,7 +9,7 @@ use crate::compound_style::CompoundStyle;
 use crate::styled_char::StyledChar;
 use crate::line_style::LineStyle;
 use crate::scrollbar_style::ScrollBarStyle;
-use crate::text_view::TextView;
+use crate::views::TextView;
 use crate::tbl::*;
 
 use crossterm::{self, Attribute, Color};

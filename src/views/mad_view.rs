@@ -1,7 +1,7 @@
 use std::io;
 
 use crate::area::Area;
-use crate::text_view::TextView;
+use crate::views::TextView;
 use crate::skin::MadSkin;
 
 /// A MadView is like a textview but it owns everything, from the

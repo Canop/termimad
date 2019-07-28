@@ -1,3 +1,10 @@
+<a name="v0.6.0"></a>
+### v0.6.0 - 2019-07-28
+Some tools that were parts of several Termimad based applications are now shared here:
+- an event source emmiting events on a crossbeam channel
+- an input field
+- a list view with auto-resized columns
+
 <a name="v0.5.1"></a>
 ### v0.5.1 - 2019-07-21
 - a few utilies exported for apps with specific usages (compute_scrollbar, spacing.print_str, etc.)
