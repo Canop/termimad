@@ -1,3 +1,7 @@
+<a name="v0.6.1"></a>
+### v0.6.1 - 2019-07-29
+- add modifiable style for the input_field
+
 <a name="v0.6.0"></a>
 ### v0.6.0 - 2019-07-28
 Some tools that were parts of several Termimad based applications are now shared here:

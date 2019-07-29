@@ -14,21 +14,33 @@ pub struct InputField {
     content: Vec<char>,
     pub area: Area,
     cursor_pos: usize, // position in chars
+    normal_style: CompoundStyle,
+    cursor_style: CompoundStyle,
 }
 
 impl InputField {
     pub fn new(area: Area) -> Self {
         debug_assert!(area.height==1, "input area must be of height 1");
+        let normal_style = CompoundStyle::default();
+        let mut cursor_style = normal_style.clone();
+        cursor_style.add_attr(Attribute::Reverse);
         Self {
             content: Vec::new(),
             area,
             cursor_pos: 0,
+            normal_style,
+            cursor_style,
         }
     }
     pub fn change_area(&mut self, x: u16, y: u16, w: u16) {
         self.area.left = x;
         self.area.top = y;
         self.area.width = w;
+    }
+    pub fn set_normal_style(&mut self, style: CompoundStyle) {
+        self.normal_style = style;
+        self.cursor_style = self.normal_style.clone();
+        self.cursor_style.add_attr(Attribute::Reverse);
     }
     pub fn get_content(&self) -> String {
         self.content.iter().collect()
@@ -117,17 +129,16 @@ impl InputField {
     pub fn display(&self) {
         let cursor = TerminalCursor::new();
         cursor.goto(self.area.left, self.area.top).unwrap();
-        let cursor_style = CompoundStyle::with_attr(Attribute::Reverse);
         for (i, c) in self.content.iter().enumerate() {
             if self.cursor_pos == i {
-                print!("{}", cursor_style.apply_to(c));
+                print!("{}", self.cursor_style.apply_to(c));
             } else {
-                print!("{}", c);
+                print!("{}", self.normal_style.apply_to(c));
             }
         }
         let mut e = self.content.len();
         if e == self.cursor_pos {
-            print!("{}", cursor_style.apply_to(' '));
+            print!("{}", self.cursor_style.apply_to(' '));
             e += 1;
         }
         for _ in e..self.area.width as usize {
