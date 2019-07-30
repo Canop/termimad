@@ -19,13 +19,13 @@ use termimad::*;
 use std::{
     collections::HashSet,
     fs,
-    io,
     os::unix::fs::MetadataExt, // TODO windows compatibility...
     path::{Path, PathBuf},
+    sync::{atomic::{AtomicU64, Ordering}, Arc},
     thread,
 };
 use crossbeam:: {
-    channel::{Sender, Receiver, unbounded},
+    channel::{Receiver, unbounded},
 };
 
 struct FileInfo {
@@ -81,8 +81,14 @@ pub fn u64_to_str(mut v: u64) -> String {
 }
 
 fn compute_children(root: &Path) -> Receiver<FileInfo> {
+    lazy_static! {
+        static ref PROC: PathBuf = Path::new("/proc").to_path_buf();
+    }
     let (tx_comp, rx_comp) = unbounded();
     for entry in root.read_dir().expect("read_dir call failed").flatten() {
+        if entry.path() == *PROC {
+            continue; // size of this dir doesn't mean anything useful, let's just forget it
+        }
         if let Ok(md) = entry.metadata() {
             if md.is_file() {
                 tx_comp.send(FileInfo {
@@ -109,6 +115,7 @@ fn make_skin() -> MadSkin {
     skin.headers[0].compound_style = CompoundStyle::with_attr(Attribute::Bold);
     skin.headers[0].align = Alignment::Left;
     skin.italic.set_fg(ansi(225));
+    skin.bold = CompoundStyle::with_fg(Blue);
     skin
 }
 
@@ -117,15 +124,18 @@ struct Screen<'t> {
     pub list_view: ListView<'t, FileInfo>,
     skin: &'t MadSkin,
     dimensions: (u16, u16),
+    total_size: Arc<AtomicU64>,
 }
 impl<'t> Screen<'t> {
     pub fn new() -> Self {
         lazy_static! {
             static ref SKIN: MadSkin = make_skin();
         }
+        let total_size = Arc::new(AtomicU64::new(0));
+        let column_total_size = Arc::clone(&total_size);
         let columns = vec![
             ListViewColumn::new(
-                "path",
+                "name",
                 10, 50,
                 Box::new(|fi: &FileInfo| ListViewCell::new(
                     fi.path.file_name().unwrap().to_string_lossy().to_string(),
@@ -142,21 +152,49 @@ impl<'t> Screen<'t> {
             ).with_align(Alignment::Right),
             ListViewColumn::new(
                 "size",
-                10, 12,
+                6, 8,
                 Box::new(|fi: &FileInfo| ListViewCell::new(
                     u64_to_str(fi.size),
                     &SKIN.paragraph.compound_style,
                 )),
             ).with_align(Alignment::Right),
+            ListViewColumn::new(
+                "size",
+                15, 17,
+                Box::new(move |fi: &FileInfo| {
+                    let total_size = column_total_size.load(Ordering::Relaxed);
+                    ListViewCell::new(
+                        if total_size > 0 {
+                            let part = (fi.size as f64) / (total_size as f64);
+                            let mut s = format!("{:>3.0}% ", 100.0 * part);
+                            for i in 0..10 {
+                                s.push(if (i as f64) < (10.0 * part) - 0.5 { '█' } else { ' ' });
+                            }
+                            s
+                        } else {
+                            "".to_owned()
+                        },
+                        if fi.is_dir { &SKIN.bold } else { &SKIN.paragraph.compound_style },
+                    )
+                }),
+            ).with_align(Alignment::Left),
         ];
         let area = Area::new(0, 1, 10, 10);
-        let list_view = ListView::new(area, columns, &SKIN);
+        let mut list_view = ListView::new(area, columns, &SKIN);
+        list_view.sort(Box::new(|a, b| b.size.cmp(&a.size)));
         Self {
             title: "Welcome".to_owned(),
             skin: &SKIN,
             list_view,
             dimensions: (0, 0),
+            total_size,
         }
+    }
+    pub fn add_to_total_size(&mut self, to_add: u64) {
+        self.total_size.fetch_add(to_add, Ordering::Relaxed);
+    }
+    pub fn set_total_size(&mut self, total_size: u64) {
+        self.total_size.store(total_size, Ordering::Relaxed);
     }
     pub fn display(&mut self) {
         let (w, h) = terminal_size();
@@ -180,12 +218,13 @@ impl<'t> Screen<'t> {
 }
 
 fn main() {
-    let root = Path::new("/");
     let _alt_screen = AlternateScreen::to_alternate(true);
     let cursor = TerminalCursor::new();
     cursor.hide().unwrap();
     let mut screen = Screen::new();
-    screen.title = format!("# {}", root.as_os_str().to_string_lossy());
+
+    let root = Path::new("/");
+    screen.title = format!("# **{}** *computing...*", root.as_os_str().to_string_lossy());
 
     let event_source = EventSource::new();
     let rx_user = event_source.receiver();
@@ -197,11 +236,12 @@ fn main() {
         select! {
             recv(rx_comp) -> comp => {
                 if let Ok(fi) = comp {
+                    screen.add_to_total_size(fi.size);
                     screen.list_view.add_row(fi);
                 } else {
                     //break;
                     // This happens on computation end (channel closed).
-                    // We don't break because we let the user read the result.
+                    screen.title = format!("# **{}**", root.as_os_str().to_string_lossy());
                 }
             }
             recv(rx_user) -> user_event => {

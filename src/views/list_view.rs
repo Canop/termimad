@@ -1,5 +1,6 @@
 
 use std::io;
+use std::cmp::Ordering;
 use crossterm::{
     ClearType,
     Terminal,
@@ -32,10 +33,9 @@ pub struct ListViewColumn<'t, T> {
     extract: Box<dyn Fn(&T) -> ListViewCell<'t>>, // a function building cells from the rows
 }
 
-struct Row<'t, T> {
+struct Row<T> {
     data: T,
     displayed: bool,
-    cells: Vec<ListViewCell<'t>>,
 }
 
 /// A filterable list whose columns can be automatically resized.
@@ -49,12 +49,13 @@ struct Row<'t, T> {
 pub struct ListView<'t, T> {
     titles: Vec<Title>,
     columns: Vec<ListViewColumn<'t, T>>,
-    rows: Vec<Row<'t, T>>,
+    rows: Vec<Row<T>>,
     pub area: Area,
     pub scroll: i32, // 0 for no scroll, positive if scrolled
     pub skin: &'t MadSkin,
     filter: Option<Box<dyn Fn(&T) -> bool>>, // a function determining if the row must be displayed
     displayed_rows_count: usize,
+    row_order: Option<Box<dyn Fn(&T, &T) -> Ordering>>,
 }
 
 impl<'t> ListViewCell<'t> {
@@ -101,7 +102,6 @@ impl<'t, T> ListView<'t, T> {
     /// The columns can't be changed afterwards but the area can be modified.
     /// When two columns have the same title, those titles are merged (but
     /// the columns below stay separated).
-    ///
     pub fn new(area: Area, columns: Vec<ListViewColumn<'t, T>>, skin: &'t MadSkin) -> Self {
         let mut titles: Vec<Title> = Vec::new();
         for (column_idx, column) in columns.iter().enumerate() {
@@ -126,7 +126,12 @@ impl<'t, T> ListView<'t, T> {
             skin,
             filter: None,
             displayed_rows_count: 0,
+            row_order: None,
         }
+    }
+    /// set a comparator for row sorting
+    pub fn sort(&mut self, sort: Box<dyn Fn(&T, &T) -> Ordering>) {
+        self.row_order = Some(sort);
     }
     /// return the height which is available for rows
     pub fn tbody_height(&self) -> i32 {
@@ -145,9 +150,6 @@ impl<'t, T> ListView<'t, T> {
         )
     }
     pub fn add_row(&mut self, data: T) {
-        let cells = self.columns.iter()
-            .map(|column| (column.extract)(&data))
-            .collect();
         let iab = self.do_scroll_show_bottom();
         let displayed = match &self.filter {
             Some(fun) => fun(&data),
@@ -162,8 +164,10 @@ impl<'t, T> ListView<'t, T> {
         self.rows.push(Row {
             data,
             displayed,
-            cells,
         });
+        if let Some(row_order) = &self.row_order {
+            self.rows.sort_by(|a, b| row_order(&a.data, &b.data));
+        }
     }
     /// return both the number of displayed rows and the total number
     pub fn row_counts(&self) -> (usize, usize) {
@@ -263,12 +267,12 @@ impl<'t, T> ListView<'t, T> {
                     break;
                 }
                 if self.rows[row_idx].displayed {
-                    let cells = &self.rows[row_idx].cells;
                     for (col_idx, col) in self.columns.iter().enumerate() {
                         if col_idx != 0 {
                             print!("{}", vbar);
                         }
-                        col.print_cell(&cells[col_idx]);
+                        let cell = (col.extract)(&self.rows[row_idx].data);
+                        col.print_cell(&cell);
                     }
                     row_idx +=1;
                     break;
