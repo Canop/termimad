@@ -1,5 +1,5 @@
 use std::fmt;
-use crossterm::{self, Attribute, Color};
+use crossterm_style::{Attribute, Color};
 use minimad::Alignment;
 
 use crate::compound_style::CompoundStyle;

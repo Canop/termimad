@@ -1,6 +1,6 @@
 
 use std::fmt::{self, Display};
-use crossterm::{self, Color, StyledObject};
+use crossterm_style::{Color, StyledObject};
 
 use crate::compound_style::CompoundStyle;
 

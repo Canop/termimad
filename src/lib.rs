@@ -14,7 +14,7 @@ to your tastes or (better) to your application's configuration.
 
 
 ```rust
-use crossterm::{Color::*, Attribute::*};
+use crossterm_style::{Color::*, Attribute::*};
 use termimad::*;
 
 // start with the default skin
@@ -34,7 +34,7 @@ terminals. It's recommended to stick to [Ansi colors](fn.ansi.html), [gray level
 
 
 ```
-use crossterm::TerminalCursor;
+use crossterm_cursor::TerminalCursor;
 # use termimad::*;
 # let skin = MadSkin::default();
 

@@ -1,4 +1,4 @@
-use crossterm::{self, Color};
+use crossterm_style::Color;
 
 /// Build a RGB color
 ///

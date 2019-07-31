@@ -1,4 +1,5 @@
-use crossterm::{Color::*, Terminal, ClearType};
+use crossterm_style::Color::*;
+use crossterm_terminal::{Terminal, ClearType};
 use termimad::*;
 
 static MD: &str = r#"

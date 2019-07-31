@@ -1,4 +1,4 @@
-use crossterm::{Color::*};
+use crossterm_style::Color::*;
 use termimad::*;
 
 static MD_TABLE: &str = r#"

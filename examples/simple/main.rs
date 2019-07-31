@@ -1,4 +1,4 @@
-use crossterm::{Attribute::*, Color::*};
+use crossterm_style::{Attribute::*, Color::*};
 use termimad::*;
 
 fn show(skin: &MadSkin, src: &str) {

@@ -1,16 +1,16 @@
 
 use std::io;
 use std::cmp::Ordering;
-use crossterm::{
-    ClearType,
-    Terminal,
-    TerminalCursor,
-};
+use crossterm_terminal::{ClearType, Terminal};
+use crossterm_style::{Color, Colored};
+use crossterm_cursor::TerminalCursor;
+
 use crate::{
-    compute_scrollbar,
+    Alignment,
     Area,
     CompoundStyle,
-    Alignment,
+    compute_scrollbar,
+    gray,
     MadSkin,
     Spacing,
 };
@@ -51,11 +51,13 @@ pub struct ListView<'t, T> {
     columns: Vec<ListViewColumn<'t, T>>,
     rows: Vec<Row<T>>,
     pub area: Area,
-    pub scroll: i32, // 0 for no scroll, positive if scrolled
+    scroll: i32, // 0 for no scroll, positive if scrolled
     pub skin: &'t MadSkin,
     filter: Option<Box<dyn Fn(&T) -> bool>>, // a function determining if the row must be displayed
     displayed_rows_count: usize,
     row_order: Option<Box<dyn Fn(&T, &T) -> Ordering>>,
+    selection: Option<usize>, // index of the selected line
+    selection_background: Color,
 }
 
 impl<'t> ListViewCell<'t> {
@@ -91,9 +93,16 @@ impl<'t, T> ListViewColumn<'t, T> {
         self.spacing.align = align;
         self
     }
-    pub fn print_cell(&self, cell: &ListViewCell<'_>) {
-        self.spacing.print_counted_str(&cell.con, cell.width, &cell.style);
-    }
+    //pub fn print_cell(&self, cell: &ListViewCell<'_>, selected: bool) {
+    //    let style = if selected {
+    //        let style = cell.style.clone();
+    //        style.set_bg(self.selection_background);
+    //        style
+    //    } else {
+    //        &cell.style
+    //    };
+    //    self.spacing.print_counted_str(&cell.con, cell.width, style);
+    //}
 }
 
 impl<'t, T> ListView<'t, T> {
@@ -127,6 +136,8 @@ impl<'t, T> ListView<'t, T> {
             filter: None,
             displayed_rows_count: 0,
             row_order: None,
+            selection: None,
+            selection_background: gray(5),
         }
     }
     /// set a comparator for row sorting
@@ -267,12 +278,23 @@ impl<'t, T> ListView<'t, T> {
                     break;
                 }
                 if self.rows[row_idx].displayed {
+                    let selected = Some(row_idx) == self.selection;
                     for (col_idx, col) in self.columns.iter().enumerate() {
                         if col_idx != 0 {
-                            print!("{}", vbar);
+                            if selected {
+                                print!("{}{}", Colored::Bg(self.selection_background), vbar);
+                            } else {
+                                print!("{}", vbar);
+                            }
                         }
                         let cell = (col.extract)(&self.rows[row_idx].data);
-                        col.print_cell(&cell);
+                        if selected {
+                            let mut style = cell.style.clone();
+                            style.set_bg(self.selection_background);
+                            col.spacing.print_counted_str(&cell.con, cell.width, &style);
+                        } else {
+                            col.spacing.print_counted_str(&cell.con, cell.width, cell.style);
+                        }
                     }
                     row_idx +=1;
                     break;
@@ -311,5 +333,35 @@ impl<'t, T> ListView<'t, T> {
     pub fn try_scroll_pages(&mut self, pages_count: i32) {
         self.try_scroll_lines(pages_count * self.tbody_height())
     }
-
+    /// try to select the next visible line
+    pub fn try_select_next(&mut self, up: bool) {
+        if self.displayed_rows_count == 0 {
+            return;
+        }
+        if self.displayed_rows_count == 1 || self.selection.is_none() {
+            for i in 0..self.rows.len() {
+                if self.rows[i].displayed {
+                    self.selection = Some(i);
+                    return;
+                }
+            }
+        }
+        for i in 0..self.rows.len() {
+            let delta_idx = if up { self.rows.len() - 1 - i } else { i + 1 };
+            let row_idx = (delta_idx + self.selection.unwrap()) % self.rows.len();
+            if self.rows[row_idx].displayed {
+                self.selection = Some(row_idx);
+                return;
+            }
+        }
+    }
+    pub fn get_selection(&self) -> Option<&T> {
+        self.selection.map(|sel| &self.rows[sel].data)
+    }
+    pub fn has_selection(&self) -> bool {
+        self.selection.is_some()
+    }
+    pub fn unselect(&mut self) {
+        self.selection = None;
+    }
 }

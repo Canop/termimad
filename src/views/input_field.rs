@@ -1,8 +1,7 @@
-use crossterm::{
-    Attribute,
-    KeyEvent,
-    TerminalCursor,
-};
+use crossterm_style::Attribute;
+use crossterm_cursor::TerminalCursor;
+use crossterm_input::KeyEvent;
+
 use crate::{
     Area,
     CompoundStyle,

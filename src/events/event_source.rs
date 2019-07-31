@@ -5,7 +5,7 @@ use std::sync::{
     atomic::{AtomicUsize, Ordering},
 };
 use crossbeam::channel::{Sender, Receiver, unbounded};
-use crossterm::TerminalInput;
+use crossterm_input::TerminalInput;
 
 use crate::events::Event;
 

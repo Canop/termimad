@@ -1,3 +1,7 @@
+<a name="v0.6.2"></a>
+### v0.6.2 - 2019-07-31
+- fix build inconsistencies due to lack of precise sub crate versionning in crossterm
+
 <a name="v0.6.1"></a>
 ### v0.6.1 - 2019-07-29
 - add modifiable style for the input_field

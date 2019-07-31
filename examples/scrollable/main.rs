@@ -1,4 +1,7 @@
-use crossterm::{AlternateScreen, TerminalCursor, TerminalInput, KeyEvent::*, InputEvent::*, Color::*};
+use crossterm_screen::AlternateScreen;
+use crossterm_cursor::TerminalCursor;
+use crossterm_input::{TerminalInput, KeyEvent::*, InputEvent::*};
+use crossterm_style::Color::*;
 use termimad::*;
 use std::io;
 

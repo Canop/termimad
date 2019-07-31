@@ -12,7 +12,7 @@ use crate::scrollbar_style::ScrollBarStyle;
 use crate::views::TextView;
 use crate::tbl::*;
 
-use crossterm::{self, Attribute, Color};
+use crossterm_style::{Attribute, Color};
 use minimad::{Alignment, Compound, Composite, CompositeStyle, Line, MAX_HEADER_DEPTH};
 use std::{self, fmt, io};
 
