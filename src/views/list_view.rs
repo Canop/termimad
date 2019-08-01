@@ -93,16 +93,6 @@ impl<'t, T> ListViewColumn<'t, T> {
         self.spacing.align = align;
         self
     }
-    //pub fn print_cell(&self, cell: &ListViewCell<'_>, selected: bool) {
-    //    let style = if selected {
-    //        let style = cell.style.clone();
-    //        style.set_bg(self.selection_background);
-    //        style
-    //    } else {
-    //        &cell.style
-    //    };
-    //    self.spacing.print_counted_str(&cell.con, cell.width, style);
-    //}
 }
 
 impl<'t, T> ListView<'t, T> {
@@ -161,7 +151,9 @@ impl<'t, T> ListView<'t, T> {
         )
     }
     pub fn add_row(&mut self, data: T) {
-        let iab = self.do_scroll_show_bottom();
+        let stick_to_bottom =
+            self.row_order.is_none() &&
+            self.do_scroll_show_bottom();
         let displayed = match &self.filter {
             Some(fun) => fun(&data),
             None => true,
@@ -169,8 +161,8 @@ impl<'t, T> ListView<'t, T> {
         if displayed {
             self.displayed_rows_count += 1;
         }
-        if iab && self.displayed_rows_count as i32 > self.tbody_height() {
-            self.scroll += 1;
+        if stick_to_bottom {
+            self.scroll_to_bottom();
         }
         self.rows.push(Row {
             data,
@@ -179,6 +171,15 @@ impl<'t, T> ListView<'t, T> {
         if let Some(row_order) = &self.row_order {
             self.rows.sort_by(|a, b| row_order(&a.data, &b.data));
         }
+    }
+    /// remove all rows (and selection).
+    ///
+    /// Keep the columns and the sort function, if any.
+    pub fn clear_rows(&mut self) {
+        self.rows.clear();
+        self.scroll = 0;
+        self.displayed_rows_count = 0;
+        self.selection = None;
     }
     /// return both the number of displayed rows and the total number
     pub fn row_counts(&self) -> (usize, usize) {
@@ -226,6 +227,7 @@ impl<'t, T> ListView<'t, T> {
         self.displayed_rows_count = self.rows.len();
         self.filter = None;
     }
+    /// display the whole list in its area
     pub fn display(&self) -> io::Result<()> {
         let terminal = Terminal::new();
         let cursor = TerminalCursor::new();
@@ -340,6 +342,7 @@ impl<'t, T> ListView<'t, T> {
         }
         if self.displayed_rows_count == 1 || self.selection.is_none() {
             for i in 0..self.rows.len() {
+                let i = (i + self.scroll as usize) % self.rows.len();
                 if self.rows[i].displayed {
                     self.selection = Some(i);
                     return;
