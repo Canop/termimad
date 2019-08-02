@@ -123,7 +123,7 @@ pub use skin::MadSkin;
 pub use styled_char::StyledChar;
 pub use spacing::Spacing;
 pub use text::FmtText;
-pub use views::{InputField, ListView, ListViewCell, ListViewColumn, MadView, TextView};
+pub use views::{InputField, ListView, ListViewCell, ListViewColumn, MadView, ProgressBar, TextView};
 
 /// Return a reference to the global skin (modifiable).
 ///

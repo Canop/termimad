@@ -1,3 +1,11 @@
+<a name="v0.6.4"></a>
+### v0.6.4 - 2019-08-02
+- add ProgressBar
+
+<a name="v0.6.3"></a>
+### v0.6.3 - 2019-08-01
+- improvements of ListView
+
 <a name="v0.6.2"></a>
 ### v0.6.2 - 2019-07-31
 - fix build inconsistencies due to lack of precise sub crate versionning in crossterm
