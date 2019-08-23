@@ -19,7 +19,7 @@ impl From<ObjectStyle> for CompoundStyle {
 impl CompoundStyle {
 
     /// Apply an `StyledObject` to the passed displayable object.
-    pub fn apply_to<D: Display>(&self, val: D) -> StyledObject<D> {
+    pub fn apply_to<D: Display + Clone>(&self, val: D) -> StyledObject<D> {
         self.object_style.apply_to(val)
     }
 
