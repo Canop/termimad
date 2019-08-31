@@ -135,6 +135,7 @@ impl<'t, T> ListView<'t, T> {
         self.row_order = Some(sort);
     }
     /// return the height which is available for rows
+    #[inline(always)]
     pub fn tbody_height(&self) -> i32 {
         self.area.height as i32 - 2
     }
@@ -329,6 +330,7 @@ impl<'t, T> ListView<'t, T> {
         self.scroll = (self.scroll + lines_count)
             .min(self.displayed_rows_count as i32 - self.tbody_height() + 1)
             .max(0);
+        self.make_selection_visible();
     }
     /// set the scroll amount.
     /// pages_count can be negative
@@ -345,6 +347,7 @@ impl<'t, T> ListView<'t, T> {
                 let i = (i + self.scroll as usize) % self.rows.len();
                 if self.rows[i].displayed {
                     self.selection = Some(i);
+                    self.make_selection_visible();
                     return;
                 }
             }
@@ -354,7 +357,47 @@ impl<'t, T> ListView<'t, T> {
             let row_idx = (delta_idx + self.selection.unwrap()) % self.rows.len();
             if self.rows[row_idx].displayed {
                 self.selection = Some(row_idx);
+                self.make_selection_visible();
                 return;
+            }
+        }
+    }
+    /// select the first visible line (unless there's nothing).
+    pub fn select_first_line(&mut self) {
+        for i in 0..self.rows.len() {
+            if self.rows[i].displayed {
+                self.selection = Some(i);
+                self.make_selection_visible();
+                return;
+            }
+        }
+        self.selection = None;
+    }
+    /// select the last visible line (unless there's nothing).
+    pub fn select_last_line(&mut self) {
+        for i in (0..self.rows.len()).rev() {
+            if self.rows[i].displayed {
+                self.selection = Some(i);
+                self.make_selection_visible();
+                return;
+            }
+        }
+        self.selection = None;
+    }
+    /// scroll to ensure the selected line (if any) is visible.
+    ///
+    /// This is automatically called by try_scroll
+    ///  and try select functions
+    pub fn make_selection_visible(&mut self) {
+        if self.displayed_rows_count as i32 <= self.tbody_height() {
+            return; // there's no scroll
+        }
+        if let Some(selection) = self.selection {
+            let sel = selection as i32;
+            if sel <= self.scroll {
+                self.scroll = (sel-2).max(0);
+            } else if sel >= self.scroll + self.tbody_height() - 1 {
+                self.scroll = (sel - self.tbody_height() + 2) as i32;
             }
         }
     }

@@ -1,3 +1,8 @@
+<a name="v0.6.5"></a>
+### v0.6.5 - 2019-08-31
+- list view: autoscroll on selection change
+- list view: select_first_line & select_last_line
+
 <a name="v0.6.4"></a>
 ### v0.6.4 - 2019-08-02
 - add ProgressBar
