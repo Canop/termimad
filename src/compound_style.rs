@@ -1,5 +1,5 @@
 use std::fmt::{self, Display};
-use crossterm_style::{Attribute, Color, ObjectStyle, StyledObject};
+use crossterm::{Attribute, Color, ObjectStyle, StyledObject};
 
 
 /// A style which may be applied to a compound

@@ -1,4 +1,4 @@
-use crossterm_terminal::Terminal;
+use crossterm::Terminal;
 
 pub trait AreaContent {
     fn height() -> u16;

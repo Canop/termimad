@@ -1,6 +1,6 @@
 use std::io;
-use crossterm_cursor::TerminalCursor;
-use crossterm_terminal::{Terminal, ClearType};
+use crossterm::TerminalCursor;
+use crossterm::{Terminal, ClearType};
 
 use crate::area::Area;
 use crate::displayable_line::DisplayableLine;

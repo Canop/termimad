@@ -1,6 +1,6 @@
-use crossterm_style::Attribute;
-use crossterm_cursor::TerminalCursor;
-use crossterm_input::KeyEvent;
+use crossterm::Attribute;
+use crossterm::TerminalCursor;
+use crossterm::KeyEvent;
 
 use crate::{
     Area,
