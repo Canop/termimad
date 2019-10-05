@@ -4,6 +4,9 @@ pub trait AreaContent {
     fn height() -> u16;
 }
 
+/// A default width which is used when we failed measuring the real terminal width
+const DEFAULT_TERMINAL_WIDTH: u16 = 80;
+
 /// A rectangular part of the screen
 #[derive(Debug, PartialEq, Eq)]
 pub struct Area {
@@ -113,9 +116,21 @@ pub fn compute_scrollbar(
 
 /// Return a (width, height) with the dimensions of the available
 /// terminal in characters.
-pub fn terminal_size() -> (u16, u16) {
+///
+pub fn measured_terminal_size() -> (u16, u16) {
     let (w, h) = Terminal::new().terminal_size();
     // there's a bug in crossterm 0.9.6. It reports a size smaller by
     //  one in both directions
     (w + 1, h + 1)
+}
+
+/// Return a (width, height) with the dimensions of the available
+/// terminal in characters.
+///
+/// If we failed to measure the width, we replace it with
+///  DEFAULT_TERMINAL_WIDTH.
+pub fn terminal_size() -> (u16, u16) {
+    let (w, h) = measured_terminal_size();
+    let w = if w <= 2 { DEFAULT_TERMINAL_WIDTH } else { w };
+    (w, h)
 }

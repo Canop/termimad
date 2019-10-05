@@ -1,3 +1,7 @@
+<a name="v0.6.6"></a>
+### v0.6.6 - 2019-10-05
+- provide a default terminal width when the real one can't be measured
+
 <a name="v0.6.5"></a>
 ### v0.6.5 - 2019-08-31
 - list view: autoscroll on selection change
