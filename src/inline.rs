@@ -16,6 +16,7 @@ pub struct FmtInline<'k, 's> {
 
 impl fmt::Display for FmtInline<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.skin.write_fmt_composite(f, &self.composite, None, false)
+        self.skin
+            .write_fmt_composite(f, &self.composite, None, false)
     }
 }

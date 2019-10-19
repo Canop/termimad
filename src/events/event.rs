@@ -1,5 +1,4 @@
-
-use crossterm_input::{InputEvent, KeyEvent, MouseEvent, MouseButton};
+use crossterm::{InputEvent, KeyEvent, MouseButton, MouseEvent};
 
 /// a valid user event
 #[derive(Debug, Clone)]
@@ -15,10 +14,13 @@ impl Event {
         match crossterm_event {
             Some(InputEvent::Keyboard(key)) => Some(Event::Key(key)),
             Some(InputEvent::Mouse(MouseEvent::Release(x, y))) => Some(Event::Click(x, y)),
-            Some(InputEvent::Mouse(MouseEvent::Press(MouseButton::WheelUp, _, _))) => Some(Event::Wheel(-1)),
-            Some(InputEvent::Mouse(MouseEvent::Press(MouseButton::WheelDown, _, _))) => Some(Event::Wheel(1)),
+            Some(InputEvent::Mouse(MouseEvent::Press(MouseButton::WheelUp, _, _))) => {
+                Some(Event::Wheel(-1))
+            }
+            Some(InputEvent::Mouse(MouseEvent::Press(MouseButton::WheelDown, _, _))) => {
+                Some(Event::Wheel(1))
+            }
             _ => None,
         }
     }
 }
-

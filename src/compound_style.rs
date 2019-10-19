@@ -1,6 +1,8 @@
 use std::fmt::{self, Display};
-use crossterm::{Attribute, Color, ObjectStyle, StyledObject};
 
+use crossterm::{queue, Attribute, Color, ObjectStyle, PrintStyledFont, StyledObject};
+
+use crate::errors::Result;
 
 /// A style which may be applied to a compound
 #[derive(Default, Clone)]
@@ -10,48 +12,60 @@ pub struct CompoundStyle {
 
 impl From<ObjectStyle> for CompoundStyle {
     fn from(object_style: ObjectStyle) -> CompoundStyle {
-        CompoundStyle {
-            object_style
-        }
+        CompoundStyle { object_style }
     }
 }
 
 impl CompoundStyle {
-
     /// Apply an `StyledObject` to the passed displayable object.
-    pub fn apply_to<D: Display>(&self, val: D) -> StyledObject<D> {
+    pub fn apply_to<D: Display>(&self, val: D) -> StyledObject<D>
+    where
+        D: Clone,
+    {
         self.object_style.apply_to(val)
     }
 
+    pub fn queue<W, D>(&self, w: &mut W, val: D) -> Result<()>
+    where
+        D: Clone + Display,
+        W: std::io::Write,
+    {
+        Ok(queue!(w, PrintStyledFont(self.apply_to(val)))?)
+    }
+
     /// Get an new instance of `CompoundStyle`
-    pub fn new(fg_color: Option<Color>, bg_color: Option<Color>, attrs: Vec<Attribute>) -> CompoundStyle {
+    pub fn new(
+        fg_color: Option<Color>,
+        bg_color: Option<Color>,
+        attrs: Vec<Attribute>,
+    ) -> CompoundStyle {
         CompoundStyle {
             object_style: ObjectStyle {
                 fg_color,
                 bg_color,
                 attrs,
-            }
+            },
         }
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_fgbg(fg: Color, bg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ObjectStyle::new().fg(fg).bg(bg)
+            object_style: ObjectStyle::new().fg(fg).bg(bg),
         }
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_fg(fg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ObjectStyle::new().fg(fg)
+            object_style: ObjectStyle::new().fg(fg),
         }
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_bg(bg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ObjectStyle::new().bg(bg)
+            object_style: ObjectStyle::new().bg(bg),
         }
     }
 
@@ -95,12 +109,7 @@ impl CompoundStyle {
     ///
     /// Implementation Note: performances here are critical
     #[inline(always)]
-    pub fn repeat_string(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-        s: &str,
-        count: usize,
-    ) -> fmt::Result {
+    pub fn repeat_string(&self, f: &mut fmt::Formatter<'_>, s: &str, count: usize) -> fmt::Result {
         if count > 0 {
             write!(f, "{}", self.apply_to(s.repeat(count)))
         } else {
@@ -110,12 +119,7 @@ impl CompoundStyle {
 
     /// Write 0 or more spaces with the line's compound style
     #[inline(always)]
-    pub fn repeat_space(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-        count: usize,
-    ) -> fmt::Result {
+    pub fn repeat_space(&self, f: &mut fmt::Formatter<'_>, count: usize) -> fmt::Result {
         self.repeat_string(f, " ", count)
     }
 }
-

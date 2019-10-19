@@ -1,10 +1,13 @@
 /*!
+Run with
+
+    cargo run --example progress
+
 Display the different steps of a pixel precise progress bar.
 
 Note: This example is just a draft that I'll complete later with animations, colors, etc.
 */
 use termimad::*;
-
 
 fn main() {
     let n = 40;

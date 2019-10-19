@@ -1,12 +1,8 @@
 use crossterm::Attribute;
-use crossterm::TerminalCursor;
 use crossterm::KeyEvent;
+use crossterm::TerminalCursor;
 
-use crate::{
-    Area,
-    CompoundStyle,
-    Event,
-};
+use crate::{Area, CompoundStyle, Event};
 
 /// A simple input field, managing its cursor position.
 pub struct InputField {
@@ -19,7 +15,7 @@ pub struct InputField {
 
 impl InputField {
     pub fn new(area: Area) -> Self {
-        debug_assert!(area.height==1, "input area must be of height 1");
+        debug_assert!(area.height == 1, "input area must be of height 1");
         let normal_style = CompoundStyle::default();
         let mut cursor_style = normal_style.clone();
         cursor_style.add_attr(Attribute::Reverse);
@@ -89,7 +85,7 @@ impl InputField {
     /// Return true when the event was used.
     pub fn apply_event(&mut self, event: &Event) -> bool {
         match event {
-            Event::Click(x, y) if *y == self.area.top+1 && *x > self.area.left => {
+            Event::Click(x, y) if *y == self.area.top + 1 && *x > self.area.left => {
                 let p = (x - 1 - self.area.left) as usize;
                 self.cursor_pos = p.min(self.content.len());
                 true
@@ -106,23 +102,17 @@ impl InputField {
                 self.put_char(*c);
                 true
             }
-            Event::Key(KeyEvent::Left) if self.cursor_pos>0 => {
+            Event::Key(KeyEvent::Left) if self.cursor_pos > 0 => {
                 self.cursor_pos -= 1;
                 true
             }
-            Event::Key(KeyEvent::Right) if self.cursor_pos<self.content.len() => {
+            Event::Key(KeyEvent::Right) if self.cursor_pos < self.content.len() => {
                 self.cursor_pos += 1;
                 true
             }
-            Event::Key(KeyEvent::Backspace) => {
-                self.del_char_left()
-            }
-            Event::Key(KeyEvent::Delete) => {
-                self.del_char_below()
-            }
-            _ => {
-                false
-            }
+            Event::Key(KeyEvent::Backspace) => self.del_char_left(),
+            Event::Key(KeyEvent::Delete) => self.del_char_below(),
+            _ => false,
         }
     }
     pub fn display(&self) {
@@ -145,4 +135,3 @@ impl InputField {
         }
     }
 }
-

@@ -1,3 +1,6 @@
+### Next Version
+- Displaying can be done on stderr or stdout, or in a subshell
+
 <a name="v0.6.5"></a>
 ### v0.6.5 - 2019-08-31
 - list view: autoscroll on selection change

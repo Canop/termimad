@@ -14,7 +14,7 @@ to your tastes or (better) to your application's configuration.
 
 
 ```rust
-use crossterm_style::{Color::*, Attribute::*};
+use crossterm::{Color::*, Attribute::*};
 use termimad::*;
 
 // start with the default skin
@@ -34,7 +34,7 @@ terminals. It's recommended to stick to [Ansi colors](fn.ansi.html), [gray level
 
 
 ```
-use crossterm_cursor::TerminalCursor;
+use crossterm::TerminalCursor;
 # use termimad::*;
 # let skin = MadSkin::default();
 
@@ -58,7 +58,7 @@ A multi-line markdown string can be printed the same way than an *inline* snippe
 # use termimad::*;
 # let skin = MadSkin::default();
 # let my_markdown = "#title\n* item 1\n* item 2";
-println!("{}", skin.term_text(my_markdown));
+eprintln!("{}", skin.term_text(my_markdown));
 ```
 
 `MadSkin` contains other functions to prepare a text for no specific size or for one which isn't the terminal's width.
@@ -86,7 +86,6 @@ The repository contains several other examples, which hopefully cover the whole 
 
 */
 
-
 #[macro_use]
 extern crate lazy_static;
 
@@ -96,23 +95,25 @@ mod color;
 mod composite;
 mod compound_style;
 mod displayable_line;
+mod errors;
 mod events;
 mod inline;
 mod line;
 mod line_style;
 mod scrollbar_style;
-mod styled_char;
 mod skin;
 mod spacing;
+mod styled_char;
 mod tbl;
 mod text;
 mod views;
 mod wrap;
 
-pub use area::{Area, compute_scrollbar, terminal_size};
-pub use color::{gray, ansi, rgb};
+pub use area::{compute_scrollbar, terminal_size, Area};
+pub use color::{ansi, gray, rgb};
 pub use composite::FmtComposite;
 pub use compound_style::CompoundStyle;
+pub use errors::{Error, Result};
 pub use events::{Event, EventSource};
 pub use inline::FmtInline;
 pub use line::FmtLine;
@@ -120,10 +121,12 @@ pub use line_style::LineStyle;
 pub use minimad::Alignment;
 pub use scrollbar_style::ScrollBarStyle;
 pub use skin::MadSkin;
-pub use styled_char::StyledChar;
 pub use spacing::Spacing;
+pub use styled_char::StyledChar;
 pub use text::FmtText;
-pub use views::{InputField, ListView, ListViewCell, ListViewColumn, MadView, ProgressBar, TextView};
+pub use views::{
+    InputField, ListView, ListViewCell, ListViewColumn, MadView, ProgressBar, TextView,
+};
 
 /// Return a reference to the global skin (modifiable).
 ///

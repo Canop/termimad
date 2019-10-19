@@ -1,8 +1,7 @@
 use std::fmt;
 
-use crate::skin::MadSkin;
 use crate::line::FmtLine;
-
+use crate::skin::MadSkin;
 
 /// A facility to write just a line of a text.
 ///
@@ -16,11 +15,7 @@ pub struct DisplayableLine<'s, 'l, 'p> {
 
 impl<'s, 'l, 'p> DisplayableLine<'s, 'l, 'p> {
     pub fn new(skin: &'s MadSkin, line: &'p FmtLine<'l>, width: Option<usize>) -> Self {
-        DisplayableLine {
-            skin,
-            line,
-            width,
-        }
+        DisplayableLine { skin, line, width }
     }
 }
 

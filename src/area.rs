@@ -1,4 +1,8 @@
 use crossterm::Terminal;
+use std::process;
+
+const DEFAULT_TERMINAL_WIDTH: u16 = 50;
+const DEFAULT_TERMINAL_HEIGHT: u16 = 20;
 
 pub trait AreaContent {
     fn height() -> u16;
@@ -18,20 +22,19 @@ fn div_ceil(a: i32, b: i32) -> i32 {
 }
 
 impl Area {
-
     /// Build a new area. You'll need to set the position and size
     /// before you can use it
     pub fn uninitialized() -> Area {
-        Area { left: 0, top:0, height:1, width:5 } // width can't be less than 5
+        Area {
+            left: 0,
+            top: 0,
+            height: 1,
+            width: 5,
+        } // width can't be less than 5
     }
 
     /// build a new area.
-    pub fn new(
-        left: u16,
-        top: u16,
-        width: u16,
-        height: u16,
-    ) -> Area {
+    pub fn new(left: u16, top: u16, width: u16, height: u16) -> Area {
         assert!(width > 4);
         Area {
             left,
@@ -57,8 +60,8 @@ impl Area {
         // this will crash if padding is too big. feature?
         self.left += dx;
         self.top += dy;
-        self.width -= 2*dx;
-        self.height -= 2*dy;
+        self.width -= 2 * dx;
+        self.height -= 2 * dy;
     }
 
     /// symmetrically shrink the area if its width is bigger than `max_width`
@@ -80,17 +83,13 @@ impl Area {
         scroll: i32, // 0 for no scroll, positive if scrolled
         content_height: i32,
     ) -> Option<(u16, u16)> {
-        compute_scrollbar(
-            scroll,
-            content_height,
-            self.height as i32,
-        )
+        compute_scrollbar(scroll, content_height, self.height as i32)
     }
 }
 
 pub fn compute_scrollbar(
-    scroll: i32, // 0 for no scroll, positive if scrolled
-    content_height: i32, // number of lines of the content
+    scroll: i32,           // 0 for no scroll, positive if scrolled
+    content_height: i32,   // number of lines of the content
     available_height: i32, // for an area it's usually its height
 ) -> Option<(u16, u16)> {
     let h = available_height;
@@ -106,16 +105,44 @@ pub fn compute_scrollbar(
             (h - se) as u16
         } else {
             sc as u16 + 1
-        }
+        },
     ))
+}
 
+/// execute tput with the given argument and parse
+/// the output as a u16.
+///
+/// The arg should be "cols" or "lines"
+fn tput_value(arg: &str) -> Option<u16> {
+    match process::Command::new("tput").arg(arg).output() {
+        Ok(process::Output { stdout, .. }) => {
+            let value = stdout
+                .iter()
+                .map(|&b| b as u16)
+                .take_while(|&b| b >= 48 && b <= 58)
+                .fold(0, |v, b| v * 10 + (b - 48));
+            if value > 0 {
+                Some(value)
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
 }
 
 /// Return a (width, height) with the dimensions of the available
 /// terminal in characters.
+///
 pub fn terminal_size() -> (u16, u16) {
-    let (w, h) = Terminal::new().terminal_size();
-    // there's a bug in crossterm 0.9.6. It reports a size smaller by
-    //  one in both directions
-    (w + 1, h + 1)
+    let size = Terminal::new().size();
+    #[cfg(unix)]
+    {
+        if size.is_err() {
+            if let (Some(w), Some(h)) = (tput_value("cols"), tput_value("lines")) {
+                return (w, h);
+            }
+        }
+    }
+    size.unwrap_or((DEFAULT_TERMINAL_WIDTH, DEFAULT_TERMINAL_HEIGHT))
 }
