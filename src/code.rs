@@ -1,4 +1,3 @@
-
 use crate::line::*;
 use crate::spacing::Spacing;
 use minimad::{Alignment, CompositeStyle};
@@ -70,7 +69,7 @@ pub fn find_blocks(lines: &Vec<FmtLine<'_>>) -> Vec<CodeBlock> {
 /// ensure the widths of all lines in a code block are
 /// the same line.
 pub fn justify_blocks(lines: &mut Vec<FmtLine<'_>>) {
-    let blocks =find_blocks(lines);
+    let blocks = find_blocks(lines);
     for b in blocks {
         b.justify(lines);
     }

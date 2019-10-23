@@ -1,4 +1,4 @@
-use crossterm_style::{Attribute::*, Color::*};
+use crossterm::{Attribute::*, Color::*};
 use termimad::*;
 
 fn show(skin: &MadSkin, src: &str) {
@@ -28,5 +28,8 @@ fn main() {
     skin.paragraph.set_fgbg(Magenta, rgb(30, 30, 40));
     skin.italic.add_attr(Underlined);
     skin.italic.add_attr(OverLined);
-    println!("\nand now {}\n", skin.inline("a little *too much* **style!** (and `some(code)` too)"));
+    println!(
+        "\nand now {}\n",
+        skin.inline("a little *too much* **style!** (and `some(code)` too)")
+    );
 }

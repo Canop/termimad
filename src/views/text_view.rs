@@ -1,9 +1,10 @@
-use std::io;
-use crossterm_cursor::TerminalCursor;
-use crossterm_terminal::{Terminal, ClearType};
+use std::io::{stdout, Write};
+
+use crossterm::{queue, Clear, ClearType, Goto};
 
 use crate::area::Area;
 use crate::displayable_line::DisplayableLine;
+use crate::errors::Result;
 use crate::text::FmtText;
 
 /// A scrollable text, in a specific area.
@@ -38,12 +39,8 @@ pub struct TextView<'a, 't> {
 }
 
 impl<'a, 't> TextView<'a, 't> {
-
     /// make a displayed text, that is a text in an area
-    pub fn from(
-        area: &'a Area,
-        text: &'t FmtText<'_, '_>,
-    ) -> TextView<'a, 't> {
+    pub fn from(area: &'a Area, text: &'t FmtText<'_, '_>) -> TextView<'a, 't> {
         TextView {
             area,
             text,
@@ -71,31 +68,36 @@ impl<'a, 't> TextView<'a, 't> {
     }
 
     /// display the text in the area, taking the scroll into account.
-    pub fn write(&self) -> io::Result<()> {
-        let terminal = Terminal::new();
-        let cursor = TerminalCursor::new();
+    pub fn write(&self) -> Result<()> {
+        let mut stdout = stdout();
+        self.write_on(&mut stdout)?;
+        stdout.flush()?;
+        Ok(())
+    }
+
+    /// display the text in the area, taking the scroll into account.
+    pub fn write_on<W>(&self, w: &mut W) -> Result<()>
+    where
+        W: std::io::Write,
+    {
         let scrollbar = self.scrollbar();
         let sx = self.area.left + self.area.width;
         let mut i = self.scroll as usize;
         for y in 0..self.area.height {
-            cursor.goto(self.area.left, self.area.top+y)?;
+            queue!(w, Goto(self.area.left, self.area.top + y))?;
             if i < self.text.lines.len() {
-                let dl = DisplayableLine::new(
-                    self.text.skin,
-                    &self.text.lines[i],
-                    self.text.width,
-                );
-                print!("{}", &dl);
+                let dl = DisplayableLine::new(self.text.skin, &self.text.lines[i], self.text.width);
+                write!(w, "{}", &dl)?;
                 i += 1;
             } else {
-                terminal.clear(ClearType::UntilNewLine)?;
+                queue!(w, Clear(ClearType::UntilNewLine))?;
             }
             if let Some((sctop, scbottom)) = scrollbar {
-                cursor.goto(sx, self.area.top+y)?;
+                queue!(w, Goto(sx, self.area.top + y))?;
                 if sctop <= y && y <= scbottom {
-                    print!("{}", self.text.skin.scrollbar.thumb);
+                    write!(w, "{}", self.text.skin.scrollbar.thumb)?;
                 } else {
-                    print!("{}", self.text.skin.scrollbar.track);
+                    write!(w, "{}", self.text.skin.scrollbar.track)?;
                 }
             }
         }

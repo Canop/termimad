@@ -1,6 +1,6 @@
 [package]
 name = "termimad"
-version = "0.6.6"
+version = "0.7.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 repository = "https://github.com/Canop/termimad"
 description = "Markdown Renderer for the Terminal"
@@ -13,11 +13,9 @@ readme = "README.md"
 [dependencies]
 lazy_static = "1.3"
 minimad = "0.4.1"
-#minimad = { path = "../minimad" }
-crossterm_cursor = "=0.2.4"
-crossterm_input = "=0.3.6"
-crossterm_screen = "=0.2.3"
-crossterm_style = "=0.3.3"
-crossterm_terminal = "=0.2.4"
-crossterm_utils = "=0.2.3"
+crossterm = "0.12.1"
 crossbeam = "0.7"
+thiserror = "1.0.2"
+
+# [patch.crates-io]
+# crossterm = { path = "../crossterm-rs/crossterm" }

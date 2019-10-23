@@ -1,11 +1,11 @@
-use std::thread;
-use std::time::{Instant, Duration};
+use crossbeam::channel::{unbounded, Receiver, Sender};
+use crossterm::TerminalInput;
 use std::sync::{
-    Arc,
     atomic::{AtomicUsize, Ordering},
+    Arc,
 };
-use crossbeam::channel::{Sender, Receiver, unbounded};
-use crossterm_input::TerminalInput;
+use std::thread;
+use std::time::{Duration, Instant};
 
 use crate::events::Event;
 
@@ -57,7 +57,11 @@ impl EventSource {
                     // save the event, and maybe change it
                     // (may change a click into a double-click)
                     if let Event::Click(x, y) = event {
-                        if let Some(TimedEvent{time, event:Event::Click(_, last_y)}) = last_event {
+                        if let Some(TimedEvent {
+                            time,
+                            event: Event::Click(_, last_y),
+                        }) = last_event
+                        {
                             if last_y == y && time.elapsed() < DOUBLE_CLICK_MAX_DURATION {
                                 event = Event::DoubleClick(x, y);
                             }
@@ -107,5 +111,3 @@ impl EventSource {
         self.rx_events.clone()
     }
 }
-
-

@@ -1,4 +1,3 @@
-
 use crate::color::*;
 use crate::styled_char::StyledChar;
 

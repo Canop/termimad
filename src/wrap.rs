@@ -25,7 +25,10 @@ fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
 /// cut the passed composite in several composites fitting the given *visible* width
 /// (which might be bigger or smaller than the length of the underlying string).
 /// width can't be less than 3.
-pub fn hard_wrap_composite<'s>(src_composite: &FmtComposite<'s>, width: usize) -> Vec<FmtComposite<'s>> {
+pub fn hard_wrap_composite<'s>(
+    src_composite: &FmtComposite<'s>,
+    width: usize,
+) -> Vec<FmtComposite<'s>> {
     assert!(width > 2);
     let mut composites = Vec::new();
     let max_cut_back = width / 5;
@@ -43,7 +46,7 @@ pub fn hard_wrap_composite<'s>(src_composite: &FmtComposite<'s>, width: usize) -
     };
     let mut ll = match src_composite.composite.style {
         CompositeStyle::ListItem => 2, // space of the bullet
-        CompositeStyle::Quote => 2, // space of the bullet
+        CompositeStyle::Quote => 2,    // space of the bullet
         _ => 0,
     };
     let mut ignored_cut_back: Option<usize> = None;
@@ -96,7 +99,7 @@ pub fn hard_wrap_composite<'s>(src_composite: &FmtComposite<'s>, width: usize) -
                 }
             }
         }
-        if c_start<s.len() {
+        if c_start < s.len() {
             let sc = sc.tail(c_start);
             ll = sc.as_str().chars().count();
             dst_composite.add_compound(sc);
@@ -108,7 +111,14 @@ pub fn hard_wrap_composite<'s>(src_composite: &FmtComposite<'s>, width: usize) -
         // now we try to see if we can move back the cut to the last space
         if let Some(diff) = ignored_cut_back {
             if diff + dst_composite.visible_length < width {
-                composites.last_mut().unwrap().composite.compounds.last_mut().unwrap().end -= diff;
+                composites
+                    .last_mut()
+                    .unwrap()
+                    .composite
+                    .compounds
+                    .last_mut()
+                    .unwrap()
+                    .end -= diff;
                 composites.last_mut().unwrap().visible_length -= diff;
                 dst_composite.composite.compounds[0].start -= diff;
                 dst_composite.visible_length += diff;
@@ -129,12 +139,12 @@ pub fn hard_wrap_lines<'s>(src_lines: Vec<FmtLine<'s>>, width: usize) -> Vec<Fmt
     let mut src_lines = src_lines;
     let mut lines = Vec::new();
     for src_line in src_lines.drain(..) {
-        if let FmtLine::Normal( fc ) = src_line {
+        if let FmtLine::Normal(fc) = src_line {
             if fc.visible_length <= width {
-                lines.push(FmtLine::Normal( fc ));
+                lines.push(FmtLine::Normal(fc));
             } else {
                 for fc in hard_wrap_composite(&fc, width) {
-                    lines.push(FmtLine::Normal( fc ));
+                    lines.push(FmtLine::Normal(fc));
                 }
             }
         } else {
@@ -152,13 +162,13 @@ pub fn hard_wrap_lines<'s>(src_lines: Vec<FmtLine<'s>>, width: usize) -> Vec<Fmt
 #[cfg(test)]
 mod wrap_tests {
 
-    use crate::skin::MadSkin;
     use crate::displayable_line::DisplayableLine;
+    use crate::skin::MadSkin;
     use crate::wrap::*;
 
     fn visible_fmt_line_length(skin: &MadSkin, line: &FmtLine<'_>) -> usize {
         match line {
-            FmtLine::Normal( fc ) => skin.visible_composite_length(&fc.composite),
+            FmtLine::Normal(fc) => skin.visible_composite_length(&fc.composite),
             _ => 0, // FIXME implement
         }
     }
@@ -172,9 +182,15 @@ mod wrap_tests {
         println!("------- test wrapping with width: {}", width);
         for line in &text.lines {
             let len = visible_fmt_line_length(skin, &line);
-            print!("len:{: >4}  | {}", len, DisplayableLine {
-                skin: &skin, line, width:None,
-            });
+            print!(
+                "len:{: >4}  | {}",
+                len,
+                DisplayableLine {
+                    skin: &skin,
+                    line,
+                    width: None,
+                }
+            );
             assert!(len <= width);
             assert!(len > 0);
         }
@@ -188,7 +204,9 @@ mod wrap_tests {
             assert_eq!(
                 visible_fmt_line_length(skin, &text.lines[i]),
                 lenghts[i],
-                "expected length for line {} when wrapping at {}", i, width
+                "expected length for line {} when wrapping at {}",
+                i,
+                width
             );
         }
     }
@@ -200,15 +218,13 @@ mod wrap_tests {
         let skin = crate::get_default_skin();
         // build a text and check it
         let src = "This is a *long* line which needs to be **broken**.\n\
-            And the text goes on with a list:\n\
-            * short item\n\
-            * a *somewhat longer item* (with a part in **bold**)";
+                   And the text goes on with a list:\n\
+                   * short item\n\
+                   * a *somewhat longer item* (with a part in **bold**)";
         println!("input text:\n{}", &src);
         for width in 3..50 {
             check_no_overflow(skin, &src, width);
         }
         check_line_lengths(skin, &src, 24, vec![19, 19, 7, 20, 13, 12, 24, 22]);
     }
-
 }
-

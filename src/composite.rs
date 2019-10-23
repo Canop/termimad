@@ -1,4 +1,4 @@
-use minimad::{Compound, Composite};
+use minimad::{Composite, Compound};
 
 use crate::skin::MadSkin;
 use crate::spacing::Spacing;
@@ -43,4 +43,3 @@ impl<'s> FmtComposite<'s> {
         self.composite.compounds.push(compound);
     }
 }
-

@@ -1,19 +1,9 @@
-
-use std::io;
 use std::cmp::Ordering;
-use crossterm_terminal::{ClearType, Terminal};
-use crossterm_style::{Color, Colored};
-use crossterm_cursor::TerminalCursor;
+use std::io::{stdout, Write};
 
-use crate::{
-    Alignment,
-    Area,
-    CompoundStyle,
-    compute_scrollbar,
-    gray,
-    MadSkin,
-    Spacing,
-};
+use crossterm::{queue, Clear, ClearType, Color, Colored, Goto, Result};
+
+use crate::{compute_scrollbar, gray, Alignment, Area, CompoundStyle, MadSkin, Spacing};
 
 pub struct ListViewCell<'t> {
     con: String,
@@ -63,11 +53,7 @@ pub struct ListView<'t, T> {
 impl<'t> ListViewCell<'t> {
     pub fn new(con: String, style: &'t CompoundStyle) -> Self {
         let width = con.chars().count();
-        Self {
-            con,
-            style,
-            width,
-        }
+        Self { con, style, width }
     }
 }
 
@@ -76,7 +62,7 @@ impl<'t, T> ListViewColumn<'t, T> {
         title: &str,
         min_width: usize,
         max_width: usize,
-        extract: Box<dyn Fn(&T) -> ListViewCell<'t>>
+        extract: Box<dyn Fn(&T) -> ListViewCell<'t>>,
     ) -> Self {
         Self {
             title: title.to_owned(),
@@ -152,9 +138,7 @@ impl<'t, T> ListView<'t, T> {
         )
     }
     pub fn add_row(&mut self, data: T) {
-        let stick_to_bottom =
-            self.row_order.is_none() &&
-            self.do_scroll_show_bottom();
+        let stick_to_bottom = self.row_order.is_none() && self.do_scroll_show_bottom();
         let displayed = match &self.filter {
             Some(fun) => fun(&data),
             None => true,
@@ -165,10 +149,7 @@ impl<'t, T> ListView<'t, T> {
         if stick_to_bottom {
             self.scroll_to_bottom();
         }
-        self.rows.push(Row {
-            data,
-            displayed,
-        });
+        self.rows.push(Row { data, displayed });
         if let Some(row_order) = &self.row_order {
             self.rows.sort_by(|a, b| row_order(&a.data, &b.data));
         }
@@ -189,8 +170,7 @@ impl<'t, T> ListView<'t, T> {
     /// recompute the widths of all columns.
     /// This should be called when the area size is modified
     pub fn update_dimensions(&mut self) {
-        let available_width: i32 =
-            self.area.width as i32
+        let available_width: i32 = self.area.width as i32
             - (self.columns.len() as i32 - 1) // we remove the separator
             - 1; // we remove 1 to let space for the scrollbar
         let sum_min_widths: i32 = self.columns.iter().map(|c| c.min_width as i32).sum();
@@ -201,7 +181,8 @@ impl<'t, T> ListView<'t, T> {
         } else {
             let mut excess = available_width - sum_min_widths;
             for i in 0..self.columns.len() {
-                let d = ((self.columns[i].max_width - self.columns[i].min_width) as i32).min(excess);
+                let d =
+                    ((self.columns[i].max_width - self.columns[i].min_width) as i32).min(excess);
                 excess -= d;
                 self.columns[i].spacing.width = self.columns[i].min_width + d as usize;
             }
@@ -229,23 +210,26 @@ impl<'t, T> ListView<'t, T> {
         self.filter = None;
     }
     /// display the whole list in its area
-    pub fn display(&self) -> io::Result<()> {
-        let terminal = Terminal::new();
-        let cursor = TerminalCursor::new();
+    pub fn display(&self) -> Result<()> {
+        let mut stdout = stdout();
         let sx = self.area.left + self.area.width;
         let vbar = self.skin.table.compound_style.apply_to("│");
         let tee = self.skin.table.compound_style.apply_to("┬");
         let cross = self.skin.table.compound_style.apply_to("┼");
         let hbar = self.skin.table.compound_style.apply_to("─");
         // title line
-        cursor.goto(self.area.left, self.area.top)?;
+        queue!(stdout, Goto(self.area.left, self.area.top))?;
         for (title_idx, title) in self.titles.iter().enumerate() {
             if title_idx != 0 {
                 print!("{}", vbar);
             }
-            let width =
-                title.columns.iter().map(|ci| self.columns[*ci].spacing.width).sum::<usize>()
-                + title.columns.len() - 1;
+            let width = title
+                .columns
+                .iter()
+                .map(|ci| self.columns[*ci].spacing.width)
+                .sum::<usize>()
+                + title.columns.len()
+                - 1;
             let spacing = Spacing {
                 width,
                 align: Alignment::Center,
@@ -256,7 +240,7 @@ impl<'t, T> ListView<'t, T> {
             );
         }
         // separator line
-        cursor.goto(self.area.left, self.area.top+1)?;
+        queue!(stdout, Goto(self.area.left, self.area.top + 1))?;
         for (title_idx, title) in self.titles.iter().enumerate() {
             if title_idx != 0 {
                 print!("{}", cross);
@@ -274,10 +258,10 @@ impl<'t, T> ListView<'t, T> {
         let mut row_idx = self.scroll as usize;
         let scrollbar = self.scrollbar();
         for y in 2..self.area.height {
-            cursor.goto(self.area.left, self.area.top+y)?;
+            queue!(stdout, Goto(self.area.left, self.area.top + y))?;
             loop {
                 if row_idx == self.rows.len() {
-                    terminal.clear(ClearType::UntilNewLine)?;
+                    queue!(stdout, Clear(ClearType::UntilNewLine))?;
                     break;
                 }
                 if self.rows[row_idx].displayed {
@@ -296,16 +280,17 @@ impl<'t, T> ListView<'t, T> {
                             style.set_bg(self.selection_background);
                             col.spacing.print_counted_str(&cell.con, cell.width, &style);
                         } else {
-                            col.spacing.print_counted_str(&cell.con, cell.width, cell.style);
+                            col.spacing
+                                .print_counted_str(&cell.con, cell.width, cell.style);
                         }
                     }
-                    row_idx +=1;
+                    row_idx += 1;
                     break;
                 }
-                row_idx +=1;
+                row_idx += 1;
             }
             if let Some((sctop, scbottom)) = scrollbar {
-                cursor.goto(sx, self.area.top+y)?;
+                queue!(stdout, Goto(sx, self.area.top + y))?;
                 let y = y - 2;
                 if sctop <= y && y <= scbottom {
                     print!("{}", self.skin.scrollbar.thumb);
@@ -395,7 +380,7 @@ impl<'t, T> ListView<'t, T> {
         if let Some(selection) = self.selection {
             let sel = selection as i32;
             if sel <= self.scroll {
-                self.scroll = (sel-2).max(0);
+                self.scroll = (sel - 2).max(0);
             } else if sel >= self.scroll + self.tbody_height() - 1 {
                 self.scroll = (sel - self.tbody_height() + 2) as i32;
             }

@@ -1,8 +1,8 @@
 use minimad::{Line, TableRule};
 
+use crate::composite::FmtComposite;
 use crate::skin::MadSkin;
 use crate::tbl::{FmtTableRow, FmtTableRule, RelativePosition};
-use crate::composite::FmtComposite;
 
 /// A line in a text. This structure should normally not be
 /// used outside of the lib.
@@ -17,21 +17,15 @@ impl<'s> FmtLine<'s> {
     /// Build a fmtline from a minimad line.
     /// Skin is passed because it might affect the visible size
     /// in the future
-    pub fn from(mline: Line<'s>, skin: & MadSkin) -> Self {
+    pub fn from(mline: Line<'s>, skin: &MadSkin) -> Self {
         match mline {
-            Line::Normal(composite) => FmtLine::Normal(
-                FmtComposite::from(composite, skin)
-            ),
-            Line::TableRow(table_row) => FmtLine::TableRow(
-                FmtTableRow::from(table_row, skin)
-            ),
-            Line::TableRule(TableRule{cells}) => FmtLine::TableRule(
-                FmtTableRule {
-                    position: RelativePosition::Other,
-                    widths: Vec::new(),
-                    aligns: cells,
-                }
-            ),
+            Line::Normal(composite) => FmtLine::Normal(FmtComposite::from(composite, skin)),
+            Line::TableRow(table_row) => FmtLine::TableRow(FmtTableRow::from(table_row, skin)),
+            Line::TableRule(TableRule { cells }) => FmtLine::TableRule(FmtTableRule {
+                position: RelativePosition::Other,
+                widths: Vec::new(),
+                aligns: cells,
+            }),
             Line::HorizontalRule => FmtLine::HorizontalRule,
         }
     }

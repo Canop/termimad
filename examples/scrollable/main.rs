@@ -1,20 +1,25 @@
-use crossterm_screen::AlternateScreen;
-use crossterm_cursor::TerminalCursor;
-use crossterm_input::{TerminalInput, KeyEvent::*, InputEvent::*};
-use crossterm_style::Color::*;
+//! run this example with
+//!   cargo run --example scrollable
+//!
+use crossterm::{
+    input, queue, Color::*, EnterAlternateScreen, Hide, InputEvent::*, KeyEvent::*,
+    LeaveAlternateScreen, RawScreen, Show,
+};
+use std::io::{stderr, Write};
 use termimad::*;
-use std::io;
 
-fn show_scrollable(skin: MadSkin, markdown: &str) -> io::Result<()> {
-    let cursor = TerminalCursor::new();
-    cursor.hide()?;
+fn run_app(skin: MadSkin) -> Result<()> {
+    let mut w = stderr(); // we could also have used stdout
+    queue!(w, EnterAlternateScreen)?;
+    let _raw = RawScreen::into_raw_mode()?;
+    queue!(w, Hide)?; // hiding the cursor
     let mut area = Area::full_screen();
     area.pad(1, 1); // let's add some margin
     area.pad_for_max_width(120); // we don't want a too wide text column
-    let mut view = MadView::from(markdown.to_owned(), area, skin);
-    let mut events = TerminalInput::new().read_sync();
+    let mut view = MadView::from(MD.to_owned(), area, skin);
+    let mut events = input().read_sync();
     loop {
-        view.write()?;
+        view.write_on(&mut w)?;
         if let Some(Keyboard(key)) = events.next() {
             match key {
                 Up => view.try_scroll_lines(-1),
@@ -25,7 +30,9 @@ fn show_scrollable(skin: MadSkin, markdown: &str) -> io::Result<()> {
             }
         }
     }
-    cursor.show()?;
+    queue!(w, Show)?; // we must restore the cursor
+    queue!(w, LeaveAlternateScreen)?;
+    w.flush()?;
     Ok(())
 }
 
@@ -40,10 +47,9 @@ fn make_skin() -> MadSkin {
     skin
 }
 
-fn main() {
-    let _alt_screen = AlternateScreen::to_alternate(true);
+fn main() -> Result<()> {
     let skin = make_skin();
-    show_scrollable(skin, MD).unwrap();
+    run_app(skin)
 }
 
 static MD: &str = r#"# Scrollable Markdown in Termimad

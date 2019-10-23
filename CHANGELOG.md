@@ -1,3 +1,7 @@
+<a name="v0.7.0"></a>
+### v0.7.0 - 2019-09-22
+- Displaying can be done on stderr or stdout, or in a subshell
+
 <a name="v0.6.6"></a>
 ### v0.6.6 - 2019-10-05
 - provide a default terminal width when the real one can't be measured
