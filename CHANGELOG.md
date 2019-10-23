@@ -1,4 +1,5 @@
-### Next Version
+<a name="v0.7.0"></a>
+### v0.7.0 - 2019-09-22
 - Displaying can be done on stderr or stdout, or in a subshell
 
 <a name="v0.6.5"></a>
