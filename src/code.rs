@@ -38,7 +38,7 @@ fn code_line_length(line: &FmtLine<'_>) -> Option<usize> {
 /// Warning: the indices in a codeblock are invalid as
 /// soon as lines are inserted or removed. This function
 /// should normally not be used from another module or lib
-pub fn find_blocks(lines: &Vec<FmtLine<'_>>) -> Vec<CodeBlock> {
+pub fn find_blocks(lines: &[FmtLine<'_>]) -> Vec<CodeBlock> {
     let mut blocks: Vec<CodeBlock> = Vec::new();
     let mut current: Option<CodeBlock> = None;
     for (idx, line) in lines.iter().enumerate() {

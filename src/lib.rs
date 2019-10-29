@@ -34,21 +34,9 @@ terminals. It's recommended to stick to [Ansi colors](fn.ansi.html), [gray level
 
 
 ```
-use crossterm::TerminalCursor;
 # use termimad::*;
-# let skin = MadSkin::default();
-
 // with the default skin, nothing simpler:
 termimad::print_inline("value: **52**");
-
-// now in a precise position
-// (assuming an alternate terminal, see the "scrollable" example)
-// and with the skin we precedently customized:
-
-let cursor = TerminalCursor::new();
-cursor.goto(0, 4).unwrap();
-skin.print_inline("page *3* / 5");
-
 ```
 # Print a text
 

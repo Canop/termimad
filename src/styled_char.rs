@@ -1,6 +1,6 @@
 use std::fmt::{self, Display};
 
-use crossterm::{queue, Color, PrintStyledFont, StyledObject};
+use crossterm::{queue, Color, PrintStyledContent, StyledContent};
 
 use crate::compound_style::CompoundStyle;
 use crate::errors::Result;
@@ -10,7 +10,7 @@ use crate::errors::Result;
 pub struct StyledChar {
     compound_style: CompoundStyle,
     nude_char: char,
-    styled_char: StyledObject<char>, // redundant, kept for performance
+    styled_char: StyledContent<char>, // redundant, kept for performance
 }
 
 impl StyledChar {
@@ -41,7 +41,7 @@ impl StyledChar {
     }
     /// Return a struct implementing `Display`, made of a (optimized) repetition
     ///  of the character with its style.
-    pub fn repeated(&self, count: usize) -> StyledObject<String> {
+    pub fn repeated(&self, count: usize) -> StyledContent<String> {
         let mut s = String::new();
         for _ in 0..count {
             s.push(self.nude_char);
@@ -62,7 +62,7 @@ impl StyledChar {
     where
         W: std::io::Write,
     {
-        Ok(queue!(w, PrintStyledFont(self.styled_char.clone()))?)
+        Ok(queue!(w, PrintStyledContent(self.styled_char.clone()))?)
     }
 }
 

@@ -1,36 +1,30 @@
 use std::fmt::{self, Display};
 
-use crossterm::{queue, Attribute, Color, ObjectStyle, PrintStyledFont, StyledObject};
+use crossterm::{
+    queue, Attribute, Color, ContentStyle, PrintStyledContent, SetBg, SetFg, StyledContent,
+};
 
 use crate::errors::Result;
 
 /// A style which may be applied to a compound
 #[derive(Default, Clone)]
 pub struct CompoundStyle {
-    pub object_style: ObjectStyle, // a crossterm object style
+    pub object_style: ContentStyle, // a crossterm content style
 }
 
-impl From<ObjectStyle> for CompoundStyle {
-    fn from(object_style: ObjectStyle) -> CompoundStyle {
+impl From<ContentStyle> for CompoundStyle {
+    fn from(object_style: ContentStyle) -> CompoundStyle {
         CompoundStyle { object_style }
     }
 }
 
 impl CompoundStyle {
-    /// Apply an `StyledObject` to the passed displayable object.
-    pub fn apply_to<D: Display>(&self, val: D) -> StyledObject<D>
+    /// Apply an `StyledContent` to the passed displayable object.
+    pub fn apply_to<D: Display>(&self, val: D) -> StyledContent<D>
     where
         D: Clone,
     {
-        self.object_style.apply_to(val)
-    }
-
-    pub fn queue<W, D>(&self, w: &mut W, val: D) -> Result<()>
-    where
-        D: Clone + Display,
-        W: std::io::Write,
-    {
-        Ok(queue!(w, PrintStyledFont(self.apply_to(val)))?)
+        self.object_style.apply(val)
     }
 
     /// Get an new instance of `CompoundStyle`
@@ -40,7 +34,7 @@ impl CompoundStyle {
         attrs: Vec<Attribute>,
     ) -> CompoundStyle {
         CompoundStyle {
-            object_style: ObjectStyle {
+            object_style: ContentStyle {
                 fg_color,
                 bg_color,
                 attrs,
@@ -51,21 +45,21 @@ impl CompoundStyle {
     /// Get an new instance of `CompoundStyle`
     pub fn with_fgbg(fg: Color, bg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ObjectStyle::new().fg(fg).bg(bg),
+            object_style: ContentStyle::new().foreground(fg).background(bg),
         }
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_fg(fg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ObjectStyle::new().fg(fg),
+            object_style: ContentStyle::new().foreground(fg),
         }
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_bg(bg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ObjectStyle::new().bg(bg),
+            object_style: ContentStyle::new().background(bg),
         }
     }
 
@@ -105,6 +99,16 @@ impl CompoundStyle {
         self.object_style.attrs.extend(&other.object_style.attrs);
     }
 
+    #[inline(always)]
+    pub fn get_fg(&self) -> Option<Color> {
+        self.object_style.fg_color
+    }
+
+    #[inline(always)]
+    pub fn get_bg(&self) -> Option<Color> {
+        self.object_style.bg_color
+    }
+
     /// Write a string several times with the line compound style
     ///
     /// Implementation Note: performances here are critical
@@ -121,5 +125,42 @@ impl CompoundStyle {
     #[inline(always)]
     pub fn repeat_space(&self, f: &mut fmt::Formatter<'_>, count: usize) -> fmt::Result {
         self.repeat_string(f, " ", count)
+    }
+
+    /// write the value with this style on the given
+    /// writer
+    pub fn queue<W, D>(&self, w: &mut W, val: D) -> Result<()>
+    where
+        D: Clone + Display,
+        W: std::io::Write,
+    {
+        Ok(queue!(w, PrintStyledContent(self.apply_to(val)))?)
+    }
+
+    /// write the string with this style on the given
+    /// writer
+    pub fn queue_str<W>(&self, w: &mut W, s: &str) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        self.queue(w, s.to_string())
+    }
+
+    pub fn queue_fg<W>(&self, w: &mut W) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        Ok(if let Some(fg) = self.object_style.fg_color {
+            queue!(w, SetFg(fg))?;
+        })
+    }
+
+    pub fn queue_bg<W>(&self, w: &mut W) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        Ok(if let Some(bg) = self.object_style.bg_color {
+            queue!(w, SetBg(bg))?;
+        })
     }
 }

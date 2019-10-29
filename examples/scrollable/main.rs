@@ -2,8 +2,8 @@
 //!   cargo run --example scrollable
 //!
 use crossterm::{
-    input, queue, Color::*, EnterAlternateScreen, Hide, InputEvent::*, KeyEvent::*,
-    LeaveAlternateScreen, RawScreen, Show,
+    cursor::Hide, cursor::Show, input, queue, Color::*, EnterAlternateScreen, InputEvent::*,
+    KeyEvent::*, LeaveAlternateScreen, RawScreen,
 };
 use std::io::{stderr, Write};
 use termimad::*;

@@ -1,4 +1,4 @@
-use crossterm::Terminal;
+use crossterm::terminal;
 use std::process;
 
 /// A default width which is used when we failed measuring the real terminal width
@@ -138,7 +138,7 @@ fn tput_value(arg: &str) -> Option<u16> {
 /// terminal in characters.
 ///
 pub fn terminal_size() -> (u16, u16) {
-    let size = Terminal::new().size();
+    let size = terminal::size();
     #[cfg(unix)]
     {
         if size.is_err() {

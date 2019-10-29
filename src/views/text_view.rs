@@ -1,6 +1,10 @@
 use std::io::{stdout, Write};
 
-use crossterm::{queue, Clear, ClearType, Goto};
+use crossterm::{
+    cursor::MoveTo,
+    queue,
+    terminal::{Clear, ClearType},
+};
 
 use crate::area::Area;
 use crate::displayable_line::DisplayableLine;
@@ -84,7 +88,7 @@ impl<'a, 't> TextView<'a, 't> {
         let sx = self.area.left + self.area.width;
         let mut i = self.scroll as usize;
         for y in 0..self.area.height {
-            queue!(w, Goto(self.area.left, self.area.top + y))?;
+            queue!(w, MoveTo(self.area.left, self.area.top + y))?;
             if i < self.text.lines.len() {
                 let dl = DisplayableLine::new(self.text.skin, &self.text.lines[i], self.text.width);
                 write!(w, "{}", &dl)?;
@@ -93,7 +97,7 @@ impl<'a, 't> TextView<'a, 't> {
                 queue!(w, Clear(ClearType::UntilNewLine))?;
             }
             if let Some((sctop, scbottom)) = scrollbar {
-                queue!(w, Goto(sx, self.area.top + y))?;
+                queue!(w, MoveTo(sx, self.area.top + y))?;
                 if sctop <= y && y <= scbottom {
                     write!(w, "{}", self.text.skin.scrollbar.thumb)?;
                 } else {

@@ -1,7 +1,12 @@
 use std::cmp::Ordering;
 use std::io::{stdout, Write};
 
-use crossterm::{queue, Clear, ClearType, Color, Colored, Goto, Result};
+use crossterm::{
+    cursor::MoveTo,
+    queue,
+    terminal::{Clear, ClearType},
+    Color, Colored, Result,
+};
 
 use crate::{compute_scrollbar, gray, Alignment, Area, CompoundStyle, MadSkin, Spacing};
 
@@ -66,8 +71,8 @@ impl<'t, T> ListViewColumn<'t, T> {
     ) -> Self {
         Self {
             title: title.to_owned(),
-            min_width: min_width,
-            max_width: max_width,
+            min_width,
+            max_width,
             spacing: Spacing {
                 width: min_width,
                 align: Alignment::Center,
@@ -218,7 +223,7 @@ impl<'t, T> ListView<'t, T> {
         let cross = self.skin.table.compound_style.apply_to("┼");
         let hbar = self.skin.table.compound_style.apply_to("─");
         // title line
-        queue!(stdout, Goto(self.area.left, self.area.top))?;
+        queue!(stdout, MoveTo(self.area.left, self.area.top))?;
         for (title_idx, title) in self.titles.iter().enumerate() {
             if title_idx != 0 {
                 print!("{}", vbar);
@@ -240,7 +245,7 @@ impl<'t, T> ListView<'t, T> {
             );
         }
         // separator line
-        queue!(stdout, Goto(self.area.left, self.area.top + 1))?;
+        queue!(stdout, MoveTo(self.area.left, self.area.top + 1))?;
         for (title_idx, title) in self.titles.iter().enumerate() {
             if title_idx != 0 {
                 print!("{}", cross);
@@ -258,7 +263,7 @@ impl<'t, T> ListView<'t, T> {
         let mut row_idx = self.scroll as usize;
         let scrollbar = self.scrollbar();
         for y in 2..self.area.height {
-            queue!(stdout, Goto(self.area.left, self.area.top + y))?;
+            queue!(stdout, MoveTo(self.area.left, self.area.top + y))?;
             loop {
                 if row_idx == self.rows.len() {
                     queue!(stdout, Clear(ClearType::UntilNewLine))?;
@@ -290,7 +295,7 @@ impl<'t, T> ListView<'t, T> {
                 row_idx += 1;
             }
             if let Some((sctop, scbottom)) = scrollbar {
-                queue!(stdout, Goto(sx, self.area.top + y))?;
+                queue!(stdout, MoveTo(sx, self.area.top + y))?;
                 let y = y - 2;
                 if sctop <= y && y <= scbottom {
                     print!("{}", self.skin.scrollbar.thumb);

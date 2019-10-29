@@ -1,5 +1,5 @@
 use crossbeam::channel::{unbounded, Receiver, Sender};
-use crossterm::TerminalInput;
+use crossterm::{RawScreen, TerminalInput};
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
@@ -7,7 +7,7 @@ use std::sync::{
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::events::Event;
+use crate::{errors::Error, events::Event};
 
 const DOUBLE_CLICK_MAX_DURATION: Duration = Duration::from_millis(700);
 
@@ -35,22 +35,39 @@ pub struct EventSource {
     rx_events: Receiver<Event>,
     tx_quit: Sender<bool>,
     event_count: Arc<AtomicUsize>,
+    _raw_screen: RawScreen, // leaves raw screen on drop
 }
 
 impl EventSource {
     /// create a new source
-    pub fn new() -> EventSource {
+    ///
+    /// If desired, mouse support must be separately
+    /// enabled:
+    /// ```
+    /// use crossterm::{EnableMouseCapture, queue};
+    /// # use std::io::Write;
+    /// # let mut w = std::io::stdout();
+    /// queue!(w, EnableMouseCapture).unwrap();
+    ///
+    /// ```
+    /// and disabled:
+    /// ```
+    /// use crossterm::{DisableMouseCapture, queue};
+    /// # use std::io::Write;
+    /// # let mut w = std::io::stdout();
+    /// queue!(w, DisableMouseCapture).unwrap();
+    ///
+    /// ```
+    pub fn new() -> Result<EventSource, Error> {
         let (tx_events, rx_events) = unbounded();
         let (tx_quit, rx_quit) = unbounded();
         let event_count = Arc::new(AtomicUsize::new(0));
         let internal_event_count = Arc::clone(&event_count);
+        let _raw_screen = RawScreen::into_raw_mode()?;
+        let input = TerminalInput::new();
+        let mut last_event: Option<TimedEvent> = None;
+        let mut crossterm_events = input.read_sync();
         thread::spawn(move || {
-            let input = TerminalInput::new();
-            let mut last_event: Option<TimedEvent> = None;
-            if let Err(e) = input.enable_mouse_mode() {
-                eprintln!("WARN Error while enabling mouse. {:?}", e);
-            }
-            let mut crossterm_events = input.read_sync();
             loop {
                 let crossterm_event = crossterm_events.next();
                 if let Some(mut event) = Event::from_crossterm_event(crossterm_event) {
@@ -85,11 +102,12 @@ impl EventSource {
                 }
             }
         });
-        EventSource {
+        Ok(EventSource {
             rx_events,
             tx_quit,
             event_count,
-        }
+            _raw_screen,
+        })
     }
 
     /// either start listening again, or quit, depending on the passed bool.

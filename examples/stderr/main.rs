@@ -1,6 +1,12 @@
+//! This example demonstrates how to run an application on stderr
+//!
+//! Run this example with
+//!   cargo run --example stderr
+//!
+
 use crossterm::{
-    input, queue, Color::*, EnterAlternateScreen, Hide, InputEvent::*, KeyEvent::*,
-    LeaveAlternateScreen, RawScreen, Show,
+    cursor::Hide, cursor::Show, input, queue, Color::*, EnterAlternateScreen, InputEvent::*,
+    KeyEvent::*, LeaveAlternateScreen, RawScreen,
 };
 use termimad::*;
 

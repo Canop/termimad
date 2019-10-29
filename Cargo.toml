@@ -17,5 +17,5 @@ crossterm = "0.12.1"
 crossbeam = "0.7"
 thiserror = "1.0.2"
 
-# [patch.crates-io]
-# crossterm = { path = "../crossterm-rs/crossterm" }
+[patch.crates-io]
+crossterm = { path = "../crossterm-rs/crossterm" }

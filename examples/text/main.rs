@@ -1,4 +1,5 @@
-use crossterm::{ClearType, Color::*, Terminal};
+use crossterm::{execute, terminal, Color::*};
+use std::io::Write;
 use termimad::*;
 
 static MD: &str = r#"
@@ -47,8 +48,8 @@ fn print_direct(skin: &MadSkin) {
 }
 
 fn print_in_text_view(skin: MadSkin) {
-    let terminal = Terminal::new();
-    terminal.clear(ClearType::All).unwrap();
+    let mut w = std::io::stdout();
+    execute!(w, terminal::Clear(terminal::ClearType::All)).unwrap();
     let mut area = Area::full_screen();
     area.pad(2, 1); // let's add some margin
     let text = skin.area_text(MD, &area);

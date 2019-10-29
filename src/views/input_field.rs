@@ -1,8 +1,8 @@
-use crossterm::Attribute;
-use crossterm::KeyEvent;
-use crossterm::TerminalCursor;
+use std::io::Write;
 
-use crate::{Area, CompoundStyle, Event};
+use crossterm::{cursor, queue, Attribute, KeyEvent};
+
+use crate::{Area, CompoundStyle, Error, Event};
 
 /// A simple input field, managing its cursor position.
 pub struct InputField {
@@ -40,12 +40,14 @@ impl InputField {
     pub fn get_content(&self) -> String {
         self.content.iter().collect()
     }
+    /// tell whether the content of the input is equal
+    ///  to the argument
     pub fn is_content(&self, s: &str) -> bool {
         // TODO this comparison could be optimized
         let str_content = self.get_content();
         str_content == s
     }
-    /// changes the content to the new one and
+    /// change the content to the new one and
     ///  put the cursor at the end **if** the
     ///  content is different from the previous one.
     pub fn set_content(&mut self, s: &str) {
@@ -115,23 +117,41 @@ impl InputField {
             _ => false,
         }
     }
-    pub fn display(&self) {
-        let cursor = TerminalCursor::new();
-        cursor.goto(self.area.left, self.area.top).unwrap();
+
+    /// render the input field on screen.
+    ///
+    /// All rendering must be explicitely called, no rendering is
+    /// done on functions changing the state.
+    ///
+    /// w is typically either stderr or stdout.
+    pub fn display_on<W>(&self, w: &mut W) -> Result<(), Error>
+    where
+        W: std::io::Write,
+    {
+        queue!(w, cursor::MoveTo(self.area.left, self.area.top))?;
         for (i, c) in self.content.iter().enumerate() {
             if self.cursor_pos == i {
-                print!("{}", self.cursor_style.apply_to(c));
+                self.cursor_style.queue(w, c)?;
             } else {
-                print!("{}", self.normal_style.apply_to(c));
+                self.normal_style.queue(w, c)?;
             }
         }
         let mut e = self.content.len();
         if e == self.cursor_pos {
-            print!("{}", self.cursor_style.apply_to(' '));
+            self.cursor_style.queue(w, ' ')?;
             e += 1;
         }
         for _ in e..self.area.width as usize {
-            print!(" ");
+            self.normal_style.queue(w, ' ')?;
         }
+        Ok(())
+    }
+
+    /// render the input field on stdout
+    pub fn display(&self) -> Result<(), Error> {
+        let mut w = std::io::stdout();
+        self.display_on(&mut w)?;
+        w.flush()?;
+        Ok(())
     }
 }
