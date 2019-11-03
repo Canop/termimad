@@ -1,4 +1,4 @@
-use crossterm::{Attribute, Color};
+use crossterm::style::{Attribute, Color};
 use minimad::Alignment;
 use std::fmt;
 

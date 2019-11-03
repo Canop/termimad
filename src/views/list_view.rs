@@ -4,11 +4,13 @@ use std::io::{stdout, Write};
 use crossterm::{
     cursor::MoveTo,
     queue,
+    style::{Color, SetBackgroundColor},
     terminal::{Clear, ClearType},
-    Color, Colored, Result,
 };
 
-use crate::{compute_scrollbar, gray, Alignment, Area, CompoundStyle, MadSkin, Spacing};
+use crate::{
+    compute_scrollbar, errors::Result, gray, Alignment, Area, CompoundStyle, MadSkin, Spacing,
+};
 
 pub struct ListViewCell<'t> {
     con: String,
@@ -214,19 +216,21 @@ impl<'t, T> ListView<'t, T> {
         self.displayed_rows_count = self.rows.len();
         self.filter = None;
     }
-    /// display the whole list in its area
-    pub fn display(&self) -> Result<()> {
-        let mut stdout = stdout();
+    /// write the list view on the given writer
+    pub fn write_on<W>(&self, w: &mut W) -> Result<()>
+    where
+        W: std::io::Write,
+    {
         let sx = self.area.left + self.area.width;
-        let vbar = self.skin.table.compound_style.apply_to("│");
-        let tee = self.skin.table.compound_style.apply_to("┬");
-        let cross = self.skin.table.compound_style.apply_to("┼");
-        let hbar = self.skin.table.compound_style.apply_to("─");
+        let vbar = self.skin.table.compound_style.style_char('│');
+        let tee = self.skin.table.compound_style.style_char('┬');
+        let cross = self.skin.table.compound_style.style_char('┼');
+        let hbar = self.skin.table.compound_style.style_char('─');
         // title line
-        queue!(stdout, MoveTo(self.area.left, self.area.top))?;
+        queue!(w, MoveTo(self.area.left, self.area.top))?;
         for (title_idx, title) in self.titles.iter().enumerate() {
             if title_idx != 0 {
-                print!("{}", vbar);
+                vbar.queue(w)?;
             }
             let width = title
                 .columns
@@ -239,23 +243,24 @@ impl<'t, T> ListView<'t, T> {
                 width,
                 align: Alignment::Center,
             };
-            spacing.print_str(
+            spacing.write_str(
+                w,
                 &self.columns[title.columns[0]].title,
                 &self.skin.headers[0].compound_style,
-            );
+            )?;
         }
         // separator line
-        queue!(stdout, MoveTo(self.area.left, self.area.top + 1))?;
+        queue!(w, MoveTo(self.area.left, self.area.top + 1))?;
         for (title_idx, title) in self.titles.iter().enumerate() {
             if title_idx != 0 {
-                print!("{}", cross);
+                cross.queue(w)?;
             }
             for (col_idx_idx, col_idx) in title.columns.iter().enumerate() {
                 if col_idx_idx > 0 {
-                    print!("{}", tee);
+                    tee.queue(w)?;
                 }
                 for _ in 0..self.columns[*col_idx].spacing.width {
-                    print!("{}", hbar);
+                    hbar.queue(w)?;
                 }
             }
         }
@@ -263,10 +268,10 @@ impl<'t, T> ListView<'t, T> {
         let mut row_idx = self.scroll as usize;
         let scrollbar = self.scrollbar();
         for y in 2..self.area.height {
-            queue!(stdout, MoveTo(self.area.left, self.area.top + y))?;
+            queue!(w, MoveTo(self.area.left, self.area.top + y))?;
             loop {
                 if row_idx == self.rows.len() {
-                    queue!(stdout, Clear(ClearType::UntilNewLine))?;
+                    queue!(w, Clear(ClearType::UntilNewLine))?;
                     break;
                 }
                 if self.rows[row_idx].displayed {
@@ -274,19 +279,19 @@ impl<'t, T> ListView<'t, T> {
                     for (col_idx, col) in self.columns.iter().enumerate() {
                         if col_idx != 0 {
                             if selected {
-                                print!("{}{}", Colored::Bg(self.selection_background), vbar);
-                            } else {
-                                print!("{}", vbar);
+                                queue!(w, SetBackgroundColor(self.selection_background))?;
                             }
+                            vbar.queue(w)?;
                         }
                         let cell = (col.extract)(&self.rows[row_idx].data);
                         if selected {
                             let mut style = cell.style.clone();
                             style.set_bg(self.selection_background);
-                            col.spacing.print_counted_str(&cell.con, cell.width, &style);
+                            col.spacing
+                                .write_counted_str(w, &cell.con, cell.width, &style)?;
                         } else {
                             col.spacing
-                                .print_counted_str(&cell.con, cell.width, cell.style);
+                                .write_counted_str(w, &cell.con, cell.width, cell.style)?;
                         }
                     }
                     row_idx += 1;
@@ -295,15 +300,22 @@ impl<'t, T> ListView<'t, T> {
                 row_idx += 1;
             }
             if let Some((sctop, scbottom)) = scrollbar {
-                queue!(stdout, MoveTo(sx, self.area.top + y))?;
+                queue!(w, MoveTo(sx, self.area.top + y))?;
                 let y = y - 2;
                 if sctop <= y && y <= scbottom {
-                    print!("{}", self.skin.scrollbar.thumb);
+                    self.skin.scrollbar.thumb.queue(w)?;
                 } else {
-                    print!("{}", self.skin.scrollbar.track);
+                    self.skin.scrollbar.track.queue(w)?;
                 }
             }
         }
+        Ok(())
+    }
+    /// display the whole list in its area
+    pub fn write(&self) -> Result<()> {
+        let mut stdout = stdout();
+        self.write_on(&mut stdout)?;
+        stdout.flush()?;
         Ok(())
     }
     /// return true if the last line of the list is visible

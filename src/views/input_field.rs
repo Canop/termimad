@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use crossterm::{cursor, queue, Attribute, KeyEvent};
+use crossterm::{cursor, input::KeyEvent, queue, style::Attribute};
 
 use crate::{Area, CompoundStyle, Error, Event};
 

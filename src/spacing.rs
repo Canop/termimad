@@ -1,4 +1,4 @@
-use crate::compound_style::CompoundStyle;
+use crate::{compound_style::CompoundStyle, errors::Result};
 use minimad::Alignment;
 
 #[derive(Debug, Clone, Copy)]
@@ -46,11 +46,20 @@ impl Spacing {
     pub fn completions_for(&self, inner_width: usize) -> (usize, usize) {
         Spacing::completions(self.align, inner_width, self.width)
     }
-    pub fn print_counted_str(&self, s: &str, str_width: usize, style: &CompoundStyle) {
+    pub fn write_counted_str<W>(
+        &self,
+        w: &mut W,
+        s: &str,
+        str_width: usize,
+        style: &CompoundStyle,
+    ) -> Result<()>
+    where
+        W: std::io::Write,
+    {
         if str_width >= self.width {
             // we must truncate
             let s = truncate(s, self.width);
-            print!("{}", style.apply_to(s));
+            style.queue_str(w, s)?;
         } else {
             // we must complete with spaces
             // This part could be written in a more efficient way
@@ -63,10 +72,14 @@ impl Spacing {
             for _ in 0..rp {
                 con.push(' ');
             }
-            print!("{}", style.apply_to(&con));
+            style.queue(w, con)?;
         }
+        Ok(())
     }
-    pub fn print_str(&self, s: &str, style: &CompoundStyle) {
-        self.print_counted_str(s, s.chars().count(), style);
+    pub fn write_str<W>(&self, w: &mut W, s: &str, style: &CompoundStyle) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        self.write_counted_str(w, s, s.chars().count(), style)
     }
 }

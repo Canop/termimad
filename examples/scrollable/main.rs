@@ -2,8 +2,12 @@
 //!   cargo run --example scrollable
 //!
 use crossterm::{
-    cursor::Hide, cursor::Show, input, queue, Color::*, EnterAlternateScreen, InputEvent::*,
-    KeyEvent::*, LeaveAlternateScreen, RawScreen,
+    cursor::Hide,
+    cursor::Show,
+    input::{input, InputEvent::*, KeyEvent::*},
+    queue,
+    screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
+    style::Color::*,
 };
 use std::io::{stderr, Write};
 use termimad::*;
@@ -14,7 +18,7 @@ fn run_app(skin: MadSkin) -> Result<()> {
     let _raw = RawScreen::into_raw_mode()?;
     queue!(w, Hide)?; // hiding the cursor
     let mut area = Area::full_screen();
-    area.pad(1, 1); // let's add some margin
+    //area.pad(1, 1); // let's add some margin
     area.pad_for_max_width(120); // we don't want a too wide text column
     let mut view = MadView::from(MD.to_owned(), area, skin);
     let mut events = input().read_sync();

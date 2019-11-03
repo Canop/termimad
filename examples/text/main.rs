@@ -1,4 +1,4 @@
-use crossterm::{execute, terminal, Color::*};
+use crossterm::{execute, style::Color::*, terminal};
 use std::io::Write;
 use termimad::*;
 

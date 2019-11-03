@@ -5,8 +5,11 @@
 //!
 
 use crossterm::{
-    cursor::Hide, cursor::Show, input, queue, Color::*, EnterAlternateScreen, InputEvent::*,
-    KeyEvent::*, LeaveAlternateScreen, RawScreen,
+    cursor,
+    input::{input, InputEvent::*, KeyEvent::*},
+    queue,
+    screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
+    style::Color::*,
 };
 use termimad::*;
 
@@ -40,7 +43,7 @@ where
 {
     queue!(w, EnterAlternateScreen)?;
     let _raw = RawScreen::into_raw_mode()?;
-    queue!(w, Hide)?; // hiding the cursor
+    queue!(w, cursor::Hide)?; // hiding the cursor
     let mut area = Area::full_screen();
     area.pad(1, 1); // let's add some margin
     area.pad_for_max_width(120); // we don't want a too wide text column
@@ -64,7 +67,7 @@ where
             }
         }
     }
-    queue!(w, Show)?; // we must restore the cursor
+    queue!(w, cursor::Show)?; // we must restore the cursor
     queue!(w, LeaveAlternateScreen)?;
     w.flush()?;
     Ok(user_char)

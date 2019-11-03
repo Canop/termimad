@@ -1,3 +1,8 @@
+<a name="v0.7.1"></a>
+### v0.7.1 - 2019-11-03
+- compatibility with crossterm 0.13
+- mouse support in stderr
+
 <a name="v0.7.0"></a>
 ### v0.7.0 - 2019-09-22
 - Displaying can be done on stderr or stdout, or in a subshell

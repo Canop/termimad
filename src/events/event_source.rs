@@ -1,5 +1,5 @@
 use crossbeam::channel::{unbounded, Receiver, Sender};
-use crossterm::{RawScreen, TerminalInput};
+use crossterm::{input::TerminalInput, screen::RawScreen};
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
@@ -44,7 +44,7 @@ impl EventSource {
     /// If desired, mouse support must be separately
     /// enabled:
     /// ```
-    /// use crossterm::{EnableMouseCapture, queue};
+    /// use crossterm::{input::EnableMouseCapture, queue};
     /// # use std::io::Write;
     /// # let mut w = std::io::stdout();
     /// queue!(w, EnableMouseCapture).unwrap();
@@ -52,7 +52,7 @@ impl EventSource {
     /// ```
     /// and disabled:
     /// ```
-    /// use crossterm::{DisableMouseCapture, queue};
+    /// use crossterm::{input::DisableMouseCapture, queue};
     /// # use std::io::Write;
     /// # let mut w = std::io::stdout();
     /// queue!(w, DisableMouseCapture).unwrap();
@@ -90,13 +90,8 @@ impl EventSource {
                     tx_events.send(event).unwrap();
                     let quit = rx_quit.recv().unwrap();
                     if quit {
-                        // Cleanly quitting this thread is necessary
-                        //  to ensure stdin is properly closed when
-                        //  we launch an external application in the same
-                        //  terminal
-                        // Disabling mouse mode is also necessary to let the
-                        //  terminal in a proper state.
-                        input.disable_mouse_mode().unwrap();
+                        // there's not much to clean anymore in the current
+                        // version
                         return;
                     }
                 }

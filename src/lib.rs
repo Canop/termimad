@@ -14,7 +14,7 @@ to your tastes or (better) to your application's configuration.
 
 
 ```rust
-use crossterm::{Color::*, Attribute::*};
+use crossterm::style::{Color::*, Attribute::*};
 use termimad::*;
 
 // start with the default skin

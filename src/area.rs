@@ -1,5 +1,5 @@
+
 use crossterm::terminal;
-use std::process;
 
 /// A default width which is used when we failed measuring the real terminal width
 const DEFAULT_TERMINAL_WIDTH: u16 = 50;
@@ -112,40 +112,10 @@ pub fn compute_scrollbar(
     ))
 }
 
-/// execute tput with the given argument and parse
-/// the output as a u16.
-///
-/// The arg should be "cols" or "lines"
-fn tput_value(arg: &str) -> Option<u16> {
-    match process::Command::new("tput").arg(arg).output() {
-        Ok(process::Output { stdout, .. }) => {
-            let value = stdout
-                .iter()
-                .map(|&b| b as u16)
-                .take_while(|&b| b >= 48 && b <= 58)
-                .fold(0, |v, b| v * 10 + (b - 48));
-            if value > 0 {
-                Some(value)
-            } else {
-                None
-            }
-        }
-        _ => None,
-    }
-}
-
 /// Return a (width, height) with the dimensions of the available
 /// terminal in characters.
 ///
 pub fn terminal_size() -> (u16, u16) {
     let size = terminal::size();
-    #[cfg(unix)]
-    {
-        if size.is_err() {
-            if let (Some(w), Some(h)) = (tput_value("cols"), tput_value("lines")) {
-                return (w, h);
-            }
-        }
-    }
     size.unwrap_or((DEFAULT_TERMINAL_WIDTH, DEFAULT_TERMINAL_HEIGHT))
 }

@@ -1,4 +1,4 @@
-use crossterm::{InputEvent, KeyEvent, MouseButton, MouseEvent};
+use crossterm::input::{InputEvent, KeyEvent, MouseButton, MouseEvent};
 
 /// a valid user event
 #[derive(Debug, Clone)]

@@ -1,10 +1,14 @@
 use std::fmt::{self, Display};
 
 use crossterm::{
-    queue, Attribute, Color, ContentStyle, PrintStyledContent, SetBg, SetFg, StyledContent,
+    queue,
+    style::{
+        Attribute, Color, ContentStyle, PrintStyledContent, SetBackgroundColor, SetForegroundColor,
+        StyledContent,
+    },
 };
 
-use crate::errors::Result;
+use crate::{errors::Result, styled_char::StyledChar};
 
 /// A style which may be applied to a compound
 #[derive(Default, Clone)]
@@ -29,15 +33,15 @@ impl CompoundStyle {
 
     /// Get an new instance of `CompoundStyle`
     pub fn new(
-        fg_color: Option<Color>,
-        bg_color: Option<Color>,
-        attrs: Vec<Attribute>,
+        foreground_color: Option<Color>,
+        background_color: Option<Color>,
+        attributes: Vec<Attribute>,
     ) -> CompoundStyle {
         CompoundStyle {
             object_style: ContentStyle {
-                fg_color,
-                bg_color,
-                attrs,
+                foreground_color,
+                background_color,
+                attributes,
             },
         }
     }
@@ -72,41 +76,49 @@ impl CompoundStyle {
 
     /// Set the foreground color to the passed color.
     pub fn set_fg(&mut self, color: Color) {
-        self.object_style.fg_color = Some(color);
+        self.object_style.foreground_color = Some(color);
     }
 
     /// Set the background color to the passed color.
     pub fn set_bg(&mut self, color: Color) {
-        self.object_style.bg_color = Some(color);
+        self.object_style.background_color = Some(color);
     }
 
     /// Set the colors to the passed ones
     pub fn set_fgbg(&mut self, fg: Color, bg: Color) {
-        self.object_style.fg_color = Some(fg);
-        self.object_style.bg_color = Some(bg);
+        self.object_style.foreground_color = Some(fg);
+        self.object_style.background_color = Some(bg);
     }
 
     /// Add an `Attribute`. Like italic, underlined or bold.
     pub fn add_attr(&mut self, attr: Attribute) {
-        self.object_style.attrs.push(attr);
+        self.object_style.attributes.push(attr);
     }
 
     /// Add the defined characteristics of `other` to self, overwriting
     ///  its own one when defined
     pub fn overwrite_with(&mut self, other: &CompoundStyle) {
-        self.object_style.fg_color = other.object_style.fg_color.or(self.object_style.fg_color);
-        self.object_style.bg_color = other.object_style.bg_color.or(self.object_style.bg_color);
-        self.object_style.attrs.extend(&other.object_style.attrs);
+        self.object_style.foreground_color = other
+            .object_style
+            .foreground_color
+            .or(self.object_style.foreground_color);
+        self.object_style.background_color = other
+            .object_style
+            .background_color
+            .or(self.object_style.background_color);
+        self.object_style
+            .attributes
+            .extend(&other.object_style.attributes); // TODO duplicates ?
     }
 
     #[inline(always)]
     pub fn get_fg(&self) -> Option<Color> {
-        self.object_style.fg_color
+        self.object_style.foreground_color
     }
 
     #[inline(always)]
     pub fn get_bg(&self) -> Option<Color> {
-        self.object_style.bg_color
+        self.object_style.background_color
     }
 
     /// Write a string several times with the line compound style
@@ -150,8 +162,8 @@ impl CompoundStyle {
     where
         W: std::io::Write,
     {
-        Ok(if let Some(fg) = self.object_style.fg_color {
-            queue!(w, SetFg(fg))?;
+        Ok(if let Some(fg) = self.object_style.foreground_color {
+            queue!(w, SetForegroundColor(fg))?;
         })
     }
 
@@ -159,8 +171,12 @@ impl CompoundStyle {
     where
         W: std::io::Write,
     {
-        Ok(if let Some(bg) = self.object_style.bg_color {
-            queue!(w, SetBg(bg))?;
+        Ok(if let Some(bg) = self.object_style.background_color {
+            queue!(w, SetBackgroundColor(bg))?;
         })
+    }
+
+    pub fn style_char(&self, nude_char: char) -> StyledChar {
+        StyledChar::new(self.clone(), nude_char)
     }
 }

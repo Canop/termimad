@@ -1,6 +1,6 @@
-use std::{self, fmt};
+use std::{io::Write, fmt};
 
-use crossterm::{Attribute, Color};
+use crossterm::style::{Attribute, Color};
 use minimad::{Alignment, Composite, CompositeStyle, Compound, Line, MAX_HEADER_DEPTH};
 
 use crate::area::{terminal_size, Area};
@@ -176,10 +176,24 @@ impl MadSkin {
     }
 
     pub fn write_in_area(&self, markdown: &str, area: &Area) -> Result<()> {
+        let mut w = std::io::stdout();
+        self.write_in_area_on(&mut w, markdown, area)?;
+        w.flush()?;
+        Ok(())
+    }
+
+    pub fn write_in_area_on<W>(
+        &self,
+        w: &mut W,
+        markdown: &str,
+        area: &Area,
+    ) -> Result<()>
+        where W: std::io::Write
+    {
         let text = self.area_text(markdown, area);
         let mut view = TextView::from(&area, &text);
         view.show_scrollbar = false;
-        Ok(view.write()?)
+        Ok(view.write_on(w)?)
     }
 
     pub fn print_inline(&self, src: &str) {

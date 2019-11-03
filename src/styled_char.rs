@@ -1,6 +1,9 @@
 use std::fmt::{self, Display};
 
-use crossterm::{queue, Color, PrintStyledContent, StyledContent};
+use crossterm::{
+    queue,
+    style::{Color, PrintStyledContent, StyledContent},
+};
 
 use crate::compound_style::CompoundStyle;
 use crate::errors::Result;
