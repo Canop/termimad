@@ -1,5 +1,5 @@
 use crossbeam::channel::{unbounded, Receiver, Sender};
-use crossterm::{input::TerminalInput, screen::RawScreen};
+use crossterm::{input::{self, TerminalInput}, screen::RawScreen};
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
@@ -90,8 +90,7 @@ impl EventSource {
                     tx_events.send(event).unwrap();
                     let quit = rx_quit.recv().unwrap();
                     if quit {
-                        // there's not much to clean anymore in the current
-                        // version
+                        input::stop_reading_thread();
                         return;
                     }
                 }

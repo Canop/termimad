@@ -1,3 +1,7 @@
+<a name="v0.7.2"></a>
+### v0.7.2 - 2019-11-04
+- incorporate crossterm 0.13.2 which fixes a regression on input reader
+
 <a name="v0.7.1"></a>
 ### v0.7.1 - 2019-11-03
 - compatibility with crossterm 0.13
