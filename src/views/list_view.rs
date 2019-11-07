@@ -130,7 +130,7 @@ impl<'t, T> ListView<'t, T> {
     /// return the height which is available for rows
     #[inline(always)]
     pub fn tbody_height(&self) -> i32 {
-        self.area.height as i32 - 2
+        i32::from(self.area.height) - 2
     }
     /// return an option which when filled contains
     ///  a tupple with the top and bottom of the vertical
@@ -177,7 +177,8 @@ impl<'t, T> ListView<'t, T> {
     /// recompute the widths of all columns.
     /// This should be called when the area size is modified
     pub fn update_dimensions(&mut self) {
-        let available_width: i32 = self.area.width as i32
+        let available_width: i32 =
+            i32::from(self.area.width)
             - (self.columns.len() as i32 - 1) // we remove the separator
             - 1; // we remove 1 to let space for the scrollbar
         let sum_min_widths: i32 = self.columns.iter().map(|c| c.min_width as i32).sum();

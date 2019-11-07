@@ -43,3 +43,9 @@ impl<'s> FmtComposite<'s> {
         self.composite.compounds.push(compound);
     }
 }
+
+impl Default for FmtComposite<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
+}

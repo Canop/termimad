@@ -115,4 +115,8 @@ The code for this example is in examples/scrollable. To read the whole text just
 * Be careful that some colors aren't displayable on all terminals. The default color set of your application should not include arbitrary RGB colors.
 * If a feature is missing, or you don't know how to use some part, come and ping me on my chat during West European hours.
 
-[broot](https://github.com/Canop/broot) is a real application using Termimad to handle its help screen (if you're the author of another one, please tell me), you might want to see how it does it.
+[broot](https://github.com/Canop/broot) is a real application using Termimad to handle its help screen, you might want to see how it does it.
+
+[whalespotter](https://github.com/Canop/whalespotter) has been designed specifically to showcase Termimad components in a real application.
+
+If you're the author of another application using Termimad, please tell me.

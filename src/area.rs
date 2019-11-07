@@ -1,4 +1,3 @@
-
 use crossterm::terminal;
 
 /// A default width which is used when we failed measuring the real terminal width
@@ -86,7 +85,7 @@ impl Area {
         scroll: i32, // 0 for no scroll, positive if scrolled
         content_height: i32,
     ) -> Option<(u16, u16)> {
-        compute_scrollbar(scroll, content_height, self.height as i32)
+        compute_scrollbar(scroll, content_height, i32::from(self.height))
     }
 }
 

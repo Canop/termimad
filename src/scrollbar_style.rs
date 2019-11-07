@@ -20,3 +20,9 @@ impl ScrollBarStyle {
         }
     }
 }
+
+impl Default for ScrollBarStyle {
+    fn default() -> Self {
+        Self::new()
+    }
+}

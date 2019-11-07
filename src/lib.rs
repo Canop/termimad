@@ -2,8 +2,8 @@
 or scrollable wrapped markdown texts in the terminal.
 
 In order to use Termimad you typically need
-* some *markdown*, a string which you can have loaded or dynamically built
-* a *skin*, which defines the colors and style attributes of every parts
+* some *markdown*: a string which you can have loaded or dynamically built
+* a *skin*: which defines the colors and style attributes of every parts
 
 Additionnaly, you might define an *area* of the screen in which to draw (and maybe scroll).
 
@@ -21,7 +21,7 @@ use termimad::*;
 let mut skin = MadSkin::default();
 // let's decide bold is in light gray
 skin.bold.set_fg(gray(20));
-// let's make strikeout not striked out but red
+// let's make strikeout not striked out but red, with no specific background, and bold
 skin.strikeout = CompoundStyle::new(Some(Red), None, vec![Bold]);
 ```
 
@@ -49,7 +49,7 @@ A multi-line markdown string can be printed the same way than an *inline* snippe
 eprintln!("{}", skin.term_text(my_markdown));
 ```
 
-`MadSkin` contains other functions to prepare a text for no specific size or for one which isn't the terminal's width.
+[`MadSkin`](struct.MadSkin.html) contains other functions to prepare a text for no specific size or for one which isn't the terminal's width. It also offers several functions to print it either on `stdout` or on a given `Write`.
 
 # Display a text, maybe scroll it
 
@@ -66,7 +66,7 @@ let mut view = MadView::from(markdown, area, skin);
 view.write().unwrap();
 ```
 
-If you don't want give ownership of the skin, markdown and area, you may prefer to use a [`TextView`](struct.TextView.html).
+If you don't want to give ownership of the skin, markdown and area, you may prefer to use a [`TextView`](struct.TextView.html).
 
 You may see how to write a text viewer responding to key inputs to scroll a markdown text in [the scrollable example](https://github.com/Canop/termimad/blob/master/examples/scrollable/main.rs).
 

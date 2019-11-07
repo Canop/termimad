@@ -43,8 +43,7 @@ Here's the code to print this markdown block in the terminal:
 "#;
 
 fn print_direct(skin: &MadSkin) {
-    println!("\n");
-    println!("{}", skin.term_text(MD));
+    skin.print_text(MD);
 }
 
 fn print_in_text_view(skin: MadSkin) {

@@ -1,5 +1,8 @@
 use crossbeam::channel::{unbounded, Receiver, Sender};
-use crossterm::{input::{self, TerminalInput}, screen::RawScreen};
+use crossterm::{
+    input::{self, TerminalInput},
+    screen::RawScreen,
+};
 use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,

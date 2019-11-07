@@ -162,18 +162,20 @@ impl CompoundStyle {
     where
         W: std::io::Write,
     {
-        Ok(if let Some(fg) = self.object_style.foreground_color {
+        if let Some(fg) = self.object_style.foreground_color {
             queue!(w, SetForegroundColor(fg))?;
-        })
+        }
+        Ok(())
     }
 
     pub fn queue_bg<W>(&self, w: &mut W) -> Result<()>
     where
         W: std::io::Write,
     {
-        Ok(if let Some(bg) = self.object_style.background_color {
+        if let Some(bg) = self.object_style.background_color {
             queue!(w, SetBackgroundColor(bg))?;
-        })
+        }
+        Ok(())
     }
 
     pub fn style_char(&self, nude_char: char) -> StyledChar {

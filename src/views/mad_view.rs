@@ -65,6 +65,6 @@ impl MadView {
     /// set the scroll amount.
     /// lines_count can be negative
     pub fn try_scroll_pages(&mut self, pages_count: i32) {
-        self.try_scroll_lines(pages_count * self.area.height as i32);
+        self.try_scroll_lines(pages_count * i32::from(self.area.height));
     }
 }

@@ -1,4 +1,4 @@
-use std::{io::Write, fmt};
+use std::{fmt, io::Write};
 
 use crossterm::style::{Attribute, Color};
 use minimad::{Alignment, Composite, CompositeStyle, Compound, Line, MAX_HEADER_DEPTH};
@@ -182,13 +182,9 @@ impl MadSkin {
         Ok(())
     }
 
-    pub fn write_in_area_on<W>(
-        &self,
-        w: &mut W,
-        markdown: &str,
-        area: &Area,
-    ) -> Result<()>
-        where W: std::io::Write
+    pub fn write_in_area_on<W>(&self, w: &mut W, markdown: &str, area: &Area) -> Result<()>
+    where
+        W: std::io::Write,
     {
         let text = self.area_text(markdown, area);
         let mut view = TextView::from(&area, &text);
@@ -196,11 +192,47 @@ impl MadSkin {
         Ok(view.write_on(w)?)
     }
 
+    /// do a `print!` of the given src interpreted as a markdown span
     pub fn print_inline(&self, src: &str) {
         print!("{}", self.inline(src));
     }
+    /// do a `print!` of the given src interpreted as a markdown text
     pub fn print_text(&self, src: &str) {
         print!("{}", self.term_text(src));
+    }
+
+    /// parse the given src as a markdown snippet and write it on
+    /// the given `Write`
+    pub fn write_inline_on<W>(&self, w: &mut W, src: &str) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        Ok(write!(w, "{}", self.inline(src))?)
+    }
+
+    /// parse the given src as a markdown text and write it on
+    /// the given `Write`
+    pub fn write_text_on<W>(&self, w: &mut W, src: &str) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        Ok(write!(w, "{}", self.term_text(src))?)
+    }
+
+    /// parse the given src as a markdown snippet and write it on stdout
+    pub fn write_inline(&self, src: &str) -> Result<()> {
+        let mut w = std::io::stdout();
+        self.write_inline_on(&mut w, src)?;
+        w.flush()?;
+        Ok(())
+    }
+
+    /// parse the given src as a markdown text and write it on stdout
+    pub fn write_text(&self, src: &str) -> Result<()> {
+        let mut w = std::io::stdout();
+        self.write_text_on(&mut w, src)?;
+        w.flush()?;
+        Ok(())
     }
 
     /// Write a composite.
