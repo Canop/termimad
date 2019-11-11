@@ -1,5 +1,7 @@
 
-### master
+<a name="v0.7.4"></a>
+### v0.7.4 - 2019-11-11
+- introduce inline templates, and especially the `mad_print_inline!` and `mad_write_inline!` macros
 - add functions to shrink or extend a composite to a given width, using internal elision if possible
 
 <a name="v0.7.3"></a>

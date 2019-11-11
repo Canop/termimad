@@ -33,6 +33,7 @@ pub struct MadSkin {
     pub bullet: StyledChar,
     pub quote_mark: StyledChar,
     pub horizontal_rule: StyledChar,
+    pub ellipsis: CompoundStyle,
 }
 
 impl Default for MadSkin {
@@ -59,6 +60,7 @@ impl Default for MadSkin {
                 '▐',
             ),
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
+            ellipsis: CompoundStyle::default(),
         };
         skin.code_block.set_bg(gray(4));
         for h in &mut skin.headers {
@@ -124,6 +126,9 @@ impl MadSkin {
     /// return the style appliable to a given compound.
     /// It's a composition of the various appliable base styles.
     fn compound_style(&self, line_style: &LineStyle, compound: &Compound<'_>) -> CompoundStyle {
+        if *compound.src == *crate::fit::ELLIPSIS {
+            return self.ellipsis.clone();
+        }
         let mut os = line_style.compound_style.clone();
         if compound.italic {
             os.overwrite_with(&self.italic);
@@ -199,6 +204,44 @@ impl MadSkin {
     /// do a `print!` of the given src interpreted as a markdown text
     pub fn print_text(&self, src: &str) {
         print!("{}", self.term_text(src));
+    }
+
+    pub fn print_composite(&self, composite: Composite<'_>) {
+        print!("{}", FmtInline{
+            skin: self,
+            composite: FmtComposite::from(composite, self),
+        });
+    }
+
+    pub fn write_composite<W>(&self, w: &mut W, composite: Composite<'_>) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        Ok(write!(w, "{}", FmtInline{
+            skin: self,
+            composite: FmtComposite::from(composite, self),
+        })?)
+    }
+
+    /// write a composite filling the given width
+    ///
+    /// Ellision or truncation may occur, but no wrap
+    pub fn write_composite_fill<W>(
+        &self,
+        w: &mut W,
+        composite: Composite<'_>,
+        width: usize,
+        align: Alignment,
+    ) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        let mut fc = FmtComposite::from(composite, self);
+        fc.fill_width(width, align, self);
+        Ok(write!(w, "{}", FmtInline{
+            skin: self,
+            composite: fc,
+        })?)
     }
 
     /// parse the given src as a markdown snippet and write it on

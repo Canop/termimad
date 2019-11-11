@@ -107,15 +107,43 @@ The code for this example is in examples/scrollable. To read the whole text just
 
     cargo run --example scrollable
 
+### Templates
+
+In order to separate the rendering format from the content, the `format!` macro is not always a good solution because you may not be sure the content is free of characters which may mess the markdown.
+
+A solution is to use one of the templating functions or macros.
+
+Example:
+
+```
+mad_print_inline!(
+	&skin,
+	"**$0 formula:** *$1*", // the markdown template, interpreted once
+	"Disk",  // fills $0
+	"2*π*r", // fills $1. Note that the stars don't mess the markdown
+);
+```
+
+![mad_print_inline](doc/mad_print_inline.png)
+
+Main difference with using `print!(format!( ... ))`:
+* the markdown parsing and template building are done only once (using `lazy_static` internally)
+* the given values aren't interpreted as markdown fragments and don't impact the style
+* arguments can be omited, repeated, given in any order
+* no support for fmt parameters or arguments other than `&str` *(in the current version)*
+
+You'll find more examples and advice in the *templates* example.
+
+Note that there's no macro yet supporting templates for whole markdown *texts* but they should be available soon.
 
 ## Advices to get started
 
-* Start by reading the examples (in `/examples`): they cover the whole API and especially all the skin definition functions. They also show how you can use the alternate screen and scroll a page.
+* Start by reading the examples (in `/examples`): they cover almost the whole API, including templates, how to use an alternate screen or scroll the page, etc.
 * If you want to see how some file would look with Termimad, you may try the cli [Clima](https://github.com/Canop/clima).
 * Be careful that some colors aren't displayable on all terminals. The default color set of your application should not include arbitrary RGB colors.
 * If a feature is missing, or you don't know how to use some part, come and ping me on my chat during West European hours.
 
-[broot](https://github.com/Canop/broot) is a real application using Termimad to handle its help screen, you might want to see how it does it.
+[broot](https://github.com/Canop/broot) is a real application using Termimad, you might want to see how it does it.
 
 [whalespotter](https://github.com/Canop/whalespotter) has been designed specifically to showcase Termimad components in a real application.
 

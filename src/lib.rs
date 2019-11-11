@@ -70,12 +70,44 @@ If you don't want to give ownership of the skin, markdown and area, you may pref
 
 You may see how to write a text viewer responding to key inputs to scroll a markdown text in [the scrollable example](https://github.com/Canop/termimad/blob/master/examples/scrollable/main.rs).
 
+# Templates
+
+In order to separate the rendering format from the content, the `format!` macro is not always a good solution because you may not be sure the content is free of characters which may mess the markdown.
+
+A solution is to use one of the templating functions or macros.
+
+Example:
+
+```
+mad_print_inline!(
+	&skin,
+	"**$0 formula:** *$1*", // the markdown template, interpreted once
+	"Disk",  // fills $0
+	"2*π*r", // fills $1. Note that the stars don't mess the markdown
+);
+```
+
+Main difference with using `print!(format!( ... ))`:
+* the markdown parsing and template building are done only once (using `lazy_static` internally)
+* the given values aren't interpreted as markdown fragments and don't impact the style
+* arguments can be omited, repeated, given in any order
+* no support for fmt parameters or arguments other than `&str` *(in the current version)*
+
+You'll find more examples and advice in the *templates* example.
+
+Note that there's no macro yet supporting templates for whole markdown *texts* but they should be available soon.
+
+# Examples
+
 The repository contains several other examples, which hopefully cover the whole API while being simple enough. It's recommended you start by trying them or at least glance at their code.
 
 */
 
 #[macro_use]
 extern crate lazy_static;
+
+#[macro_use]
+extern crate minimad;
 
 mod area;
 mod code;
@@ -85,9 +117,11 @@ mod compound_style;
 mod displayable_line;
 mod errors;
 mod events;
+mod fit;
 mod inline;
 mod line;
 mod line_style;
+mod macros;
 mod scrollbar_style;
 mod skin;
 mod spacing;
@@ -103,6 +137,7 @@ pub use composite::FmtComposite;
 pub use compound_style::CompoundStyle;
 pub use errors::{Error, Result};
 pub use events::{Event, EventSource};
+pub use fit::Fitter;
 pub use inline::FmtInline;
 pub use line::FmtLine;
 pub use line_style::LineStyle;
