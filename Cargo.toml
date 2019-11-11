@@ -12,10 +12,11 @@ readme = "README.md"
 
 [dependencies]
 lazy_static = "1.4"
-minimad = "0.4.1"
+minimad = "0.4.2"
 crossterm = "0.13.2"
 crossbeam = "0.7"
 thiserror = "1.0.4"
 
 [patch.crates-io]
+# minimad = { path = "../minimad" }
 # crossterm = { path = "../crossterm-rs/crossterm" }

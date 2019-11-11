@@ -1,4 +1,7 @@
 
+### master
+- add functions to shrink or extend a composite to a given width, using internal elision if possible
+
 <a name="v0.7.3"></a>
 ### v0.7.3 - 2019-11-08
 - add easy alternate to `skin.print_text` handling IO error
