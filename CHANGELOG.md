@@ -1,3 +1,8 @@
+
+<a name="v0.7.3"></a>
+### v0.7.3 - 2019-11-08
+- add easy alternate to `skin.print_text` handling IO error
+
 <a name="v0.7.2"></a>
 ### v0.7.2 - 2019-11-04
 - incorporate crossterm 0.13.2 which fixes a regression on input reader
