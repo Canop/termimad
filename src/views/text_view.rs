@@ -94,6 +94,7 @@ impl<'a, 't> TextView<'a, 't> {
                 write!(w, "{}", &dl)?;
                 i += 1;
             } else {
+                self.text.skin.paragraph.compound_style.queue_bg(w)?;
                 queue!(w, Clear(ClearType::UntilNewLine))?;
             }
             if let Some((sctop, scbottom)) = scrollbar {
