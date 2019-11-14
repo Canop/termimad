@@ -177,7 +177,7 @@ impl MadSkin {
     ///
     /// Code blocs will be right justified
     pub fn area_text<'k, 's>(&'k self, src: &'s str, area: &Area) -> FmtText<'k, 's> {
-        FmtText::from(self, src, Some(area.width as usize))
+        FmtText::from(self, src, Some(area.width as usize - 1))
     }
 
     pub fn write_in_area(&self, markdown: &str, area: &Area) -> Result<()> {

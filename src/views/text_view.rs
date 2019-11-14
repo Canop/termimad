@@ -43,6 +43,7 @@ pub struct TextView<'a, 't> {
 }
 
 impl<'a, 't> TextView<'a, 't> {
+
     /// make a displayed text, that is a text in an area
     pub fn from(area: &'a Area, text: &'t FmtText<'_, '_>) -> TextView<'a, 't> {
         TextView {

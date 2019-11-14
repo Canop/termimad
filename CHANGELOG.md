@@ -1,3 +1,7 @@
+
+### Master
+- fix skin's background not applied on empty lines at end of text_view
+
 <a name="v0.7.5"></a>
 ### v0.7.5 - 2019-11-13
 - fix skin's background not applied on empty lines at end of text_view
