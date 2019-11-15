@@ -79,6 +79,10 @@ A solution is to use one of the templating functions or macros.
 Example:
 
 ```
+# #[macro_use] extern crate minimad;
+# #[macro_use] extern crate lazy_static;
+# use termimad::*;
+# let skin = MadSkin::default();
 mad_print_inline!(
 	&skin,
 	"**$0 formula:** *$1*", // the markdown template, interpreted once

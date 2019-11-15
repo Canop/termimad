@@ -1,6 +1,8 @@
 
-### Master
+<a name="v0.7.6"></a>
+### v0.7.6 - 2019-11-15
 - fix skin's background not applied on empty lines at end of text_view
+- use version minimad 0.4.3 to fix case of code not detected when following italic without space in between
 
 <a name="v0.7.5"></a>
 ### v0.7.5 - 2019-11-13
