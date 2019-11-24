@@ -110,16 +110,24 @@ impl<'a, 't> TextView<'a, 't> {
         Ok(())
     }
 
-    /// set the scroll amount.
-    /// lines_count can be negative
-    pub fn try_scroll_lines(&mut self, lines_count: i32) {
-        self.scroll = (self.scroll + lines_count)
+    /// set the scroll position but makes it fit into allowed positions.
+    /// Return the actual scroll.
+    pub fn set_scroll(&mut self, scroll: i32) -> i32 {
+        self.scroll = scroll
             .min(self.content_height() - i32::from(self.area.height) + 1)
             .max(0);
+        self.scroll
     }
-    /// set the scroll amount.
+
+    /// change the scroll position
+    /// lines_count can be negative
+    pub fn try_scroll_lines(&mut self, lines_count: i32) -> i32{
+        self.set_scroll(self.scroll + lines_count)
+    }
+
+    /// change the scroll position
     /// pages_count can be negative
-    pub fn try_scroll_pages(&mut self, pages_count: i32) {
-        self.try_scroll_lines(pages_count * i32::from(self.area.height));
+    pub fn try_scroll_pages(&mut self, pages_count: i32) -> i32{
+        self.try_scroll_lines(pages_count * i32::from(self.area.height))
     }
 }

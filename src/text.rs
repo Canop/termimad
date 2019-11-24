@@ -28,19 +28,21 @@ impl<'k, 's> FmtText<'k, 's> {
     /// This can be called directly or using one of the skin helper
     /// method.
     pub fn from(skin: &'k MadSkin, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
-        let mut mt = Text::from(src);
-        let mut lines = mt
+        let mt = Text::from(src);
+        Self::from_text(skin, mt, width)
+    }
+    /// build a fmt_text from a minimad text
+    pub fn from_text(skin: &'k MadSkin, mut text: Text<'s>, width: Option<usize>) -> FmtText<'k, 's> {
+        let mut lines = text
             .lines
             .drain(..)
             .map(|mline| FmtLine::from(mline, skin))
             .collect();
-
         tbl::fix_all_tables(&mut lines, width.unwrap_or(std::usize::MAX));
         code::justify_blocks(&mut lines);
         if let Some(width) = width {
             lines = wrap::hard_wrap_lines(lines, width);
         }
-
         FmtText { skin, lines, width }
     }
 }

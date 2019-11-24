@@ -1,3 +1,10 @@
+/*!
+This example demonstrates the use of templates for building
+and displaying short snippets (called "inline").
+
+You execute this example with
+     cargo run --example inline-template
+*/
 use std::io::Write;
 use crossterm::style::{Attribute::*, Color::*};
 
@@ -10,7 +17,6 @@ extern crate lazy_static;
 #[macro_use]
 extern crate minimad;
 
-/// cargo run --example templates
 fn main() -> Result<()> {
     let mut skin = MadSkin::default();
     skin.paragraph.set_bg(ansi(17));

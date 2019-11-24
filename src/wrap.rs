@@ -111,16 +111,16 @@ pub fn hard_wrap_composite<'s>(
         // now we try to see if we can move back the cut to the last space
         if let Some(diff) = ignored_cut_back {
             if diff + dst_composite.visible_length < width {
-                composites
+                let tail = composites
                     .last_mut()
                     .unwrap()
                     .composite
                     .compounds
                     .last_mut()
                     .unwrap()
-                    .end -= diff;
+                    .cut_tail(diff);
                 composites.last_mut().unwrap().visible_length -= diff;
-                dst_composite.composite.compounds[0].start -= diff;
+                dst_composite.composite.compounds.insert(0, tail);
                 dst_composite.visible_length += diff;
             }
         }

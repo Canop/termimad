@@ -1,4 +1,8 @@
 
+<a name="v0.8.0"></a>
+### v0.8.0 - 2019-11-24
+- Templates allow going further in separating form from content
+
 <a name="v0.7.6"></a>
 ### v0.7.6 - 2019-11-15
 - fix skin's background not applied on empty lines at end of text_view

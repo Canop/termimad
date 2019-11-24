@@ -111,7 +111,11 @@ The code for this example is in examples/scrollable. To read the whole text just
 
 In order to separate the rendering format from the content, the `format!` macro is not always a good solution because you may not be sure the content is free of characters which may mess the markdown.
 
+A template is to markdown what a prepared statement is to SQL: interpreted once and preventing the content to be interpreted as parts of the structure.
+
 A solution is to use one of the templating functions or macros.
+
+#### Inline Templates
 
 Example:
 
@@ -132,9 +136,100 @@ Main difference with using `print!(format!( ... ))`:
 * arguments can be omited, repeated, given in any order
 * no support for fmt parameters or arguments other than `&str` *(in the current version)*
 
-You'll find more examples and advice in the *templates* example.
+Inline templates are especially convenient combined with automated extansion of ellipsis, for filling a field in a terminal application.
 
-Note that there's no macro yet supporting templates for whole markdown *texts* but they should be available soon.
+You'll find more examples and advice in the *inline-template* example.
+
+#### Text Template
+
+When you want to fill a multi-line area, for example the help page of your terminal application, you may use a text template.
+
+A template defines placeholders as `${name}` which you may fill when using it.
+
+For example
+
+```
+let text_template = TextTemplate::from(r#"
+	# ${app-name} v${app-version}
+	It is *very* ${adj}.
+	"#);
+let mut expander = text_template.expander();
+expander
+	.set("app-name", "MyApp")
+	.set("adj", "pretty")
+	.set("app-version", "42.5.3");
+let text = expander.expand();
+let fmt_text = FmtText::from_text(&skin, text, None);
+println!("{}", &fmt_text);
+
+```
+
+This would render like this:
+
+![text_template_01](doc/text_template_01.png)
+
+The values you set with `set` aren't parsed as markdown, so they may freely contain stars or backquotes.
+
+A template is reusable and can be defined from a text content or any string.
+
+By using *sub-templates*, you may handle repetitions. They're handy for lists or tables.
+
+For example
+
+```
+let text_template = TextTemplate::from(r#"
+	|:-:|:-:|:-:|
+	|**name**|**path**|**description**|
+	|-:|:-:|:-|
+	${module-rows
+	|**${module-name}**|`${app-version}/${module-key}`|${module-description}|
+	}
+	|-|-|-|
+	"#);
+let mut expander = text_template.expander();
+expander
+	.set("app-version", "2");
+expander.sub("module-rows")
+	.set("module-name", "lazy-regex")
+	.set("module-key", "lrex")
+	.set("module-description", "eases regexes");
+expander.sub("module-rows")
+	.set("module-name", "termimad")
+	.set("module-key", "tmd")
+	.set_md("module-description", "do things on *terminal*");
+```
+
+to get
+
+![text_template_02](doc/text_template_02.png)
+
+On this example, you can note that
+* `sub("module-rows")` gets an expander for the sub template called `module-rows`
+* `set_md` can be used when you want to insert not just a raw uninterpreted string but some inline markdown.
+* you don't need to fill global placeholders again (here `${app-version}).
+
+If you want to insert a block of code, you may use `set_lines` which applies the line style to all passed lines.
+
+For example
+
+```
+let text_template = TextTemplate::from(r#"
+	## Example of a code block
+	${some-function}
+	"#);
+let mut expander = text_template.expander();
+expander.set_lines("some-function", r#"
+	fun test(a rational) {
+	irate(a)
+	}
+	"#);
+```
+
+to get
+
+![text_template_03](doc/text_template_03.png)
+
+You'll find more text template functions in the documentation and in the example (run `cargo run --example text_template`).
 
 ## Advices to get started
 
