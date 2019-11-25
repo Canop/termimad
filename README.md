@@ -109,11 +109,13 @@ The code for this example is in examples/scrollable. To read the whole text just
 
 ### Templates
 
-In order to separate the rendering format from the content, the `format!` macro is not always a good solution because you may not be sure the content is free of characters which may mess the markdown.
+In order to separate the rendering format from the content, you may want to have some constant markdown and fill some placeholders with dynamic items.
 
-A template is to markdown what a prepared statement is to SQL: interpreted once and preventing the content to be interpreted as parts of the structure.
+The `format!` macro is not always a good solution for that because you may not be sure the content is free of characters which may mess the markdown.
 
 A solution is to use one of the templating functions or macros.
+
+A template is to markdown what a prepared statement is to SQL: interpreted once and preventing the content to be interpreted as parts of the structure.
 
 #### Inline Templates
 
@@ -130,7 +132,7 @@ mad_print_inline!(
 
 ![mad_print_inline](doc/mad_print_inline.png)
 
-Main difference with using `print!(format!( ... ))`:
+Main difference with using `skin.print_inline(format!( ... ))` to build some markdown and parse it:
 * the markdown parsing and template building are done only once (using `lazy_static` internally)
 * the given values aren't interpreted as markdown fragments and don't impact the style
 * arguments can be omited, repeated, given in any order
@@ -206,7 +208,7 @@ to get
 On this example, you can note that
 * `sub("module-rows")` gets an expander for the sub template called `module-rows`
 * `set_md` can be used when you want to insert not just a raw uninterpreted string but some inline markdown.
-* you don't need to fill global placeholders again (here `${app-version}).
+* you don't need to fill global placeholders again (here `${app-version}`).
 
 If you want to insert a block of code, you may use `set_lines` which applies the line style to all passed lines.
 
