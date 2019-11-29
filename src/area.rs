@@ -11,7 +11,7 @@ pub trait AreaContent {
 }
 
 /// A rectangular part of the screen
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Area {
     pub left: u16,
     pub top: u16,

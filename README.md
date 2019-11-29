@@ -138,7 +138,7 @@ Main difference with using `skin.print_inline(format!( ... ))` to build some mar
 * arguments can be omited, repeated, given in any order
 * no support for fmt parameters or arguments other than `&str` *(in the current version)*
 
-Inline templates are especially convenient combined with automated extansion of ellipsis, for filling a field in a terminal application.
+Inline templates are especially convenient combined with automated expansion or ellipsis, for filling a field in a terminal application.
 
 You'll find more examples and advice in the *inline-template* example.
 
@@ -217,7 +217,7 @@ For example
 ```
 let text_template = TextTemplate::from(r#"
 	## Example of a code block
-	${some-function}
+		${some-function}
 	"#);
 let mut expander = text_template.expander();
 expander.set_lines("some-function", r#"

@@ -1,4 +1,8 @@
 
+<a name="v0.8.1"></a>
+### v0.8.1 - 2019-11-29
+- TextView: draw the background till the end of line
+
 <a name="v0.8.0"></a>
 ### v0.8.0 - 2019-11-24
 - Templates allow going further in separating form from content

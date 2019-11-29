@@ -94,10 +94,9 @@ impl<'a, 't> TextView<'a, 't> {
                 let dl = DisplayableLine::new(self.text.skin, &self.text.lines[i], self.text.width);
                 write!(w, "{}", &dl)?;
                 i += 1;
-            } else {
-                self.text.skin.paragraph.compound_style.queue_bg(w)?;
-                queue!(w, Clear(ClearType::UntilNewLine))?;
             }
+            self.text.skin.paragraph.compound_style.queue_bg(w)?;
+            queue!(w, Clear(ClearType::UntilNewLine))?;
             if let Some((sctop, scbottom)) = scrollbar {
                 queue!(w, MoveTo(sx, self.area.top + y))?;
                 if sctop <= y && y <= scbottom {

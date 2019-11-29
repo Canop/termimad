@@ -83,7 +83,6 @@ fn main() -> Result<()> {
 fn make_skin() -> MadSkin {
     let mut skin = MadSkin::default();
     skin.table.align = Alignment::Center;
-    //skin.headers[0].align = Alignment::Left;
     skin.set_headers_fg(AnsiValue(178));
     skin.headers[2].set_fg(gray(22));
     skin.bold.set_fg(Yellow);
