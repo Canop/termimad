@@ -1,5 +1,6 @@
 
-### master
+<a name="v0.8.2"></a>
+### v0.8.2 - 2019-11-29
 - skin.print_expander makes using a text template less verbose
 
 <a name="v0.8.1"></a>
