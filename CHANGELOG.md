@@ -1,4 +1,7 @@
 
+### master
+- skin.print_expander makes using a text template less verbose
+
 <a name="v0.8.1"></a>
 ### v0.8.1 - 2019-11-29
 - TextView: draw the background till the end of line

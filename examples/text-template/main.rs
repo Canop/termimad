@@ -5,9 +5,8 @@ whole texts.
 You execute this example with
      cargo run --example text-template
 */
-use std::io::Write;
 
-use crossterm::style::{Attribute::*, Color::*};
+use crossterm::style::Color::*;
 use minimad::TextTemplate;
 
 #[macro_use]
@@ -73,10 +72,7 @@ fn main() -> Result<()> {
             irate(a)
         }
         "#);
-    let text = expander.expand();
-    let (width, _) = terminal_size();
-    let fmt_text = FmtText::from_text(&skin, text, Some(width as usize));
-    println!("{}", &fmt_text);
+    skin.print_expander(expander);
     Ok(())
 }
 

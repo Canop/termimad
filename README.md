@@ -160,10 +160,7 @@ expander
 	.set("app-name", "MyApp")
 	.set("adj", "pretty")
 	.set("app-version", "42.5.3");
-let text = expander.expand();
-let fmt_text = FmtText::from_text(&skin, text, None);
-println!("{}", &fmt_text);
-
+skin.print_expander(expander);
 ```
 
 This would render like this:
@@ -199,6 +196,7 @@ expander.sub("module-rows")
 	.set("module-name", "termimad")
 	.set("module-key", "tmd")
 	.set_md("module-description", "do things on *terminal*");
+skin.print_expander(expander);
 ```
 
 to get
@@ -225,6 +223,7 @@ expander.set_lines("some-function", r#"
 	irate(a)
 	}
 	"#);
+skin.print_expander(expander);
 ```
 
 to get

@@ -1,7 +1,7 @@
 use std::{fmt, io::Write};
 
 use crossterm::style::{Attribute, Color};
-use minimad::{Alignment, Composite, CompositeStyle, Compound, Line, MAX_HEADER_DEPTH};
+use minimad::{Alignment, Composite, CompositeStyle, Compound, Line, MAX_HEADER_DEPTH, TextTemplateExpander};
 
 use crate::area::{terminal_size, Area};
 use crate::color::*;
@@ -46,7 +46,7 @@ impl Default for MadSkin {
             bold: CompoundStyle::new(Some(Color::White), None, vec![Attribute::Bold]),
             italic: CompoundStyle::with_attr(Attribute::Italic),
             strikeout: CompoundStyle::with_attr(Attribute::CrossedOut),
-            inline_code: CompoundStyle::with_bg(gray(4)),
+            inline_code: CompoundStyle::with_bg(gray(3)),
             code_block: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
@@ -62,7 +62,7 @@ impl Default for MadSkin {
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
             ellipsis: CompoundStyle::default(),
         };
-        skin.code_block.set_bg(gray(4));
+        skin.code_block.set_bg(gray(3));
         for h in &mut skin.headers {
             h.add_attr(Attribute::Underlined);
         }
@@ -201,9 +201,18 @@ impl MadSkin {
     pub fn print_inline(&self, src: &str) {
         print!("{}", self.inline(src));
     }
+
     /// do a `print!` of the given src interpreted as a markdown text
     pub fn print_text(&self, src: &str) {
         print!("{}", self.term_text(src));
+    }
+
+    /// do a `print!` of the given expander
+    pub fn print_expander(&self, expander: TextTemplateExpander<'_, '_>) {
+        let (width, _) = terminal_size();
+        let text = expander.expand();
+        let fmt_text = FmtText::from_text(&self, text, Some(width as usize));
+        print!("{}", fmt_text);
     }
 
     pub fn print_composite(&self, composite: Composite<'_>) {
