@@ -6,6 +6,7 @@ use crate::styled_char::StyledChar;
 ///
 /// For the default styling only the fg color is defined
 ///  and the char is ▐ but everything can be changed.
+#[derive(Clone)]
 pub struct ScrollBarStyle {
     pub track: StyledChar,
     pub thumb: StyledChar,

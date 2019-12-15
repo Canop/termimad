@@ -9,7 +9,7 @@ use crate::compound_style::CompoundStyle;
 /// It's made of
 ///  - the base style of the compounds
 ///  - the alignment
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct LineStyle {
     pub compound_style: CompoundStyle,
     pub align: Alignment,

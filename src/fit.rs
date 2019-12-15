@@ -149,7 +149,6 @@ mod fit_tests {
         Composite,
     };
     use crate::{
-        MadSkin,
         Fitter,
         FmtComposite,
     };

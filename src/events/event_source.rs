@@ -1,16 +1,22 @@
-use crossbeam::channel::{unbounded, Receiver, Sender};
-use crossterm::{
-    input::{self, TerminalInput},
-    screen::RawScreen,
+use {
+    crate::{
+        errors::Error,
+        events::Event,
+    },
+    crossbeam::channel::{unbounded, Receiver, Sender},
+    crossterm::{
+        self,
+        terminal,
+    },
+    std::{
+        sync::{
+            atomic::{AtomicUsize, Ordering},
+            Arc,
+        },
+        thread,
+        time::{Duration, Instant},
+    }
 };
-use std::sync::{
-    atomic::{AtomicUsize, Ordering},
-    Arc,
-};
-use std::thread;
-use std::time::{Duration, Instant};
-
-use crate::{errors::Error, events::Event};
 
 const DOUBLE_CLICK_MAX_DURATION: Duration = Duration::from_millis(700);
 
@@ -38,42 +44,22 @@ pub struct EventSource {
     rx_events: Receiver<Event>,
     tx_quit: Sender<bool>,
     event_count: Arc<AtomicUsize>,
-    _raw_screen: RawScreen, // leaves raw screen on drop
 }
 
 impl EventSource {
     /// create a new source
     ///
-    /// If desired, mouse support must be separately
-    /// enabled:
-    /// ```
-    /// use crossterm::{input::EnableMouseCapture, queue};
-    /// # use std::io::Write;
-    /// # let mut w = std::io::stdout();
-    /// queue!(w, EnableMouseCapture).unwrap();
-    ///
-    /// ```
-    /// and disabled:
-    /// ```
-    /// use crossterm::{input::DisableMouseCapture, queue};
-    /// # use std::io::Write;
-    /// # let mut w = std::io::stdout();
-    /// queue!(w, DisableMouseCapture).unwrap();
-    ///
-    /// ```
+    /// If desired, mouse support must be enabled and desabled in crossterm.
     pub fn new() -> Result<EventSource, Error> {
         let (tx_events, rx_events) = unbounded();
         let (tx_quit, rx_quit) = unbounded();
         let event_count = Arc::new(AtomicUsize::new(0));
         let internal_event_count = Arc::clone(&event_count);
-        let _raw_screen = RawScreen::into_raw_mode()?;
-        let input = TerminalInput::new();
+        terminal::enable_raw_mode()?;
         let mut last_event: Option<TimedEvent> = None;
-        let mut crossterm_events = input.read_sync();
         thread::spawn(move || {
             loop {
-                let crossterm_event = crossterm_events.next();
-                if let Some(mut event) = Event::from_crossterm_event(crossterm_event) {
+                if let Some(mut event) = Event::from_crossterm_event(crossterm::event::read()) {
                     // save the event, and maybe change it
                     // (may change a click into a double-click)
                     if let Event::Click(x, y) = event {
@@ -93,7 +79,6 @@ impl EventSource {
                     tx_events.send(event).unwrap();
                     let quit = rx_quit.recv().unwrap();
                     if quit {
-                        input::stop_reading_thread();
                         return;
                     }
                 }
@@ -103,7 +88,6 @@ impl EventSource {
             rx_events,
             tx_quit,
             event_count,
-            _raw_screen,
         })
     }
 
@@ -124,5 +108,11 @@ impl EventSource {
     /// return a new receiver for the channel emmiting events
     pub fn receiver(&self) -> Receiver<Event> {
         self.rx_events.clone()
+    }
+}
+
+impl Drop for EventSource {
+    fn drop(&mut self) {
+        terminal::disable_raw_mode().unwrap();
     }
 }

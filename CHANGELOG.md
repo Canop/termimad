@@ -1,4 +1,8 @@
 
+<a name="v0.8.3"></a>
+### v0.8.3 - 2019-12-15
+- port to crossterm 0.14
+
 <a name="v0.8.2"></a>
 ### v0.8.2 - 2019-11-29
 - skin.print_expander makes using a text template less verbose

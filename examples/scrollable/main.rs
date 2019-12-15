@@ -4,9 +4,14 @@
 use crossterm::{
     cursor::Hide,
     cursor::Show,
-    input::{input, InputEvent::*, KeyEvent::*},
+    event::{
+        self,
+        Event,
+        KeyEvent,
+        KeyCode::*,
+    },
     queue,
-    screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
     style::Color::*,
 };
 use std::io::{stderr, Write};
@@ -15,17 +20,16 @@ use termimad::*;
 fn run_app(skin: MadSkin) -> Result<()> {
     let mut w = stderr(); // we could also have used stdout
     queue!(w, EnterAlternateScreen)?;
-    let _raw = RawScreen::into_raw_mode()?;
+    terminal::enable_raw_mode()?;
     queue!(w, Hide)?; // hiding the cursor
     let mut area = Area::full_screen();
-    //area.pad(1, 1); // let's add some margin
     area.pad_for_max_width(120); // we don't want a too wide text column
     let mut view = MadView::from(MD.to_owned(), area, skin);
-    let mut events = input().read_sync();
     loop {
         view.write_on(&mut w)?;
-        if let Some(Keyboard(key)) = events.next() {
-            match key {
+        w.flush()?;
+        if let Ok(Event::Key(KeyEvent{code, ..})) = event::read() {
+            match code {
                 Up => view.try_scroll_lines(-1),
                 Down => view.try_scroll_lines(1),
                 PageUp => view.try_scroll_pages(-1),
@@ -34,6 +38,7 @@ fn run_app(skin: MadSkin) -> Result<()> {
             }
         }
     }
+    terminal::disable_raw_mode()?;
     queue!(w, Show)?; // we must restore the cursor
     queue!(w, LeaveAlternateScreen)?;
     w.flush()?;

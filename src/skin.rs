@@ -20,6 +20,7 @@ use crate::views::TextView;
 
 /// A skin defining how a parsed mardkown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
+#[derive(Clone)]
 pub struct MadSkin {
     pub paragraph: LineStyle,
     pub bold: CompoundStyle,

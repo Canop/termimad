@@ -5,10 +5,15 @@
 //!
 
 use crossterm::{
+    event::{
+        self,
+        Event,
+        KeyEvent,
+        KeyCode::*,
+    },
     cursor,
-    input::{input, InputEvent::*, KeyEvent::*},
     queue,
-    screen::{EnterAlternateScreen, LeaveAlternateScreen, RawScreen},
+    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
     style::Color::*,
 };
 use termimad::*;
@@ -42,19 +47,21 @@ where
     W: std::io::Write,
 {
     queue!(w, EnterAlternateScreen)?;
-    let _raw = RawScreen::into_raw_mode()?;
+    terminal::enable_raw_mode()?;
     queue!(w, cursor::Hide)?; // hiding the cursor
     let mut area = Area::full_screen();
     area.pad(1, 1); // let's add some margin
     area.pad_for_max_width(120); // we don't want a too wide text column
     let mut view = MadView::from(MARKDOWN.to_owned(), area, skin);
-    let mut events = input().read_sync();
     let mut user_char = None;
     loop {
         view.write_on(w)?;
         w.flush()?;
-        if let Some(Keyboard(key)) = events.next() {
-            match key {
+        if let Ok(Event::Key(KeyEvent{code, modifiers})) = event::read() {
+            if !modifiers.is_empty() {
+                continue;
+            }
+            match code {
                 Up => view.try_scroll_lines(-1),
                 Down => view.try_scroll_lines(1),
                 PageUp => view.try_scroll_pages(-1),
@@ -67,6 +74,7 @@ where
             }
         }
     }
+    terminal::disable_raw_mode()?;
     queue!(w, cursor::Show)?; // we must restore the cursor
     queue!(w, LeaveAlternateScreen)?;
     w.flush()?;
@@ -81,10 +89,10 @@ fn main() {
     skin.scrollbar.thumb.set_fg(AnsiValue(178));
 
     let mut stderr = std::io::stderr();
-    match run_app(skin, &mut stderr).unwrap() {
+    match run_app(skin.clone(), &mut stderr).unwrap() {
         Some('1') => print!(".."),
         Some('2') => print!("/"),
         Some('3') => print!("~"),
-        _ => println!("{}", MARKDOWN),
+        _ => skin.print_text(MARKDOWN),
     }
 }

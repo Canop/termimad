@@ -1,8 +1,16 @@
-use std::io::Write;
-
-use crossterm::{cursor, input::KeyEvent, queue, style::Attribute};
-
-use crate::{Area, CompoundStyle, Error, Event};
+use {
+    crate::{Area, CompoundStyle, Error, Event},
+    std::io::Write,
+    crossterm::{
+        cursor,
+        event::{
+            KeyCode,
+            KeyEvent,
+        },
+        queue,
+        style::Attribute,
+    },
+};
 
 /// A simple input field, managing its cursor position.
 pub struct InputField {
@@ -92,28 +100,33 @@ impl InputField {
                 self.cursor_pos = p.min(self.content.len());
                 true
             }
-            Event::Key(KeyEvent::Home) => {
-                self.cursor_pos = 0;
-                true
+            Event::Key(KeyEvent{code, modifiers}) if modifiers.is_empty() => {
+                match code {
+                    KeyCode::Home => {
+                        self.cursor_pos = 0;
+                        true
+                    }
+                    KeyCode::End => {
+                        self.cursor_pos = self.content.len();
+                        true
+                    }
+                    KeyCode::Char(c) => {
+                        self.put_char(*c);
+                        true
+                    }
+                    KeyCode::Left if self.cursor_pos > 0 => {
+                        self.cursor_pos -= 1;
+                        true
+                    }
+                    KeyCode::Right if self.cursor_pos < self.content.len() => {
+                        self.cursor_pos += 1;
+                        true
+                    }
+                    KeyCode::Backspace => self.del_char_left(),
+                    KeyCode::Delete => self.del_char_below(),
+                    _ => false,
+                }
             }
-            Event::Key(KeyEvent::End) => {
-                self.cursor_pos = self.content.len();
-                true
-            }
-            Event::Key(KeyEvent::Char(c)) => {
-                self.put_char(*c);
-                true
-            }
-            Event::Key(KeyEvent::Left) if self.cursor_pos > 0 => {
-                self.cursor_pos -= 1;
-                true
-            }
-            Event::Key(KeyEvent::Right) if self.cursor_pos < self.content.len() => {
-                self.cursor_pos += 1;
-                true
-            }
-            Event::Key(KeyEvent::Backspace) => self.del_char_left(),
-            Event::Key(KeyEvent::Delete) => self.del_char_below(),
             _ => false,
         }
     }
