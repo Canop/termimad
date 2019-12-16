@@ -1,12 +1,14 @@
-use std::fmt::{self, Display};
-
-use crossterm::{
-    queue,
-    style::{Color, PrintStyledContent, StyledContent},
+use {
+    crate::{
+        compound_style::CompoundStyle,
+        errors::Result,
+    },
+    crossterm::{
+        QueueableCommand,
+        style::{Color, PrintStyledContent, StyledContent},
+    },
+    std::fmt::{self, Display},
 };
-
-use crate::compound_style::CompoundStyle;
-use crate::errors::Result;
 
 /// A modifiable character which can be easily written or repeated. Can
 /// be used for bullets, horizontal rules or quote marks.
@@ -66,7 +68,8 @@ impl StyledChar {
     where
         W: std::io::Write,
     {
-        Ok(queue!(w, PrintStyledContent(self.styled_char.clone()))?)
+        w.queue(PrintStyledContent(self.styled_char.clone()))?;
+        Ok(())
     }
 }
 

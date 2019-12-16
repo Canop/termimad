@@ -1,14 +1,16 @@
-use std::fmt::{self, Display};
 
-use crossterm::{
-    queue,
-    style::{
-        Attribute, Color, ContentStyle, PrintStyledContent, SetBackgroundColor, SetForegroundColor,
-        StyledContent,
+use {
+    crate::{errors::Result, styled_char::StyledChar},
+    crossterm::{
+        QueueableCommand,
+        style::{
+            Attribute, Color, ContentStyle, PrintStyledContent, SetBackgroundColor, SetForegroundColor,
+            StyledContent,
+        },
     },
+    std::fmt::{self, Display},
 };
 
-use crate::{errors::Result, styled_char::StyledChar};
 
 /// A style which may be applied to a compound
 #[derive(Default, Clone)]
@@ -24,9 +26,9 @@ impl From<ContentStyle> for CompoundStyle {
 
 impl CompoundStyle {
     /// Apply an `StyledContent` to the passed displayable object.
-    pub fn apply_to<D: Display>(&self, val: D) -> StyledContent<D>
+    pub fn apply_to<D>(&self, val: D) -> StyledContent<D>
     where
-        D: Clone,
+        D: Clone + Display,
     {
         self.object_style.apply(val)
     }
@@ -146,7 +148,8 @@ impl CompoundStyle {
         D: Clone + Display,
         W: std::io::Write,
     {
-        Ok(queue!(w, PrintStyledContent(self.apply_to(val)))?)
+        w.queue(PrintStyledContent(self.apply_to(val)))?;
+        Ok(())
     }
 
     /// write the string with this style on the given
@@ -163,7 +166,7 @@ impl CompoundStyle {
         W: std::io::Write,
     {
         if let Some(fg) = self.object_style.foreground_color {
-            queue!(w, SetForegroundColor(fg))?;
+            w.queue(SetForegroundColor(fg))?;
         }
         Ok(())
     }
@@ -173,7 +176,7 @@ impl CompoundStyle {
         W: std::io::Write,
     {
         if let Some(bg) = self.object_style.background_color {
-            queue!(w, SetBackgroundColor(bg))?;
+            w.queue(SetBackgroundColor(bg))?;
         }
         Ok(())
     }

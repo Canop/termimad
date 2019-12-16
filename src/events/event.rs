@@ -1,7 +1,12 @@
-use crossterm;
+use crossterm::{
+    self,
+    event::{
+        KeyCode, KeyModifiers,
+    },
+};
 
 /// a valid user event
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Event {
 
     Key(crossterm::event::KeyEvent),
@@ -50,5 +55,22 @@ impl Event {
             _ => None,
         }
     }
+    pub const fn crtl_key(code: KeyCode) -> Self {
+        Event::Key(
+            crossterm::event::KeyEvent {
+                code,
+                modifiers: KeyModifiers::CONTROL,
+            }
+        )
+    }
+    pub const fn simple_key(code: KeyCode) -> Self {
+        Event::Key(
+            crossterm::event::KeyEvent {
+                code,
+                modifiers: KeyModifiers::empty(),
+            }
+        )
+    }
 }
+
 
