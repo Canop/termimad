@@ -101,19 +101,21 @@ It's just a text put in an area, tracking your **scroll** position (and whether 
 
 Not two applications handle events in the same way. **Termimad** doesn't try to handle this but lets you write it yourself, which is fairly easily done with **Crossterm** for example:
 
-    let mut events = TerminalInput::new().read_sync();
-    loop {
-        text_view.write()?;
-        if let Some(Keyboard(key)) = events.next() {
-            match key {
-                Up => text_view.try_scroll_lines(-1),
-                Down => text_view.try_scroll_lines(1),
-                PageUp => text_view.try_scroll_pages(-1),
-                PageDown => text_view.try_scroll_pages(1),
-                _ => break,
-            }
+```
+let mut events = TerminalInput::new().read_sync();
+loop {
+    text_view.write()?;
+    if let Some(Keyboard(key)) = events.next() {
+        match key {
+            Up => text_view.try_scroll_lines(-1),
+            Down => text_view.try_scroll_lines(1),
+            PageUp => text_view.try_scroll_pages(-1),
+            PageDown => text_view.try_scroll_pages(1),
+            _ => break,
         }
     }
+}
+```
 
 ## Skin
 
