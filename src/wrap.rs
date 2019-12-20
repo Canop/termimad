@@ -46,7 +46,7 @@ pub fn hard_wrap_composite<'s>(
     };
     let mut ll = match src_composite.composite.style {
         CompositeStyle::ListItem => 2, // space of the bullet
-        CompositeStyle::Quote => 2,    // space of the bullet
+        CompositeStyle::Quote => 2,    // space of the quote mark
         _ => 0,
     };
     let mut ignored_cut_back: Option<usize> = None;
@@ -76,12 +76,18 @@ pub fn hard_wrap_composite<'s>(
                 last_space = Some(idx);
             }
             if ll >= width {
+                // we must cut
                 let mut cut = idx;
+                let mut loss = 0;
                 ignored_cut_back = None;
                 if idx + char_len < s.len() {
                     if let Some(ls) = last_space {
                         if ls + max_cut_back >= idx {
+                            // the last space isn't too far, we'll cut there
                             cut = ls;
+                            if idx > ls {
+                                loss = 1;
+                            }
                         } else {
                             ignored_cut_back = Some(idx - ls);
                         }
@@ -92,8 +98,8 @@ pub fn hard_wrap_composite<'s>(
                 composites.push(dst_composite);
                 dst_composite = new_dst_composite;
                 last_space = None;
-                c_start = cut; // + char_len;
-                ll = idx - cut;
+                c_start = cut + loss; // + char_len;
+                ll = idx - cut - loss;
                 if dst_composite.composite.is_quote() {
                     ll += 2;
                 }
@@ -109,6 +115,7 @@ pub fn hard_wrap_composite<'s>(
     }
     if dst_composite.visible_length > 0 {
         // now we try to see if we can move back the cut to the last space
+        // and we remove that space
         if let Some(diff) = ignored_cut_back {
             if diff + dst_composite.visible_length < width {
                 let tail = composites
@@ -198,8 +205,10 @@ mod wrap_tests {
 
     /// check line lenghts are what is expected
     fn check_line_lengths(skin: &MadSkin, src: &str, width: usize, lenghts: Vec<usize>) {
+        println!("input text:\n{}", &src);
         let text = skin.text(src, Some(width));
         assert_eq!(text.lines.len(), lenghts.len(), "same number of lines");
+        println!("wrapped text:\n{}", &text);
         for i in 0..lenghts.len() {
             assert_eq!(
                 visible_fmt_line_length(skin, &text.lines[i]),
@@ -221,10 +230,20 @@ mod wrap_tests {
                    And the text goes on with a list:\n\
                    * short item\n\
                    * a *somewhat longer item* (with a part in **bold**)";
-        println!("input text:\n{}", &src);
         for width in 3..50 {
             check_no_overflow(skin, &src, width);
         }
-        check_line_lengths(skin, &src, 24, vec![19, 19, 7, 20, 13, 12, 24, 22]);
+        //check_line_lengths(skin, &src, 25, vec![19, 19, 7, 20, 13, 12, 24, 22]);
+        check_line_lengths(skin, &src, 25, vec![19, 25, 20, 12, 12, 24, 22]);
+    }
+
+    #[test]
+    fn check_space_removing() {
+        let skin = crate::get_default_skin();
+        let src = FmtComposite::from(Composite::from_inline("syntax coloring"), &skin);
+        println!("input:\n{:?}", &src);
+        let wrapped = hard_wrap_composite(&src, 8);
+        println!("wrapped: {:?}", &wrapped);
+        assert_eq!(wrapped.len(), 2);
     }
 }
