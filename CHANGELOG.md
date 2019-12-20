@@ -1,4 +1,8 @@
 
+<a name="v0.8.5"></a>
+### v0.8.5 - 2019-12-xx
+- code fences support
+
 <a name="v0.8.4"></a>
 ### v0.8.4 - 2019-12-16
 - fix a compilation problem on windows (see https://github.com/Canop/termimad/issues/13#issuecomment-565848039)
