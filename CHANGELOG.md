@@ -1,6 +1,6 @@
 
 <a name="v0.8.5"></a>
-### v0.8.5 - 2019-12-xx
+### v0.8.5 - 2019-12-20
 - code fences support
 
 <a name="v0.8.4"></a>
