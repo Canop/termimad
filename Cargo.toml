@@ -12,8 +12,8 @@ readme = "README.md"
 
 [dependencies]
 lazy_static = "1.4"
-minimad = "0.5.2"
-crossterm = "0.14.0"
+minimad = "0.6.0"
+crossterm = "0.14.1"
 crossbeam = "0.7"
 thiserror = "1.0.4"
 

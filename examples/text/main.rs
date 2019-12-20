@@ -9,15 +9,17 @@ static MD: &str = r#"
 
 Here's the code to print this markdown block in the terminal:
 
-    let mut skin = MadSkin::default();
-    skin.set_headers_fg(rgb(255, 187, 0));
-    skin.bold.set_fg(Yellow);
-    skin.italic.set_fgbg(Magenta, rgb(30, 30, 40));
-    skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
-    skin.quote_mark = StyledChar::from_fg_char(Yellow, '▐');
-    skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
-    skin.quote_mark.set_fg(Yellow);
-    println!("{}", skin.term_text(my_markdown));
+```
+let mut skin = MadSkin::default();
+skin.set_headers_fg(rgb(255, 187, 0));
+skin.bold.set_fg(Yellow);
+skin.italic.set_fgbg(Magenta, rgb(30, 30, 40));
+skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
+skin.quote_mark = StyledChar::from_fg_char(Yellow, '▐');
+skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
+skin.quote_mark.set_fg(Yellow);
+println!("{}", skin.term_text(my_markdown));
+```
 
 **Termimad** is built over **Crossterm** and **Minimad**.
 
@@ -28,7 +30,7 @@ Here's the code to print this markdown block in the terminal:
 * *display* static or dynamic *rich* texts
 * *separate* your text building code or resources from its styling
 * *configure* your colors
-*
+
 ## Real use cases
 
 * the help screen of a terminal application
