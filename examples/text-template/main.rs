@@ -42,6 +42,12 @@ ${formatted-items
 }
 ## Example of a code block
     ${some-function}
+## Fenced Code block with a placeholder
+```
+this_is_some(code);
+this_part.is(${dynamic});
+```
+That's all for now.
 -----------
 "#;
 
@@ -52,7 +58,8 @@ fn main() -> Result<()> {
     let mut expander = text_template.expander();
     expander
         .set("app-name", "MyApp")
-        .set("app-version", "42.5.3");
+        .set("app-version", "42.5.3")
+        .set_md("dynamic", "filled_by_**template**"); // yes, in code too...
     expander.sub("module-rows")
         .set("module-name", "lazy-regex")
         .set("module-key", "lrex")
