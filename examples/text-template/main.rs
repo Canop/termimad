@@ -43,7 +43,7 @@ ${formatted-items
 ## Example of a code block
     ${some-function}
 ## Fenced Code block with a placeholder
-```
+```rust
 this_is_some(code);
 this_part.is(${dynamic});
 ```

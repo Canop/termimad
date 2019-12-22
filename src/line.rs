@@ -27,7 +27,7 @@ impl<'s> FmtLine<'s> {
                 aligns: cells,
             }),
             Line::HorizontalRule => FmtLine::HorizontalRule,
-            Line::CodeFence => FmtLine::HorizontalRule, // we're not supposed to get code fence in clean texts
+            Line::CodeFence(..) => FmtLine::HorizontalRule, // we're not supposed to get code fence in clean texts
         }
     }
     pub fn visible_length(&self) -> usize {
