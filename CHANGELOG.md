@@ -1,4 +1,8 @@
 
+<a name="v0.8.8"></a>
+### v0.8.8 - 2019-12-26
+- allow language specification in code fences
+
 <a name="v0.8.5"></a>
 ### v0.8.5 - 2019-12-20
 - code fences support

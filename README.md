@@ -29,21 +29,21 @@ A text or a table can be displayed in an *a priori* unknown part of the screen, 
 
 For example this markdown:
 
-	|:-:|:-:|-
-	|**feature**|**supported**|**details**|
-	|-:|:-:|-
-	| tables | yes | pipe based, with or without alignments
-	| italic, bold | yes | star based |
-	| inline code | yes | `with backquotes` (it works in tables too)
-	| code bloc | yes |with tabs or code fences
-	| syntax coloring | no |
-	| crossed text |  ~~not yet~~ | wait... now it works `~~like this~~`
-	| horizontal rule | yes | Use 3 or more dashes (`---`)
-	| lists | yes|* unordered lists supported
-	|  | |* ordered lists *not* supported
-	| quotes |  yes |> What a wonderful time to be alive!
-	| links | no | (but your terminal already handles raw URLs)
-	|-
+    |:-:|:-:|-
+    |**feature**|**supported**|**details**|
+    |-:|:-:|-
+    | tables | yes | pipe based, with or without alignments
+    | italic, bold | yes | star based |
+    | inline code | yes | `with backquotes` (it works in tables too)
+    | code bloc | yes |with tabs or code fences
+    | syntax coloring | no |
+    | crossed text |  ~~not yet~~ | wait... now it works `~~like this~~`
+    | horizontal rule | yes | Use 3 or more dashes (`---`)
+    | lists | yes|* unordered lists supported
+    |  | |* ordered lists *not* supported
+    | quotes |  yes |> What a wonderful time to be alive!
+    | links | no | (but your terminal already handles raw URLs)
+    |-
 
 will give different results depending on the width:
 
@@ -123,10 +123,10 @@ Example:
 
 ```
 mad_print_inline!(
-	&skin,
-	"**$0 formula:** *$1*", // the markdown template, interpreted once
-	"Disk",  // fills $0
-	"2*π*r", // fills $1. Note that the stars don't mess the markdown
+    &skin,
+    "**$0 formula:** *$1*", // the markdown template, interpreted once
+    "Disk",  // fills $0
+    "2*π*r", // fills $1. Note that the stars don't mess the markdown
 );
 ```
 
@@ -152,14 +152,14 @@ For example
 
 ```
 let text_template = TextTemplate::from(r#"
-	# ${app-name} v${app-version}
-	It is *very* ${adj}.
-	"#);
+    # ${app-name} v${app-version}
+    It is *very* ${adj}.
+    "#);
 let mut expander = text_template.expander();
 expander
-	.set("app-name", "MyApp")
-	.set("adj", "pretty")
-	.set("app-version", "42.5.3");
+    .set("app-name", "MyApp")
+    .set("adj", "pretty")
+    .set("app-version", "42.5.3");
 skin.print_expander(expander);
 ```
 
@@ -177,25 +177,25 @@ For example
 
 ```
 let text_template = TextTemplate::from(r#"
-	|:-:|:-:|:-:|
-	|**name**|**path**|**description**|
-	|-:|:-:|:-|
-	${module-rows
-	|**${module-name}**|`${app-version}/${module-key}`|${module-description}|
-	}
-	|-|-|-|
-	"#);
+    |:-:|:-:|:-:|
+    |**name**|**path**|**description**|
+    |-:|:-:|:-|
+    ${module-rows
+    |**${module-name}**|`${app-version}/${module-key}`|${module-description}|
+    }
+    |-|-|-|
+    "#);
 let mut expander = text_template.expander();
 expander
-	.set("app-version", "2");
+    .set("app-version", "2");
 expander.sub("module-rows")
-	.set("module-name", "lazy-regex")
-	.set("module-key", "lrex")
-	.set("module-description", "eases regexes");
+    .set("module-name", "lazy-regex")
+    .set("module-key", "lrex")
+    .set("module-description", "eases regexes");
 expander.sub("module-rows")
-	.set("module-name", "termimad")
-	.set("module-key", "tmd")
-	.set_md("module-description", "do things on *terminal*");
+    .set("module-name", "termimad")
+    .set("module-key", "tmd")
+    .set_md("module-description", "do things on *terminal*");
 skin.print_expander(expander);
 ```
 
@@ -214,15 +214,15 @@ For example
 
 ```
 let text_template = TextTemplate::from(r#"
-	## Example of a code block
-		${some-function}
-	"#);
+    ## Example of a code block
+        ${some-function}
+    "#);
 let mut expander = text_template.expander();
 expander.set_lines("some-function", r#"
-	fun test(a rational) {
-	irate(a)
-	}
-	"#);
+    fun test(a rational) {
+    irate(a)
+    }
+    "#);
 skin.print_expander(expander);
 ```
 
