@@ -75,7 +75,7 @@ impl EventSource {
                     }
                     last_event = Some(TimedEvent::from(event));
                     internal_event_count.fetch_add(1, Ordering::SeqCst);
-                    // we send the even to the receiver in the main event loop
+                    // we send the event to the receiver in the main event loop
                     tx_events.send(event).unwrap();
                     let quit = rx_quit.recv().unwrap();
                     if quit {

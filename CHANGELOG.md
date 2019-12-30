@@ -1,4 +1,8 @@
 
+<a name="v0.8.9"></a>
+### v0.8.9 - 2019-12-30
+- fix the Enter key not recognized in combinations on some computers by normalizing '\r' and '\n' into 'Enter'
+
 <a name="v0.8.8"></a>
 ### v0.8.8 - 2019-12-26
 - allow language specification in code fences

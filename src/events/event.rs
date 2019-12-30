@@ -27,13 +27,18 @@ pub enum Event {
 impl Event {
     /// convert a crossterm event into a termimad one.
     ///
+    /// normalize \r and \n into Enter (useful for key combinations)
+    ///
     /// To get a double-click you'll either need to use a termimad event-source
     /// or to do the computation yourself.
     pub fn from_crossterm_event(
         crossterm_event: crossterm::Result<crossterm::event::Event>
     ) -> Option<Event> {
         match crossterm_event {
-            Ok(crossterm::event::Event::Key(key)) => {
+            Ok(crossterm::event::Event::Key(mut key)) => {
+                if key.code==KeyCode::Char('\r') || key.code==KeyCode::Char('\n') {
+                    key.code = KeyCode::Enter;
+                }
                 Some(Event::Key(key))
             }
             Ok(crossterm::event::Event::Mouse(crossterm::event::MouseEvent::Up(button, x, y, ..))) => {
