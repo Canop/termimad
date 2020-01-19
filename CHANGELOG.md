@@ -1,4 +1,12 @@
 
+<a name="v0.8.11"></a>
+### v0.8.11 - 2020-01-19
+- fix missing background on space after bullet in list
+
+<a name="v0.8.10"></a>
+### v0.8.10 - 2020-01-11
+- use crossterm 0.14.2 for freeBSD compatibility
+
 <a name="v0.8.9"></a>
 ### v0.8.9 - 2019-12-30
 - fix the Enter key not recognized in combinations on some computers by normalizing '\r' and '\n' into 'Enter'

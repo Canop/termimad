@@ -306,10 +306,12 @@ impl MadSkin {
         self.paragraph.repeat_space(f, lpo)?;
         ls.compound_style.repeat_space(f, lpi)?;
         if fc.composite.is_list_item() {
-            write!(f, "{} ", self.bullet)?;
+            write!(f, "{}", self.bullet)?;
+            write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
         if fc.composite.is_quote() {
-            write!(f, "{} ", self.quote_mark)?;
+            write!(f, "{}", self.quote_mark)?;
+            write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
         for c in &fc.composite.compounds {
             let os = self.compound_style(ls, c);
