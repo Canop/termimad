@@ -30,7 +30,7 @@ impl CompoundStyle {
     where
         D: Clone + Display,
     {
-        self.object_style.apply(val)
+        self.object_style.clone().apply(val)
     }
 
     /// Get an new instance of `CompoundStyle`
