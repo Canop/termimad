@@ -4,7 +4,13 @@ use {
     crossterm::{
         QueueableCommand,
         style::{
-            Attribute, Color, ContentStyle, PrintStyledContent, SetBackgroundColor, SetForegroundColor,
+            Attribute,
+            Attributes,
+            Color,
+            ContentStyle,
+            PrintStyledContent,
+            SetBackgroundColor,
+            SetForegroundColor,
             StyledContent,
         },
     },
@@ -37,7 +43,7 @@ impl CompoundStyle {
     pub fn new(
         foreground_color: Option<Color>,
         background_color: Option<Color>,
-        attributes: Vec<Attribute>,
+        attributes: Attributes,
     ) -> CompoundStyle {
         CompoundStyle {
             object_style: ContentStyle {
@@ -94,7 +100,7 @@ impl CompoundStyle {
 
     /// Add an `Attribute`. Like italic, underlined or bold.
     pub fn add_attr(&mut self, attr: Attribute) {
-        self.object_style.attributes.push(attr);
+        self.object_style.attributes.set(attr);
     }
 
     /// Add the defined characteristics of `other` to self, overwriting
@@ -110,7 +116,7 @@ impl CompoundStyle {
             .or(self.object_style.background_color);
         self.object_style
             .attributes
-            .extend(&other.object_style.attributes); // TODO duplicates ?
+            .extend(other.object_style.attributes);
     }
 
     #[inline(always)]

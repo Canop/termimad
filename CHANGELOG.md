@@ -1,4 +1,12 @@
 
+<a name="v0.8.13"></a>
+### v0.8.13 - 2020-02-08
+- use crossterm 0.16.0 for slightly improved attributes storage
+
+<a name="v0.8.12"></a>
+### v0.8.13 - 2020-01-19
+- use crossterm 0.15 to fix ctrl-J being read as Enter
+
 <a name="v0.8.11"></a>
 ### v0.8.11 - 2020-01-19
 - fix missing background on space after bullet in list

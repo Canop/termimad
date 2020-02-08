@@ -44,7 +44,7 @@ impl Default for MadSkin {
     fn default() -> MadSkin {
         let mut skin = MadSkin {
             paragraph: LineStyle::default(),
-            bold: CompoundStyle::new(Some(Color::White), None, vec![Attribute::Bold]),
+            bold: CompoundStyle::new(Some(Color::White), None, Attribute::Bold.into()),
             italic: CompoundStyle::with_attr(Attribute::Italic),
             strikeout: CompoundStyle::with_attr(Attribute::CrossedOut),
             inline_code: CompoundStyle::with_bg(gray(3)),
@@ -57,7 +57,7 @@ impl Default for MadSkin {
             },
             bullet: StyledChar::from_fg_char(gray(8), '•'),
             quote_mark: StyledChar::new(
-                CompoundStyle::new(Some(gray(12)), None, vec![Attribute::Bold]),
+                CompoundStyle::new(Some(gray(12)), None, Attribute::Bold.into()),
                 '▐',
             ),
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
