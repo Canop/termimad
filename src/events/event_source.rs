@@ -49,7 +49,7 @@ pub struct EventSource {
 impl EventSource {
     /// create a new source
     ///
-    /// If desired, mouse support must be enabled and desabled in crossterm.
+    /// If desired, mouse support must be enabled and disabled in crossterm.
     pub fn new() -> Result<EventSource, Error> {
         let (tx_events, rx_events) = unbounded();
         let (tx_quit, rx_quit) = unbounded();
@@ -65,10 +65,13 @@ impl EventSource {
                     if let Event::Click(x, y) = event {
                         if let Some(TimedEvent {
                             time,
-                            event: Event::Click(_, last_y),
+                            event: Event::Click(last_x, last_y),
                         }) = last_event
                         {
-                            if last_y == y && time.elapsed() < DOUBLE_CLICK_MAX_DURATION {
+                            if
+                                last_x == x && last_y == y
+                                && time.elapsed() < DOUBLE_CLICK_MAX_DURATION
+                            {
                                 event = Event::DoubleClick(x, y);
                             }
                         }
