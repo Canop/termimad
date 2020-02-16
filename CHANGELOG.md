@@ -1,4 +1,8 @@
 
+<a name="v0.8.14"></a>
+### v0.8.14 - 2020-02-16
+- check w in double-click detection
+
 <a name="v0.8.13"></a>
 ### v0.8.13 - 2020-02-08
 - use crossterm 0.16.0 for slightly improved attributes storage

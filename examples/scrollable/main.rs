@@ -63,7 +63,7 @@ fn main() -> Result<()> {
 
 static MD: &str = r#"# Scrollable Markdown in Termimad
 
-Use the **🡑** and **🡓** arrow keys to scroll this page.
+Use the **↓** and **↑** arrow keys to scroll this page.
 Use any other key to quit the application.
 
 *Now I'll describe this example with more words than necessary, in order to be sure to demonstrate scrolling (and **wrapping**, too, thanks to long sentences).
@@ -133,7 +133,7 @@ The scrollbar's colors were also adjusted to be consistent.
 
 ## Usage
 
-* **🡑** and **🡓** arrow keys : scroll this page
+* **↓** and **↑** arrow keys : scroll this page
 * any other key : quit
 
 ## And let's just finish by a table
