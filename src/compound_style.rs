@@ -13,6 +13,7 @@ use {
             SetForegroundColor,
             StyledContent,
         },
+        terminal::{Clear, ClearType},
     },
     std::fmt::{self, Display},
 };
@@ -186,6 +187,25 @@ impl CompoundStyle {
         }
         Ok(())
     }
+
+    /// Clear with the compound_style's background.
+    ///
+    /// ```
+    /// # use termimad::*;
+    /// # use crossterm::terminal::ClearType;
+    /// # let skin = MadSkin::default();
+    /// let mut w = std::io::stderr();
+    /// skin.paragraph.compound_style.clear(&mut w, ClearType::UntilNewLine).unwrap();
+    /// ```
+    pub fn clear<W>(&self, w: &mut W, clear_type: ClearType) -> Result<()>
+    where
+        W: std::io::Write,
+    {
+        self.queue_bg(w)?;
+        w.queue(Clear(clear_type))?;
+        Ok(())
+    }
+
 
     pub fn style_char(&self, nude_char: char) -> StyledChar {
         StyledChar::new(self.clone(), nude_char)

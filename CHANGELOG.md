@@ -1,4 +1,8 @@
 
+<a name="v0.8.15"></a>
+### v0.8.15 - 2020-02-22
+- clear function in compound_style
+
 <a name="v0.8.14"></a>
 ### v0.8.14 - 2020-02-16
 - check w in double-click detection

@@ -24,7 +24,7 @@ fn div_ceil(a: i32, b: i32) -> i32 {
 }
 
 impl Area {
-    /// Build a new area. You'll need to set the position and size
+    /// build a new area. You'll need to set the position and size
     /// before you can use it
     pub fn uninitialized() -> Area {
         Area {
@@ -32,12 +32,11 @@ impl Area {
             top: 0,
             height: 1,
             width: 5,
-        } // width can't be less than 5
+        }
     }
 
     /// build a new area.
     pub fn new(left: u16, top: u16, width: u16, height: u16) -> Area {
-        assert!(width > 4);
         Area {
             left,
             top,
@@ -46,7 +45,7 @@ impl Area {
         }
     }
 
-    /// Build an area covering the whole terminal
+    /// build an area covering the whole terminal
     pub fn full_screen() -> Area {
         let (width, height) = terminal_size();
         Area {
@@ -55,6 +54,14 @@ impl Area {
             width,
             height,
         }
+    }
+
+    /// tell whether the char at (x,y) is in the area
+    pub fn contains(&self, x: u16, y: u16) -> bool {
+        x >= self.left
+            && x < self.left + self.width
+            && y >= self.top
+            && y < self.top + self.height
     }
 
     /// shrink the area
