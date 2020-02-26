@@ -1,22 +1,39 @@
-use std::{fmt, io::Write};
 
-use crossterm::style::{Attribute, Color};
-use minimad::{Alignment, Composite, CompositeStyle, Compound, Line, MAX_HEADER_DEPTH, TextTemplateExpander};
+use {
+    crate::{
+        area::{terminal_size, Area},
+        color::*,
+        composite::FmtComposite,
+        compound_style::CompoundStyle,
+        errors::Result,
+        inline::FmtInline,
+        line::FmtLine,
+        line_style::LineStyle,
+        scrollbar_style::ScrollBarStyle,
+        spacing::Spacing,
+        styled_char::StyledChar,
+        tbl::*,
+        text::FmtText,
+        views::TextView,
+    },
+    crossterm::style::{Attribute, Color},
+    minimad::{
+        Alignment,
+        Composite,
+        CompositeStyle,
+        Compound,
+        Line,
+        MAX_HEADER_DEPTH,
+        TextTemplateExpander,
+    },
+    std::{
+        fmt,
+        io::Write,
+        collections::HashMap,
+    },
+};
 
-use crate::area::{terminal_size, Area};
-use crate::color::*;
-use crate::composite::FmtComposite;
-use crate::compound_style::CompoundStyle;
-use crate::errors::Result;
-use crate::inline::FmtInline;
-use crate::line::FmtLine;
-use crate::line_style::LineStyle;
-use crate::scrollbar_style::ScrollBarStyle;
-use crate::spacing::Spacing;
-use crate::styled_char::StyledChar;
-use crate::tbl::*;
-use crate::text::FmtText;
-use crate::views::TextView;
+
 
 /// A skin defining how a parsed mardkown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
@@ -35,6 +52,14 @@ pub struct MadSkin {
     pub quote_mark: StyledChar,
     pub horizontal_rule: StyledChar,
     pub ellipsis: CompoundStyle,
+
+    /// compounds which should be replaced with special
+    /// renders.
+    /// Experimental. This API will probably change
+    /// (comments welcome)
+    /// Do not use compounds with a length different than 1.
+    #[cfg(feature="special-renders")]
+    pub special_chars: HashMap<Compound<'static>, StyledChar>,
 }
 
 impl Default for MadSkin {
@@ -62,6 +87,8 @@ impl Default for MadSkin {
             ),
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
             ellipsis: CompoundStyle::default(),
+            #[cfg(feature="special-renders")]
+            special_chars: HashMap::new(),
         };
         skin.code_block.set_bg(gray(3));
         for h in &mut skin.headers {
@@ -95,6 +122,14 @@ impl MadSkin {
         for h in &mut self.headers {
             h.set_bg(c);
         }
+    }
+
+    /// set a common background for the paragraph, headers,
+    /// rules, etc.
+    pub fn set_global_bg(&mut self, c: Color) {
+        self.set_headers_bg(c);
+        self.paragraph.set_bg(c);
+        self.horizontal_rule.set_bg(c);
     }
 
     /// Return the number of visible chars in a composite
@@ -313,6 +348,16 @@ impl MadSkin {
             write!(f, "{}", self.quote_mark)?;
             write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
+        #[cfg(feature="special-renders")]
+        for c in &fc.composite.compounds {
+            if let Some(replacement) = self.special_chars.get(c) {
+                write!(f, "{}", replacement)?;
+            } else {
+                let os = self.compound_style(ls, c);
+                write!(f, "{}", os.apply_to(c.as_str()))?;
+            }
+        }
+        #[cfg(not(feature="special-renders"))]
         for c in &fc.composite.compounds {
             let os = self.compound_style(ls, c);
             write!(f, "{}", os.apply_to(c.as_str()))?;

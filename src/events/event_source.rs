@@ -62,10 +62,10 @@ impl EventSource {
                 if let Some(mut event) = Event::from_crossterm_event(crossterm::event::read()) {
                     // save the event, and maybe change it
                     // (may change a click into a double-click)
-                    if let Event::Click(x, y) = event {
+                    if let Event::Click(x, y, ..) = event {
                         if let Some(TimedEvent {
                             time,
-                            event: Event::Click(last_x, last_y),
+                            event: Event::Click(last_x, last_y, ..),
                         }) = last_event
                         {
                             if

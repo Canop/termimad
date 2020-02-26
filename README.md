@@ -238,6 +238,7 @@ You'll find more text template functions in the documentation and in the example
 * If you want to see how some file would look with Termimad, you may try the cli [Clima](https://github.com/Canop/clima).
 * Be careful that some colors aren't displayable on all terminals. The default color set of your application should not include arbitrary RGB colors.
 * If a feature is missing, or you don't know how to use some part, come and ping me on my chat during West European hours.
+* The event / event-source part of Termimad is currently tailored for a short number of applications. If you use it or want to use it, please come and tell me so that your needs are taken into account!
 
 [broot](https://github.com/Canop/broot) is a real application using Termimad, you might want to see how it does it.
 

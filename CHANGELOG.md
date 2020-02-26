@@ -1,4 +1,9 @@
 
+<a name="v0.8.16"></a>
+### v0.8.16 - 2020-02-26
+- key modifiers in click events in event_source
+- the new experimental feature flag: `special-renders` lets you define replacement chars (for now) with a out of skin rendering (contact me if you're interested by this kind of feature)
+
 <a name="v0.8.15"></a>
 ### v0.8.15 - 2020-02-22
 - clear function in compound_style

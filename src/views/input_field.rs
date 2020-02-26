@@ -95,7 +95,7 @@ impl InputField {
     /// Return true when the event was used.
     pub fn apply_event(&mut self, event: &Event) -> bool {
         match event {
-            Event::Click(x, y) if *y == self.area.top + 1 && *x > self.area.left => {
+            Event::Click(x, y, ..) if *y == self.area.top + 1 && *x > self.area.left => {
                 let p = (x - 1 - self.area.left) as usize;
                 self.cursor_pos = p.min(self.content.len());
                 true

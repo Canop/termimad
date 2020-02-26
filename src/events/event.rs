@@ -6,14 +6,15 @@ use crossterm::{
 };
 
 /// a valid user event
+///
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Event {
 
     Key(crossterm::event::KeyEvent),
 
-    Click(u16, u16),
+    Click(u16, u16, KeyModifiers),
 
-    RightClick(u16, u16),
+    RightClick(u16, u16, KeyModifiers),
 
     DoubleClick(u16, u16),
 
@@ -41,10 +42,11 @@ impl Event {
                 }
                 Some(Event::Key(key))
             }
-            Ok(crossterm::event::Event::Mouse(crossterm::event::MouseEvent::Up(button, x, y, ..))) => {
+            Ok(crossterm::event::Event::Mouse(crossterm::event::MouseEvent::Up(button, x, y, modifiers))) => {
+                use crossterm::event::MouseButton::*;
                 match button {
-                    crossterm::event::MouseButton::Left => Some(Event::Click(x, y)),
-                    crossterm::event::MouseButton::Right => Some(Event::RightClick(x, y)),
+                    Left => Some(Event::Click(x, y, modifiers)),
+                    Right => Some(Event::RightClick(x, y, modifiers)),
                     _ => None
                 }
             }
