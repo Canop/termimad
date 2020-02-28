@@ -1,4 +1,8 @@
 
+<a name="v0.8.17"></a>
+### v0.8.17 - 2020-02-28
+- added event handling functions in input_field for when you don't use termimad events or have a complex event dispatching
+
 <a name="v0.8.16"></a>
 ### v0.8.16 - 2020-02-26
 - key modifiers in click events in event_source

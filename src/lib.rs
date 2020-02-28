@@ -110,6 +110,7 @@ The repository contains several other examples, which hopefully cover the whole 
 #[macro_use]
 extern crate lazy_static;
 
+#[allow(unused_imports)]
 #[macro_use]
 extern crate minimad;
 

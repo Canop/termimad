@@ -8,7 +8,11 @@ use {
             KeyEvent,
         },
         queue,
-        style::Attribute,
+        style::{
+            Attribute,
+            Color,
+            SetBackgroundColor,
+        },
     },
 };
 
@@ -90,42 +94,65 @@ impl InputField {
             false
         }
     }
+
+    /// apply a click event
+    ///
+    /// (for when you handle the events yourselves and don't
+    ///  have a termimad event)
+    pub fn apply_click_event(&mut self, x: u16, y: u16) -> bool {
+        if self.area.contains(x, y) {
+            let p = (x - 1 - self.area.left) as usize;
+            self.cursor_pos = p.min(self.content.len());
+            true
+        } else {
+            false
+        }
+    }
+
+    /// apply an event being a key without modifier.
+    ///
+    /// You don't usually call this function but the more
+    /// general `apply_event`. This one is useful when you
+    /// manage events yourselves.
+    pub fn apply_keycode_event(&mut self, code: KeyCode) -> bool {
+        match code {
+            KeyCode::Home => {
+                self.cursor_pos = 0;
+                true
+            }
+            KeyCode::End => {
+                self.cursor_pos = self.content.len();
+                true
+            }
+            KeyCode::Char(c) => {
+                self.put_char(c);
+                true
+            }
+            KeyCode::Left if self.cursor_pos > 0 => {
+                self.cursor_pos -= 1;
+                true
+            }
+            KeyCode::Right if self.cursor_pos < self.content.len() => {
+                self.cursor_pos += 1;
+                true
+            }
+            KeyCode::Backspace => self.del_char_left(),
+            KeyCode::Delete => self.del_char_below(),
+            _ => false,
+        }
+
+    }
+
     /// apply the passed event to change the state (content, cursor)
     ///
     /// Return true when the event was used.
     pub fn apply_event(&mut self, event: &Event) -> bool {
         match event {
-            Event::Click(x, y, ..) if *y == self.area.top + 1 && *x > self.area.left => {
-                let p = (x - 1 - self.area.left) as usize;
-                self.cursor_pos = p.min(self.content.len());
-                true
+            Event::Click(x, y, ..) => {
+                self.apply_click_event(*x, *y)
             }
             Event::Key(KeyEvent{code, modifiers}) if modifiers.is_empty() => {
-                match code {
-                    KeyCode::Home => {
-                        self.cursor_pos = 0;
-                        true
-                    }
-                    KeyCode::End => {
-                        self.cursor_pos = self.content.len();
-                        true
-                    }
-                    KeyCode::Char(c) => {
-                        self.put_char(*c);
-                        true
-                    }
-                    KeyCode::Left if self.cursor_pos > 0 => {
-                        self.cursor_pos -= 1;
-                        true
-                    }
-                    KeyCode::Right if self.cursor_pos < self.content.len() => {
-                        self.cursor_pos += 1;
-                        true
-                    }
-                    KeyCode::Backspace => self.del_char_left(),
-                    KeyCode::Delete => self.del_char_below(),
-                    _ => false,
-                }
+                self.apply_keycode_event(*code)
             }
             _ => false,
         }
@@ -141,6 +168,7 @@ impl InputField {
     where
         W: std::io::Write,
     {
+        queue!(w, SetBackgroundColor(Color::Reset))?;
         queue!(w, cursor::MoveTo(self.area.left, self.area.top))?;
         for (i, c) in self.content.iter().enumerate() {
             if self.cursor_pos == i {
