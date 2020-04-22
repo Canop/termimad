@@ -2,8 +2,7 @@
 //!   cargo run --example scrollable
 //!
 use crossterm::{
-    cursor::Hide,
-    cursor::Show,
+    cursor::{ Hide, Show},
     event::{
         self,
         Event,
@@ -11,31 +10,48 @@ use crossterm::{
         KeyCode::*,
     },
     queue,
-    terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
+    terminal::{
+        self,
+        Clear,
+        ClearType,
+        EnterAlternateScreen,
+        LeaveAlternateScreen,
+    },
     style::Color::*,
 };
 use std::io::{stderr, Write};
 use termimad::*;
+
+fn view_area() -> Area {
+    let mut area = Area::full_screen();
+    area.pad_for_max_width(120); // we don't want a too wide text column
+    area
+}
 
 fn run_app(skin: MadSkin) -> Result<()> {
     let mut w = stderr(); // we could also have used stdout
     queue!(w, EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
     queue!(w, Hide)?; // hiding the cursor
-    let mut area = Area::full_screen();
-    area.pad_for_max_width(120); // we don't want a too wide text column
-    let mut view = MadView::from(MD.to_owned(), area, skin);
+    let mut view = MadView::from(MD.to_owned(), view_area(), skin);
     loop {
         view.write_on(&mut w)?;
         w.flush()?;
-        if let Ok(Event::Key(KeyEvent{code, ..})) = event::read() {
-            match code {
-                Up => view.try_scroll_lines(-1),
-                Down => view.try_scroll_lines(1),
-                PageUp => view.try_scroll_pages(-1),
-                PageDown => view.try_scroll_pages(1),
-                _ => break,
+        match event::read() {
+            Ok(Event::Key(KeyEvent{code, ..})) => {
+                match code {
+                    Up => view.try_scroll_lines(-1),
+                    Down => view.try_scroll_lines(1),
+                    PageUp => view.try_scroll_pages(-1),
+                    PageDown => view.try_scroll_pages(1),
+                    _ => break,
+                }
             }
+            Ok(Event::Resize(..)) => {
+                queue!(w, Clear(ClearType::All))?;
+                view.resize(&view_area());
+            }
+            _ => {}
         }
     }
     terminal::disable_raw_mode()?;
@@ -66,7 +82,7 @@ static MD: &str = r#"# Scrollable Markdown in Termimad
 Use the **↓** and **↑** arrow keys to scroll this page.
 Use any other key to quit the application.
 
-*Now I'll describe this example with more words than necessary, in order to be sure to demonstrate scrolling (and **wrapping**, too, thanks to long sentences).
+*Now I'll describe this example with more words than necessary, in order to be sure to demonstrate scrolling (and **wrapping**, too, thanks to long sentences).*
 
 ## What's shown
 
