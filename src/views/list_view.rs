@@ -1,5 +1,7 @@
-use std::cmp::Ordering;
-use std::io::{stdout, Write};
+use std::{
+    cmp::Ordering,
+    io::{stdout, Write},
+};
 
 use crossterm::{
     cursor::MoveTo,
