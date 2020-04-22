@@ -22,6 +22,21 @@ fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
     }
 }
 
+/// a place where a line break is OK
+#[derive(Debug, Clone, Copy)]
+struct BreakPoint {
+    idx: usize,
+    len: usize, // nb chars removed on break: 0 for start of compound, 1 for a space
+}
+impl BreakPoint {
+    fn on_start(idx: usize) -> Self {
+        Self { idx, len: 0 }
+    }
+    fn on_space(idx: usize) -> Self {
+        Self { idx, len: 1 }
+    }
+}
+
 /// cut the passed composite in several composites fitting the given *visible* width
 /// (which might be bigger or smaller than the length of the underlying string).
 /// width can't be less than 3.
@@ -49,7 +64,7 @@ pub fn hard_wrap_composite<'s>(
         CompositeStyle::Quote => 2,    // space of the quote mark
         _ => 0,
     };
-    let mut ignored_cut_back: Option<usize> = None;
+    let mut ignored_cut_back: Option<(usize, BreakPoint)> = None;
     for sc in &src_composite.composite.compounds {
         ignored_cut_back = None;
         let s = sc.as_str();
@@ -68,12 +83,12 @@ pub fn hard_wrap_composite<'s>(
             ll = 0;
         }
         let mut c_start = 0;
-        let mut last_space: Option<usize> = Some(0);
+        let mut last_break_point = Some(BreakPoint::on_start(0));
         for (idx, char) in s.char_indices() {
             let char_len = char.len_utf8();
             ll += 1;
             if char.is_whitespace() {
-                last_space = Some(idx);
+                last_break_point = Some(BreakPoint::on_space(idx));
             }
             if ll >= width {
                 // we must cut
@@ -81,23 +96,24 @@ pub fn hard_wrap_composite<'s>(
                 let mut loss = 0;
                 ignored_cut_back = None;
                 if idx + char_len < s.len() {
-                    if let Some(ls) = last_space {
-                        if ls + max_cut_back >= idx {
-                            // the last space isn't too far, we'll cut there
-                            cut = ls;
-                            if idx > ls {
-                                loss = 1;
+                    if let Some(bp) = last_break_point {
+                        if bp.idx + max_cut_back >= idx {
+                            // the last break isn't too far, we'll cut there
+                            cut = bp.idx;
+                            if idx > bp.idx {
+                                loss = bp.len;
                             }
                         } else {
-                            ignored_cut_back = Some(idx - ls);
+                            ignored_cut_back = Some((idx, bp));
                         }
                     }
                 }
-                dst_composite.add_compound(sc.sub(c_start, cut));
+                let s2 = sc.sub(c_start, cut);
+                dst_composite.add_compound(s2);
                 let new_dst_composite = follow_up_composite(&dst_composite);
                 composites.push(dst_composite);
                 dst_composite = new_dst_composite;
-                last_space = None;
+                last_break_point = None;
                 c_start = cut + loss; // + char_len;
                 ll = idx - cut - loss;
                 if dst_composite.composite.is_quote() {
@@ -114,19 +130,22 @@ pub fn hard_wrap_composite<'s>(
         }
     }
     if dst_composite.visible_length > 0 {
-        // now we try to see if we can move back the cut to the last space
-        // and we remove that space
-        if let Some(diff) = ignored_cut_back {
-            if diff + dst_composite.visible_length < width {
-                let tail = composites
+        // now we try to see if we can move back the cut to the last break point
+        if let Some((idx, bp)) = ignored_cut_back {
+            let diff = idx - bp.idx;
+            if diff + dst_composite.visible_length - bp.len < width {
+                let mut tail = composites
                     .last_mut()
                     .unwrap()
                     .composite
                     .compounds
                     .last_mut()
                     .unwrap()
-                    .cut_tail(diff);
-                composites.last_mut().unwrap().visible_length -= diff;
+                    .cut_tail(diff + bp.len);
+                composites.last_mut().unwrap().visible_length -= diff + bp.len;
+                if bp.len > 0 {
+                    tail = tail.tail_chars(bp.len);
+                }
                 dst_composite.composite.compounds.insert(0, tail);
                 dst_composite.visible_length += diff;
             }
@@ -169,9 +188,14 @@ pub fn hard_wrap_lines<'s>(src_lines: Vec<FmtLine<'s>>, width: usize) -> Vec<Fmt
 #[cfg(test)]
 mod wrap_tests {
 
-    use crate::displayable_line::DisplayableLine;
-    use crate::skin::MadSkin;
-    use crate::wrap::*;
+    use {
+        crate::{
+            displayable_line::DisplayableLine,
+            skin::MadSkin,
+            wrap::*,
+        },
+        minimad::*,
+    };
 
     fn visible_fmt_line_length(skin: &MadSkin, line: &FmtLine<'_>) -> usize {
         match line {
@@ -245,5 +269,26 @@ mod wrap_tests {
         let wrapped = hard_wrap_composite(&src, 8);
         println!("wrapped: {:?}", &wrapped);
         assert_eq!(wrapped.len(), 2);
+    }
+
+    fn first_compound(line: FmtLine) -> Option<Compound> {
+        match line {
+            FmtLine::Normal(mut fc) => fc.composite.compounds.drain(..).next(),
+            _ => None,
+        }
+    }
+
+    #[test]
+    /// check the case of a wrapping occuring after a space and at the start of a compound
+    /// see https://github.com/Canop/termimad/issues/17
+    fn check_issue_17() {
+        let skin = crate::get_default_skin();
+        let src = "*Now I'll describe this example with more words than necessary, in order to be sure to demonstrate scrolling (and **wrapping**, too, thanks to long sentences).*";
+        let text = skin.text(src, Some(120));
+        assert_eq!(text.lines.len(), 2);
+        assert_eq!(
+            first_compound(text.lines.into_iter().nth(1).unwrap()),
+            Some(Compound::raw_str("wrapping").bold().italic()),
+        );
     }
 }
