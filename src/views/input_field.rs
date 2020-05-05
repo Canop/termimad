@@ -23,6 +23,7 @@ pub struct InputField {
     cursor_pos: usize, // position in chars
     normal_style: CompoundStyle,
     cursor_style: CompoundStyle,
+    pub focused: bool,
 }
 
 impl InputField {
@@ -31,12 +32,14 @@ impl InputField {
         let normal_style = CompoundStyle::default();
         let mut cursor_style = normal_style.clone();
         cursor_style.add_attr(Attribute::Reverse);
+        let focused = true;
         Self {
             content: Vec::new(),
             area,
             cursor_pos: 0,
             normal_style,
             cursor_style,
+            focused,
         }
     }
     pub fn change_area(&mut self, x: u16, y: u16, w: u16) {
@@ -101,8 +104,12 @@ impl InputField {
     ///  have a termimad event)
     pub fn apply_click_event(&mut self, x: u16, y: u16) -> bool {
         if self.area.contains(x, y) {
-            let p = (x - 1 - self.area.left) as usize;
-            self.cursor_pos = p.min(self.content.len());
+            if self.focused {
+                let p = (x - 1 - self.area.left) as usize;
+                self.cursor_pos = p.min(self.content.len());
+            } else {
+                self.focused = true;
+            }
             true
         } else {
             false
@@ -115,6 +122,9 @@ impl InputField {
     /// general `apply_event`. This one is useful when you
     /// manage events yourselves.
     pub fn apply_keycode_event(&mut self, code: KeyCode) -> bool {
+        if !self.focused {
+            return false;
+        }
         match code {
             KeyCode::Home => {
                 self.cursor_pos = 0;
@@ -171,14 +181,14 @@ impl InputField {
         queue!(w, SetBackgroundColor(Color::Reset))?;
         queue!(w, cursor::MoveTo(self.area.left, self.area.top))?;
         for (i, c) in self.content.iter().enumerate() {
-            if self.cursor_pos == i {
+            if self.cursor_pos == i && self.focused {
                 self.cursor_style.queue(w, c)?;
             } else {
                 self.normal_style.queue(w, c)?;
             }
         }
         let mut e = self.content.len();
-        if e == self.cursor_pos {
+        if e == self.cursor_pos && self.focused {
             self.cursor_style.queue(w, ' ')?;
             e += 1;
         }

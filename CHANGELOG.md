@@ -1,4 +1,8 @@
 
+<a name="v0.8.18"></a>
+### v0.8.18 - 2020-05-05
+- input fields now have a "focused" bool in their state
+
 <a name="v0.8.17"></a>
 ### v0.8.17 - 2020-02-28
 - added event handling functions in input_field for when you don't use termimad events or have a complex event dispatching
