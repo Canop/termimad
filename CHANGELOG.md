@@ -1,4 +1,8 @@
 
+<a name="v0.8.20"></a>
+### v0.8.20 - 2020-05-10
+- relax the dependency version contraint on crossterm - Fix #18
+
 <a name="v0.8.18"></a>
 ### v0.8.18 - 2020-05-05
 - input fields now have a "focused" bool in their state
