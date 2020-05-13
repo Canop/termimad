@@ -1,4 +1,8 @@
 
+<a name="v0.8.21"></a>
+### v0.8.21 - 2020-05-13
+- EventSource: better manage channel errors
+
 <a name="v0.8.20"></a>
 ### v0.8.20 - 2020-05-10
 - relax the dependency version contraint on crossterm - Fix #18

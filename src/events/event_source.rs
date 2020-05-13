@@ -79,10 +79,14 @@ impl EventSource {
                     last_event = Some(TimedEvent::from(event));
                     internal_event_count.fetch_add(1, Ordering::SeqCst);
                     // we send the event to the receiver in the main event loop
-                    tx_events.send(event).unwrap();
-                    let quit = rx_quit.recv().unwrap();
-                    if quit {
-                        return;
+                    if let Err(_) = tx_events.send(event) {
+                        return; // we don't need to go on working if nobody listens to us
+                    }
+                    match rx_quit.recv() {
+                        Ok(false) => {},
+                        _ => {
+                            return;
+                        }
                     }
                 }
             }
