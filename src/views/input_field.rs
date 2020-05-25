@@ -1,5 +1,11 @@
 use {
-    crate::{Area, CompoundStyle, Error, Event},
+    crate::{
+        Area,
+        CompoundStyle,
+        Error,
+        Event,
+        fit,
+    },
     std::io::Write,
     crossterm::{
         cursor,
@@ -180,20 +186,48 @@ impl InputField {
     {
         queue!(w, SetBackgroundColor(Color::Reset))?;
         queue!(w, cursor::MoveTo(self.area.left, self.area.top))?;
-        for (i, c) in self.content.iter().enumerate() {
-            if self.cursor_pos == i && self.focused {
-                self.cursor_style.queue(w, c)?;
+
+        let mut slice_start = 0;
+        let width = self.area.width as usize;
+        let mut ellipsis_at_start = false;
+        let mut ellipsis_at_end = false;
+        if self.content.len() + 1 >= width {
+            if self.cursor_pos <= width / 2 {
+                slice_start = 0;
+                ellipsis_at_end = true;
+            } else if self.cursor_pos >= self.content.len() - width / 2 {
+                slice_start = self.content.len() + 1 - width;
+                ellipsis_at_start = true;
             } else {
-                self.normal_style.queue(w, c)?;
+                slice_start = self.cursor_pos - width / 2;
+                ellipsis_at_start = true;
+                ellipsis_at_end = true;
             }
         }
-        let mut e = self.content.len();
-        if e == self.cursor_pos && self.focused {
-            self.cursor_style.queue(w, ' ')?;
-            e += 1;
-        }
-        for _ in e..self.area.width as usize {
-            self.normal_style.queue(w, ' ')?;
+        for i in 0..width {
+            if i == 0 && ellipsis_at_start {
+                self.normal_style.queue(w, fit::ELLIPSIS)?;
+                continue;
+            }
+            if i == width-1 && ellipsis_at_end {
+                self.normal_style.queue(w, fit::ELLIPSIS)?;
+                continue;
+            }
+            let idx = i + slice_start;
+            if idx >= self.content.len() {
+                if self.focused && (idx==self.cursor_pos) && (idx==self.content.len()) {
+                    self.cursor_style.queue(w, ' ')?;
+                } else {
+                    self.normal_style.queue(w, ' ')?;
+                }
+            } else {
+                let c = self.content[idx];
+                if self.focused && (self.cursor_pos == idx) {
+                    self.cursor_style.queue(w, c)?;
+                } else {
+                    self.normal_style.queue(w, c)?;
+                }
+            }
         }
         Ok(())
     }

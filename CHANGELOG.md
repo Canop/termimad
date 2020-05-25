@@ -1,4 +1,8 @@
 
+<a name="v0.8.22"></a>
+### v0.8.25 - 2020-05-25
+- Prevent overflowing of large text from input field (some ellipsis added if necessary)
+
 <a name="v0.8.21"></a>
 ### v0.8.21 - 2020-05-13
 - EventSource: better manage channel errors
