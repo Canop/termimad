@@ -12,6 +12,7 @@ use {
         event::{
             KeyCode,
             KeyEvent,
+            KeyModifiers,
         },
         queue,
         style::{
@@ -167,7 +168,7 @@ impl InputField {
             Event::Click(x, y, ..) => {
                 self.apply_click_event(*x, *y)
             }
-            Event::Key(KeyEvent{code, modifiers}) if modifiers.is_empty() => {
+            Event::Key(KeyEvent{code, modifiers}) if (modifiers.is_empty()||*modifiers==KeyModifiers::SHIFT) => {
                 self.apply_keycode_event(*code)
             }
             _ => false,

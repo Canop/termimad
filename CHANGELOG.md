@@ -1,6 +1,10 @@
 
+<a name="v0.8.23"></a>
+### v0.8.23 - 2020-05-29
+- fix uppercase letters not used in input field
+
 <a name="v0.8.22"></a>
-### v0.8.25 - 2020-05-25
+### v0.8.22 - 2020-05-25
 - Prevent overflowing of large text from input field (some ellipsis added if necessary)
 
 <a name="v0.8.21"></a>
