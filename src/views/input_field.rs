@@ -23,11 +23,14 @@ use {
     },
 };
 
-/// A simple input field, managing its cursor position.
+/// A simple input field, managing its cursor position and
+/// either handling the events you give it or being managed
+/// through direct manipulation functions
+/// (put_char, del_char_left, etc.)
 pub struct InputField {
     content: Vec<char>,
-    pub area: Area,
     cursor_pos: usize, // position in chars
+    pub area: Area,
     normal_style: CompoundStyle,
     cursor_style: CompoundStyle,
     pub focused: bool,
@@ -81,9 +84,10 @@ impl InputField {
     }
     /// put a char at cursor position (and increments this
     /// position)
-    pub fn put_char(&mut self, c: char) {
+    pub fn put_char(&mut self, c: char) -> bool {
         self.content.insert(self.cursor_pos, c);
         self.cursor_pos += 1;
+        true
     }
     /// remove the char left of the cursor, if any
     pub fn del_char_left(&mut self) -> bool {
@@ -104,6 +108,116 @@ impl InputField {
             false
         }
     }
+    pub fn move_right(&mut self) -> bool {
+        if self.cursor_pos < self.content.len() {
+            self.cursor_pos += 1;
+            true
+        } else {
+            false
+        }
+    }
+    pub fn move_left(&mut self) -> bool {
+        if self.cursor_pos > 0 {
+            self.cursor_pos = 0;
+            true
+        } else {
+            false
+        }
+    }
+    pub fn move_to_end(&mut self) -> bool {
+        if self.cursor_pos < self.content.len() {
+            self.cursor_pos = self.content.len();
+            true
+        } else {
+            false
+        }
+    }
+    pub fn move_to_start(&mut self) -> bool {
+        if self.cursor_pos > 0 {
+            self.cursor_pos -= 1;
+            true
+        } else {
+            false
+        }
+    }
+    pub fn move_word_left(&mut self) -> bool {
+        if self.cursor_pos == 0 {
+            return false;
+        }
+        loop {
+            self.cursor_pos -= 1;
+            if self.cursor_pos == 0 || !self.content[self.cursor_pos-1].is_alphanumeric() {
+                break;
+            }
+        }
+        true
+    }
+    pub fn move_word_right(&mut self) -> bool {
+        if self.cursor_pos == self.content.len() {
+            return false;
+        }
+        loop {
+            self.cursor_pos += 1;
+            if self.cursor_pos >= self.content.len() - 1
+                || !self.content[self.cursor_pos-1].is_alphanumeric() {
+                break;
+            }
+        }
+        true
+    }
+    pub fn del_word_left(&mut self) -> bool {
+        if self.cursor_pos == 0 {
+            return false;
+        }
+        loop {
+            self.content.remove(self.cursor_pos);
+            self.cursor_pos -= 1;
+            if self.cursor_pos == 0 || !self.content[self.cursor_pos-1].is_alphanumeric() {
+                break;
+            }
+        }
+        true
+    }
+    pub fn del_word_right(&mut self) -> bool {
+        if self.cursor_pos == self.content.len() {
+            return false;
+        }
+        loop {
+            let deleted_is_an = self.content[self.cursor_pos].is_alphanumeric();
+            self.content.remove(self.cursor_pos);
+            if self.cursor_pos >= self.content.len() - 1 || !deleted_is_an {
+                break;
+            }
+        }
+        true
+    }
+
+    /// apply an event being a key without modifier.
+    ///
+    /// You don't usually call this function but the more
+    /// general `apply_event`. This one is useful when you
+    /// manage events mostly yourselves.
+    ///
+    /// This function handles a few events like deleting a
+    /// char, or going to the start (home key) or end (end key)
+    /// of the input. If you want to totally handle events, you
+    /// may call function like `put_char` and `del_char_left`
+    /// directly.
+    pub fn apply_keycode_event(&mut self, code: KeyCode) -> bool {
+        if !self.focused {
+            return false;
+        }
+        match code {
+            KeyCode::Home => self.move_to_start(),
+            KeyCode::End => self.move_to_end(),
+            KeyCode::Char(c) => self.put_char(c),
+            KeyCode::Left => self.move_left(),
+            KeyCode::Right => self.move_right(),
+            KeyCode::Backspace => self.del_char_left(),
+            KeyCode::Delete => self.del_char_below(),
+            _ => false,
+        }
+    }
 
     /// apply a click event
     ///
@@ -121,43 +235,6 @@ impl InputField {
         } else {
             false
         }
-    }
-
-    /// apply an event being a key without modifier.
-    ///
-    /// You don't usually call this function but the more
-    /// general `apply_event`. This one is useful when you
-    /// manage events yourselves.
-    pub fn apply_keycode_event(&mut self, code: KeyCode) -> bool {
-        if !self.focused {
-            return false;
-        }
-        match code {
-            KeyCode::Home => {
-                self.cursor_pos = 0;
-                true
-            }
-            KeyCode::End => {
-                self.cursor_pos = self.content.len();
-                true
-            }
-            KeyCode::Char(c) => {
-                self.put_char(c);
-                true
-            }
-            KeyCode::Left if self.cursor_pos > 0 => {
-                self.cursor_pos -= 1;
-                true
-            }
-            KeyCode::Right if self.cursor_pos < self.content.len() => {
-                self.cursor_pos += 1;
-                true
-            }
-            KeyCode::Backspace => self.del_char_left(),
-            KeyCode::Delete => self.del_char_below(),
-            _ => false,
-        }
-
     }
 
     /// apply the passed event to change the state (content, cursor)

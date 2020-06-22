@@ -1,4 +1,8 @@
 
+<a name="v0.8.24"></a>
+### v0.8.24 - 2020-06-22
+- add a bunch of functions modifying the input (moving the cursor or deleting parts)
+
 <a name="v0.8.23"></a>
 ### v0.8.23 - 2020-05-29
 - fix uppercase letters not used in input field

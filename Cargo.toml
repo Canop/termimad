@@ -1,6 +1,6 @@
 [package]
 name = "termimad"
-version = "0.8.23"
+version = "0.8.24"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 repository = "https://github.com/Canop/termimad"
 description = "Markdown Renderer for the Terminal"
