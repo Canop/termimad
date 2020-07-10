@@ -13,7 +13,7 @@
 [l4]: https://miaou.dystroy.org/3
 
 
-A simple tool to display static or dynamic Markdown snippets in the terminal, with skin isolation.
+A simple library to display static or dynamic Markdown snippets in your terminal application, with skin isolation.
 
 Based on [crossterm](https://github.com/TimonPost/crossterm) so works on most terminals (even on windows).
 
