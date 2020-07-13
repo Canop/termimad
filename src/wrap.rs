@@ -134,20 +134,21 @@ pub fn hard_wrap_composite<'s>(
         if let Some((idx, bp)) = ignored_cut_back {
             let diff = idx - bp.idx;
             if diff + dst_composite.visible_length - bp.len < width {
-                let mut tail = composites
+                let last = composites
                     .last_mut()
                     .unwrap()
                     .composite
                     .compounds
-                    .last_mut()
-                    .unwrap()
-                    .cut_tail(diff + bp.len);
-                composites.last_mut().unwrap().visible_length -= diff + bp.len;
-                if bp.len > 0 {
-                    tail = tail.tail_chars(bp.len);
+                    .last_mut().unwrap();
+                if last.as_str().len() > diff + bp.len {
+                    let mut tail = last.cut_tail(diff + bp.len);
+                    composites.last_mut().unwrap().visible_length -= diff + bp.len;
+                    if bp.len > 0 {
+                        tail = tail.tail_chars(bp.len);
+                    }
+                    dst_composite.composite.compounds.insert(0, tail);
+                    dst_composite.visible_length += diff;
                 }
-                dst_composite.composite.compounds.insert(0, tail);
-                dst_composite.visible_length += diff;
             }
         }
         composites.push(dst_composite);

@@ -18,7 +18,6 @@ use {
     std::fmt::{self, Display},
 };
 
-
 /// A style which may be applied to a compound
 #[derive(Default, Clone)]
 pub struct CompoundStyle {
@@ -205,7 +204,6 @@ impl CompoundStyle {
         w.queue(Clear(clear_type))?;
         Ok(())
     }
-
 
     pub fn style_char(&self, nude_char: char) -> StyledChar {
         StyledChar::new(self.clone(), nude_char)
