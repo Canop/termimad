@@ -82,7 +82,7 @@ impl InputField {
         self.content = s.chars().collect();
         self.cursor_pos = self.content.len();
     }
-    /// put a char at cursor position (and increments this
+    /// put a char at cursor position (and increment this
     /// position)
     pub fn put_char(&mut self, c: char) -> bool {
         self.content.insert(self.cursor_pos, c);
@@ -118,7 +118,7 @@ impl InputField {
     }
     pub fn move_left(&mut self) -> bool {
         if self.cursor_pos > 0 {
-            self.cursor_pos = 0;
+            self.cursor_pos -= 1;
             true
         } else {
             false
@@ -134,7 +134,7 @@ impl InputField {
     }
     pub fn move_to_start(&mut self) -> bool {
         if self.cursor_pos > 0 {
-            self.cursor_pos -= 1;
+            self.cursor_pos = 0;
             true
         } else {
             false
