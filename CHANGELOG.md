@@ -1,4 +1,17 @@
 
+<a name="v0.8.27"></a>
+### v0.8.27 - 2020-10-07
+- fix inverted move_left and move_to_start
+
+<a name="v0.8.26"></a>
+### v0.8.26 - 2020-08-07
+- upgrade crossterm to 0.17.7
+
+<a name="v0.8.25"></a>
+### v0.8.25 - 2020-07-13
+- interpred lines with just ">" as empty quotes
+- fix panic on wrapping long strings without space
+
 <a name="v0.8.24"></a>
 ### v0.8.24 - 2020-06-22
 - add a bunch of functions modifying the input (moving the cursor or deleting parts)
