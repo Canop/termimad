@@ -33,8 +33,6 @@ use {
     },
 };
 
-
-
 /// A skin defining how a parsed mardkown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
 #[derive(Clone)]

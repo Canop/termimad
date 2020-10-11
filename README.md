@@ -232,6 +232,8 @@ to get
 
 You'll find more text template functions in the documentation and in the example (run `cargo run --example text_template`).
 
+You may also be interested in `OwningTemplateExpander`: an alternative expander owning the values which may be handy when you build them while iterating in sub templates.
+
 ## Advices to get started
 
 * Start by reading the examples (in `/examples`): they cover almost the whole API, including templates, how to use an alternate screen or scroll the page, etc.

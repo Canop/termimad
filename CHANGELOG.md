@@ -1,4 +1,8 @@
 
+<a name="v0.8.28"></a>
+### v0.8.28 - 2020-10-11
+- use the OwningTemplateExpander of Minimad 0.6.6
+
 <a name="v0.8.27"></a>
 ### v0.8.27 - 2020-10-07
 - fix inverted move_left and move_to_start
