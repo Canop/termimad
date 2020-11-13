@@ -1,4 +1,13 @@
 
+<a name="v0.8.30"></a>
+### v0.8.30 - 2020-11-13
+- add the FitStr utility taken from broot (correct string cutting taking real char width in cols)
+(note that not all functions in termimad precisely take all chars width in cols into account)
+
+<a name="v0.8.29"></a>
+### v0.8.29 - 2020-10-15
+- allow default value in template expansion
+
 <a name="v0.8.29"></a>
 ### v0.8.29 - 2020-10-15
 - allow default value in template expansion

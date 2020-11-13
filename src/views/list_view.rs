@@ -144,6 +144,7 @@ impl<'t, T> ListView<'t, T> {
             self.scroll,
             self.displayed_rows_count as i32,
             self.tbody_height(),
+            self.area.top,
         )
     }
     pub fn add_row(&mut self, data: T) {

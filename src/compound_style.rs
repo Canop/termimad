@@ -1,4 +1,3 @@
-
 use {
     crate::{errors::Result, styled_char::StyledChar},
     crossterm::{

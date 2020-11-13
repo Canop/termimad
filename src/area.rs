@@ -92,7 +92,7 @@ impl Area {
         scroll: i32, // 0 for no scroll, positive if scrolled
         content_height: i32,
     ) -> Option<(u16, u16)> {
-        compute_scrollbar(scroll, content_height, i32::from(self.height))
+        compute_scrollbar(scroll, content_height, i32::from(self.height), self.top)
     }
 }
 
@@ -100,6 +100,7 @@ pub fn compute_scrollbar(
     scroll: i32,           // 0 for no scroll, positive if scrolled
     content_height: i32,   // number of lines of the content
     available_height: i32, // for an area it's usually its height
+    top: u16,
 ) -> Option<(u16, u16)> {
     let h = available_height;
     if content_height <= h {
@@ -111,9 +112,9 @@ pub fn compute_scrollbar(
     Some((
         sc as u16,
         if h > sc + se {
-            (h - se) as u16
+            top + (h - se) as u16
         } else {
-            sc as u16 + 1
+            top + sc as u16 + 1
         },
     ))
 }

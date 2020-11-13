@@ -11,6 +11,9 @@ pub static ELLIPSIS: &str = "…";
 
 
 /// A fitter can shorten a composite to make it fit a target width
+///
+/// Warning: the current implementation doesn't really properly
+/// deal with chars that take more than one column on screen.
 pub struct Fitter {
 
     // sum of kept head and kept tail, should be at least 1
