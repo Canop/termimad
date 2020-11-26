@@ -1,13 +1,16 @@
-use crossterm::{
-    self,
-    event::{
-        KeyCode, KeyModifiers,
+use {
+    super::EscapeSequence,
+    crossterm::{
+        self,
+        event::{
+            KeyCode, KeyModifiers,
+        },
     },
 };
 
 /// a valid user event
 ///
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Event {
 
     Key(crossterm::event::KeyEvent),
@@ -23,6 +26,10 @@ pub enum Event {
 
     /// mouse wheel turns. contains -1 if up or 1 if down
     Wheel(i32),
+
+    /// an escape sequence which wasn't intercepted by a
+    /// lower layer
+    EscapeSequence(EscapeSequence),
 }
 
 impl Event {
@@ -33,16 +40,16 @@ impl Event {
     /// To get a double-click you'll either need to use a termimad event-source
     /// or to do the computation yourself.
     pub fn from_crossterm_event(
-        crossterm_event: crossterm::Result<crossterm::event::Event>
+        crossterm_event: crossterm::event::Event
     ) -> Option<Event> {
         match crossterm_event {
-            Ok(crossterm::event::Event::Key(mut key)) => {
+            crossterm::event::Event::Key(mut key) => {
                 if key.code==KeyCode::Char('\r') || key.code==KeyCode::Char('\n') {
                     key.code = KeyCode::Enter;
                 }
                 Some(Event::Key(key))
             }
-            Ok(crossterm::event::Event::Mouse(crossterm::event::MouseEvent::Up(button, x, y, modifiers))) => {
+            crossterm::event::Event::Mouse(crossterm::event::MouseEvent::Up(button, x, y, modifiers)) => {
                 use crossterm::event::MouseButton::*;
                 match button {
                     Left => Some(Event::Click(x, y, modifiers)),
@@ -50,13 +57,13 @@ impl Event {
                     _ => None
                 }
             }
-            Ok(crossterm::event::Event::Resize(w, h)) => {
+            crossterm::event::Event::Resize(w, h) => {
                 Some(Event::Resize(w, h))
             }
-            Ok(crossterm::event::Event::Mouse(crossterm::event::MouseEvent::ScrollUp(..))) => {
+            crossterm::event::Event::Mouse(crossterm::event::MouseEvent::ScrollUp(..)) => {
                 Some(Event::Wheel(-1))
             }
-            Ok(crossterm::event::Event::Mouse(crossterm::event::MouseEvent::ScrollDown(..))) => {
+            crossterm::event::Event::Mouse(crossterm::event::MouseEvent::ScrollDown(..)) => {
                 Some(Event::Wheel(1))
             }
             _ => None,

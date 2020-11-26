@@ -1,11 +1,19 @@
 use {
+    super::{
+        Event,
+        EscapeSequence,
+    },
     crate::{
         errors::Error,
-        events::Event,
     },
     crossbeam::channel::{unbounded, Receiver, Sender},
     crossterm::{
         self,
+        event::{
+            KeyCode,
+            KeyEvent,
+            KeyModifiers,
+        },
         terminal,
     },
     std::{
@@ -20,18 +28,10 @@ use {
 
 const DOUBLE_CLICK_MAX_DURATION: Duration = Duration::from_millis(700);
 
-/// an event with time of occuring
-struct TimedEvent {
+struct TimedClick {
     time: Instant,
-    event: Event,
-}
-impl From<Event> for TimedEvent {
-    fn from(event: Event) -> Self {
-        TimedEvent {
-            time: Instant::now(),
-            event,
-        }
-    }
+    x: u16,
+    y: u16,
 }
 
 /// a thread backed event listener emmiting events on a channel.
@@ -56,18 +56,72 @@ impl EventSource {
         let event_count = Arc::new(AtomicUsize::new(0));
         let internal_event_count = Arc::clone(&event_count);
         terminal::enable_raw_mode()?;
-        let mut last_event: Option<TimedEvent> = None;
+        let mut last_click: Option<TimedClick> = None;
+        let seq_start = KeyEvent {
+            code: KeyCode::Char('_'),
+            modifiers: KeyModifiers::ALT,
+        };
+        let seq_end = KeyEvent {
+            code: KeyCode::Char('\\'),
+            modifiers: KeyModifiers::ALT,
+        };
         thread::spawn(move || {
+            let mut current_escape_sequence: Option<EscapeSequence> = None;
+            // return true when we must close the source
+            let send_and_wait = |event| {
+                if let Err(_) = tx_events.send(event) {
+                    true // broken channel
+                } else {
+                    match rx_quit.recv() {
+                        Ok(false) => false,
+                        _ => true,
+                    }
+                }
+            };
             loop {
-                if let Some(mut event) = Event::from_crossterm_event(crossterm::event::read()) {
+                let ct_event = match crossterm::event::read() {
+                    Ok(e) => e,
+                    _ => { continue; }
+                };
+                internal_event_count.fetch_add(1, Ordering::SeqCst);
+                let in_seq = current_escape_sequence.is_some();
+                if in_seq {
+                    if let crossterm::event::Event::Key(key) = ct_event {
+                        if key == seq_end {
+                            // it's a proper sequence ending, we send it as such
+                            let mut seq = current_escape_sequence.take().unwrap();
+                            seq.keys.push(key);
+                            if send_and_wait(Event::EscapeSequence(seq)) {
+                                return;
+                            }
+                            continue;
+                        } else if !key.modifiers.intersects(KeyModifiers::ALT | KeyModifiers::CONTROL) {
+                            // adding to the current escape sequence
+                            current_escape_sequence.as_mut().unwrap().keys.push(key);
+                            continue;
+                        }
+                    }
+                    // it's neither part of a proper sequence, nor the end
+                    // we send all previous events independently before sending this one
+                    let seq = current_escape_sequence.take().unwrap();
+                    for key in seq.keys {
+                        if send_and_wait(Event::Key(key)) {
+                            return;
+                        }
+                    }
+                    // the current event will be sent normally
+                } else if let crossterm::event::Event::Key(key) = ct_event {
+                    if key == seq_start {
+                        // starting a new sequence
+                        current_escape_sequence = Some(EscapeSequence { keys: vec![key] });
+                        continue;
+                    }
+                }
+                if let Some(mut event) = Event::from_crossterm_event(ct_event) {
                     // save the event, and maybe change it
                     // (may change a click into a double-click)
                     if let Event::Click(x, y, ..) = event {
-                        if let Some(TimedEvent {
-                            time,
-                            event: Event::Click(last_x, last_y, ..),
-                        }) = last_event
-                        {
+                        if let Some(TimedClick { time, x: last_x, y: last_y }) = last_click {
                             if
                                 last_x == x && last_y == y
                                 && time.elapsed() < DOUBLE_CLICK_MAX_DURATION
@@ -75,18 +129,11 @@ impl EventSource {
                                 event = Event::DoubleClick(x, y);
                             }
                         }
+                        last_click = Some(TimedClick { time: Instant::now(), x, y });
                     }
-                    last_event = Some(TimedEvent::from(event));
-                    internal_event_count.fetch_add(1, Ordering::SeqCst);
                     // we send the event to the receiver in the main event loop
-                    if let Err(_) = tx_events.send(event) {
-                        return; // we don't need to go on working if nobody listens to us
-                    }
-                    match rx_quit.recv() {
-                        Ok(false) => {},
-                        _ => {
-                            return;
-                        }
+                    if send_and_wait(event) {
+                        return;
                     }
                 }
             }

@@ -1,5 +1,9 @@
+mod escape_sequence;
 mod event;
 mod event_source;
 
-pub use event::Event;
-pub use event_source::EventSource;
+pub use {
+    escape_sequence::EscapeSequence,
+    event::Event,
+    event_source::EventSource,
+};

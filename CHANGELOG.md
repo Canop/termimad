@@ -1,4 +1,9 @@
 
+<a name="v0.9.0"></a>
+### v0.9.0 - 2020-11-26
+- event source intercepts escape sequences and sends them (when finished) in a dedicated event variant
+- breaking change: termimad event are no longer Copy
+
 <a name="v0.8.30"></a>
 ### v0.8.30 - 2020-11-13
 - add the FitStr utility taken from broot (correct string cutting taking real char width in cols)
