@@ -1,8 +1,8 @@
 
-<a name="v0.9.0"></a>
-### v0.9.0 - 2020-11-26
-- event source intercepts escape sequences and sends them (when finished) in a dedicated event variant
-- breaking change: termimad event are no longer Copy
+<a name="v0.9.1"></a>
+### v0.9.1 - 2020-11-27
+- event source intercepts escape sequences and sends them (when finished) in a dedicated channel
+(not reading this bounded channel is possible: escape sequences are just dropped in that case)
 
 <a name="v0.8.30"></a>
 ### v0.8.30 - 2020-11-13

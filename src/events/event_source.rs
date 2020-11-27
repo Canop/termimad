@@ -6,7 +6,7 @@ use {
     crate::{
         errors::Error,
     },
-    crossbeam::channel::{unbounded, Receiver, Sender},
+    crossbeam::channel::{bounded, unbounded, Receiver, Sender},
     crossterm::{
         self,
         event::{
@@ -27,6 +27,7 @@ use {
 };
 
 const DOUBLE_CLICK_MAX_DURATION: Duration = Duration::from_millis(700);
+const ESCAPE_SEQUENCE_CHANNEL_SIZE: usize = 10;
 
 struct TimedClick {
     time: Instant,
@@ -42,6 +43,7 @@ struct TimedClick {
 ///  they should) when a user event is produced.
 pub struct EventSource {
     rx_events: Receiver<Event>,
+    rx_seqs: Receiver<EscapeSequence>,
     tx_quit: Sender<bool>,
     event_count: Arc<AtomicUsize>,
 }
@@ -52,6 +54,7 @@ impl EventSource {
     /// If desired, mouse support must be enabled and disabled in crossterm.
     pub fn new() -> Result<EventSource, Error> {
         let (tx_events, rx_events) = unbounded();
+        let (tx_seqs, rx_seqs) = bounded(ESCAPE_SEQUENCE_CHANNEL_SIZE);
         let (tx_quit, rx_quit) = unbounded();
         let event_count = Arc::new(AtomicUsize::new(0));
         let internal_event_count = Arc::clone(&event_count);
@@ -69,6 +72,7 @@ impl EventSource {
             let mut current_escape_sequence: Option<EscapeSequence> = None;
             // return true when we must close the source
             let send_and_wait = |event| {
+                internal_event_count.fetch_add(1, Ordering::SeqCst);
                 if let Err(_) = tx_events.send(event) {
                     true // broken channel
                 } else {
@@ -83,7 +87,6 @@ impl EventSource {
                     Ok(e) => e,
                     _ => { continue; }
                 };
-                internal_event_count.fetch_add(1, Ordering::SeqCst);
                 let in_seq = current_escape_sequence.is_some();
                 if in_seq {
                     if let crossterm::event::Event::Key(key) = ct_event {
@@ -91,8 +94,9 @@ impl EventSource {
                             // it's a proper sequence ending, we send it as such
                             let mut seq = current_escape_sequence.take().unwrap();
                             seq.keys.push(key);
-                            if send_and_wait(Event::EscapeSequence(seq)) {
-                                return;
+                            if let Err(_) = tx_seqs.try_send(seq) {
+                                // there's probably just nobody listening on
+                                // this zero size bounded channel
                             }
                             continue;
                         } else if !key.modifiers.intersects(KeyModifiers::ALT | KeyModifiers::CONTROL) {
@@ -140,6 +144,7 @@ impl EventSource {
         });
         Ok(EventSource {
             rx_events,
+            rx_seqs,
             tx_quit,
             event_count,
         })
@@ -162,6 +167,14 @@ impl EventSource {
     /// return a new receiver for the channel emmiting events
     pub fn receiver(&self) -> Receiver<Event> {
         self.rx_events.clone()
+    }
+
+    /// return a new receiver for the channel emmiting escape sequences
+    ///
+    /// It's a bounded channel and any escape sequence will be
+    /// dropped when it's full
+    pub fn escape_sequence_receiver(&self) -> Receiver<EscapeSequence> {
+        self.rx_seqs.clone()
     }
 }
 

@@ -1,5 +1,4 @@
 use {
-    super::EscapeSequence,
     crossterm::{
         self,
         event::{
@@ -10,7 +9,7 @@ use {
 
 /// a valid user event
 ///
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Event {
 
     Key(crossterm::event::KeyEvent),
@@ -26,10 +25,6 @@ pub enum Event {
 
     /// mouse wheel turns. contains -1 if up or 1 if down
     Wheel(i32),
-
-    /// an escape sequence which wasn't intercepted by a
-    /// lower layer
-    EscapeSequence(EscapeSequence),
 }
 
 impl Event {
