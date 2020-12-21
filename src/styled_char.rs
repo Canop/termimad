@@ -12,7 +12,7 @@ use {
 
 /// A modifiable character which can be easily written or repeated. Can
 /// be used for bullets, horizontal rules or quote marks.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct StyledChar {
     compound_style: CompoundStyle,
     nude_char: char,

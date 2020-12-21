@@ -1,4 +1,8 @@
 
+<a name="v0.9.2"></a>
+### v0.9.2 - 2020-12-21
+- styled_char and compound_style now implement Debug
+
 <a name="v0.9.1"></a>
 ### v0.9.1 - 2020-11-27
 - event source intercepts escape sequences and sends them (when finished) in a dedicated channel

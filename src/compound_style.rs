@@ -18,7 +18,7 @@ use {
 };
 
 /// A style which may be applied to a compound
-#[derive(Default, Clone)]
+#[derive(Default, Clone, Debug)]
 pub struct CompoundStyle {
     pub object_style: ContentStyle, // a crossterm content style
 }
