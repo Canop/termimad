@@ -1,4 +1,8 @@
 
+<a name="v0.9.3"></a>
+### v0.9.3 - 2021-01-27
+- new version of minimad -> owning templates allow passing any Display as value
+
 <a name="v0.9.2"></a>
 ### v0.9.2 - 2020-12-21
 - styled_char and compound_style now implement Debug

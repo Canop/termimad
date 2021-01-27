@@ -102,6 +102,11 @@ impl CompoundStyle {
         self.object_style.attributes.set(attr);
     }
 
+    /// Remove an `Attribute`. Like italic, underlined or bold.
+    pub fn remove_attr(&mut self, attr: Attribute) {
+        self.object_style.attributes.unset(attr);
+    }
+
     /// Add the defined characteristics of `other` to self, overwriting
     ///  its own one when defined
     pub fn overwrite_with(&mut self, other: &CompoundStyle) {
