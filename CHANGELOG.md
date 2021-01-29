@@ -1,4 +1,8 @@
 
+<a name="v0.9.4"></a>
+### v0.9.4 - 2021-01-29
+- update crossbeam dependency to 0.8
+
 <a name="v0.9.3"></a>
 ### v0.9.3 - 2021-01-27
 - new version of minimad -> owning templates allow passing any Display as value
