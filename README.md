@@ -242,8 +242,15 @@ You may also be interested in `OwningTemplateExpander`: an alternative expander 
 * If a feature is missing, or you don't know how to use some part, come and ping me on my chat during West European hours.
 * The event / event-source part of Termimad is currently tailored for a short number of applications. If you use it or want to use it, please come and tell me so that your needs are taken into account!
 
-[broot](https://github.com/Canop/broot) is a real application using Termimad, you might want to see how it does it.
 
-[whalespotter](https://github.com/Canop/whalespotter) has been designed specifically to showcase Termimad components in a real application.
+## Applications using termimad
+
+* [broot](https://github.com/Canop/broot) is a file manager and uses termimad for its help screen and status information
+
+* [whalespotter](https://github.com/Canop/whalespotter) has been designed specifically to showcase Termimad components in a real application.
+
+* [lfs](https://github.com/Canop/lfs) is a linux utility displaying file system. Termimad templates are used to show the data in tables
+
+* [Rhit](https://github.com/Canop/rhit) is a nginx log analyzer. Termimad templates are used to show the data in tables
 
 If you're the author of another application using Termimad, please tell me.

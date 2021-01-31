@@ -1,4 +1,9 @@
 
+<a name="v0.9.5"></a>
+### v0.9.5 - 2021-01-31
+- names of variables in templates can now contain digits
+- better column balancing in thight tables
+
 <a name="v0.9.4"></a>
 ### v0.9.4 - 2021-01-29
 - update crossbeam dependency to 0.8

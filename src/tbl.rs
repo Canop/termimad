@@ -1,10 +1,16 @@
-use minimad::{Alignment, TableRow};
 
-use crate::composite::*;
-use crate::line::FmtLine;
-use crate::skin::MadSkin;
-use crate::spacing::Spacing;
-use crate::wrap;
+use {
+    crate::{
+        composite::*,
+        line::FmtLine,
+        skin::MadSkin,
+        spacing::Spacing,
+        wrap,
+    },
+    minimad::{Alignment, TableRow},
+    std::cmp,
+};
+
 
 /// Wrap a standard table row
 pub struct FmtTableRow<'s> {
@@ -80,16 +86,27 @@ struct Col {
 /// overall sum goal.
 /// No width can go below 3.
 /// This function should be called only when the goal is attainable
-/// and when there's reducion to be done.
+/// and when there's reduction to be done.
 fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
     let sum: usize = widths.iter().sum();
     assert!(sum > goal);
+
+    //- simple case 1 : there's only one col
+    if widths.len()==1 {
+        widths[0] = goal;
+        return;
+    }
+
     let mut excess = sum - goal;
     let mut cols: Vec<Col> = widths
         .iter()
         .enumerate()
         .map(|(idx, width)| {
-            let to_remove = (width * excess / sum).min(width - 3);
+            let to_remove = if *width <= 3 {
+                3
+            } else {
+                (width * excess / sum).min(width - 3)
+            };
             excess -= to_remove;
             Col {
                 idx,
@@ -98,6 +115,30 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
             }
         })
         .collect();
+    cols.sort_by_key(|c| cmp::Reverse(c.width));
+    let d = sum - goal;
+
+    //- simple case 2 : one col is 65% of the sum alone:
+    //  we don't touch the other cols if possible
+    let w0 = cols[0].width;
+    if d * 4 < 3 * w0 && w0 * 100 > 65 * sum && w0 * 100 > 40 * (sum + d) {
+        widths[cols[0].idx] = w0 + goal - sum;
+        return;
+    }
+
+    //- simple case 3 : two cols make 75% of the sum
+    if cols.len() > 2 {
+        let (w0, w1) = (cols[0].width, cols[1].width);
+        if 3 * d < 2 * (w0 + w1) && (w0 + w1) * 100 > 75 * sum {
+            let d1 = d * w1 / sum;
+            let d0 = d - d1;
+            widths[cols[0].idx] -= d0;
+            widths[cols[1].idx] -= d1;
+            return;
+        }
+    }
+
+    //- general case, which could be improved
     cols.sort_by(|a, b| b.to_remove.cmp(&a.to_remove));
     for col in &mut cols {
         if col.to_remove < 3 {
@@ -294,5 +335,41 @@ fn find_tables(lines: &[FmtLine<'_>]) -> Vec<Table> {
 pub fn fix_all_tables(lines: &mut Vec<FmtLine<'_>>, width: usize) {
     for tbl in find_tables(lines).iter_mut().rev() {
         tbl.fix_columns(lines, width);
+    }
+}
+
+#[cfg(test)]
+mod col_reduction_tests {
+
+    use super::*;
+
+    fn min(v: &[usize]) -> usize {
+        *v.iter().min().unwrap()
+    }
+
+    #[test]
+    fn test_col_reduction_1_col() {
+        let mut widths = vec![500];
+        reduce_col_widths(&mut widths, 100);
+        assert_eq!(widths, &[100]);
+    }
+    #[test]
+    fn test_col_reduction_1_major() {
+        let mut widths = vec![80, 500, 5];
+        reduce_col_widths(&mut widths, 400);
+        assert_eq!(widths.iter().sum::<usize>(), 400);
+        assert_eq!(widths, &[80, 315, 5]);
+
+        let mut widths = vec![1, 100, 4];
+        reduce_col_widths(&mut widths, 50);
+        assert_eq!(widths.iter().sum::<usize>(), 50);
+        assert_eq!(widths, &[1, 45, 4]);
+    }
+    #[test]
+    fn test_col_reduction_2_major() {
+        let mut widths = vec![250, 300, 5];
+        reduce_col_widths(&mut widths, 250);
+        assert_eq!(widths.iter().sum::<usize>(), 250);
+        assert_eq!(min(&widths), 5);
     }
 }
