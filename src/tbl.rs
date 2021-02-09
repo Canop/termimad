@@ -121,7 +121,7 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
     //- simple case 2 : one col is 65% of the sum alone:
     //  we don't touch the other cols if possible
     let w0 = cols[0].width;
-    if d * 4 < 3 * w0 && w0 * 100 > 65 * sum && w0 * 100 > 40 * (sum + d) {
+    if d + 3 < w0 && w0 * 100 > 65 * sum && w0 * 100 > 40 * (sum + d) {
         widths[cols[0].idx] = w0 + goal - sum;
         return;
     }
@@ -129,7 +129,7 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
     //- simple case 3 : two cols make 75% of the sum
     if cols.len() > 2 {
         let (w0, w1) = (cols[0].width, cols[1].width);
-        if 3 * d < 2 * (w0 + w1) && (w0 + w1) * 100 > 75 * sum {
+        if d + 4 < (w0 + w1) && (w0 + w1) * 100 > 75 * sum {
             let d1 = d * w1 / sum;
             let d0 = d - d1;
             widths[cols[0].idx] -= d0;
@@ -205,6 +205,7 @@ impl Table {
                 widths[ic] = 3;
             }
         }
+
         // Now we resize all cells and we insert new rows if necessary.
         // We iterate in reverse order so that we can insert rows
         //  without recomputing row indices.
@@ -371,5 +372,14 @@ mod col_reduction_tests {
         reduce_col_widths(&mut widths, 250);
         assert_eq!(widths.iter().sum::<usize>(), 250);
         assert_eq!(min(&widths), 5);
+    }
+    #[test]
+    fn test_col_reduction_bug_01() {
+        // test for a bug giving a width of 0 to the first col
+        let mut widths = vec![3, 1033, 4, 10, 20, 5];
+        reduce_col_widths(&mut widths, 148);
+        for &width in &widths {
+            assert!(width > 2);
+        }
     }
 }

@@ -1,4 +1,8 @@
 
+<a name="v0.9.6"></a>
+### v0.9.6 - 2021-02-07
+- fix a bad column widths reduction
+
 <a name="v0.9.5"></a>
 ### v0.9.5 - 2021-01-31
 - names of variables in templates can now contain digits
