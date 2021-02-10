@@ -63,9 +63,9 @@ pub struct MadSkin {
 impl Default for MadSkin {
     /// Build a customizable skin.
     ///
-    /// It's initialized with sensible monochrome settings.
-    fn default() -> MadSkin {
-        let mut skin = MadSkin {
+    /// It's initialized with sensible gray level settings.
+    fn default() -> Self {
+        let mut skin = Self {
             paragraph: LineStyle::default(),
             bold: CompoundStyle::new(Some(Color::White), None, Attribute::Bold.into()),
             italic: CompoundStyle::with_attr(Attribute::Italic),
@@ -102,6 +102,32 @@ impl Default for MadSkin {
 }
 
 impl MadSkin {
+
+    /// Build a customizable skin with no style, most useful
+    /// when your application must run in no-color mode, for
+    /// example when piped to a file.
+    ///
+    /// Note that without style you have no underline, no
+    /// strikeout, etc.
+    pub fn no_style() -> Self {
+        Self {
+            paragraph: LineStyle::default(),
+            bold: CompoundStyle::default(),
+            italic: CompoundStyle::default(),
+            strikeout: CompoundStyle::default(),
+            inline_code: CompoundStyle::default(),
+            code_block: LineStyle::default(),
+            headers: Default::default(),
+            scrollbar: ScrollBarStyle::new(),
+            table: LineStyle::default(),
+            bullet: StyledChar::nude('•'),
+            quote_mark: StyledChar::nude('▐'),
+            horizontal_rule: StyledChar::nude('―'),
+            ellipsis: CompoundStyle::default(),
+            #[cfg(feature="special-renders")]
+            special_chars: HashMap::new(),
+        }
+    }
     /// Set a common foregreound color for all header levels
     ///
     /// (it's still possible to change them individually with

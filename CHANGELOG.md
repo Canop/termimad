@@ -1,4 +1,8 @@
 
+<a name="v0.9.7"></a>
+### v0.9.7 - 2021-02-10
+- MadSkin::no_style() builds a skin without any style information, suitable for writing in files
+
 <a name="v0.9.6"></a>
 ### v0.9.6 - 2021-02-07
 - fix a bad column widths reduction
