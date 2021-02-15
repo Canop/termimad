@@ -1,3 +1,6 @@
+<a name="v0.10.0"></a>
+### v0.10.0 - 2021-02-15
+- Style characters can now be escaped with a '\' - Fix #24
 
 <a name="v0.9.7"></a>
 ### v0.9.7 - 2021-02-10

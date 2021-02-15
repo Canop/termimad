@@ -2,7 +2,7 @@ use {
     crossterm::{
         self,
         event::{
-            KeyCode, KeyModifiers,
+            KeyCode, KeyModifiers, MouseEventKind,
         },
     },
 };
@@ -44,21 +44,32 @@ impl Event {
                 }
                 Some(Event::Key(key))
             }
-            crossterm::event::Event::Mouse(crossterm::event::MouseEvent::Up(button, x, y, modifiers)) => {
-                use crossterm::event::MouseButton::*;
-                match button {
-                    Left => Some(Event::Click(x, y, modifiers)),
-                    Right => Some(Event::RightClick(x, y, modifiers)),
-                    _ => None
-                }
-            }
             crossterm::event::Event::Resize(w, h) => {
                 Some(Event::Resize(w, h))
             }
-            crossterm::event::Event::Mouse(crossterm::event::MouseEvent::ScrollUp(..)) => {
+            crossterm::event::Event::Mouse(
+                crossterm::event::MouseEvent {
+                    kind: MouseEventKind::Up(button),
+                    column,
+                    row,
+                    modifiers,
+                }
+            ) => {
+                use crossterm::event::MouseButton::*;
+                match button {
+                    Left => Some(Event::Click(column, row, modifiers)),
+                    Right => Some(Event::RightClick(column, row, modifiers)),
+                    _ => None
+                }
+            }
+            crossterm::event::Event::Mouse(
+                crossterm::event::MouseEvent { kind: MouseEventKind::ScrollUp, .. }
+            ) => {
                 Some(Event::Wheel(-1))
             }
-            crossterm::event::Event::Mouse(crossterm::event::MouseEvent::ScrollDown(..)) => {
+            crossterm::event::Event::Mouse(
+                crossterm::event::MouseEvent { kind: MouseEventKind::ScrollDown, .. }
+            ) => {
                 Some(Event::Wheel(1))
             }
             _ => None,
