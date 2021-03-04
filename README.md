@@ -230,7 +230,7 @@ to get
 
 ![text_template_03](doc/text_template_03.png)
 
-You'll find more text template functions in the documentation and in the example (run `cargo run --example text_template`).
+You'll find more text template functions in the documentation and in the example (run `cargo run --example text-template`).
 
 You may also be interested in `OwningTemplateExpander`: an alternative expander owning the values which may be handy when you build them while iterating in sub templates.
 
