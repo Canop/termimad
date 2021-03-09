@@ -57,7 +57,7 @@ will give different results depending on the width:
 
 ```toml
 [dependencies]
-termimad = "0.5"
+termimad = "0.10"
 ```
 
 ### With the default skin:
