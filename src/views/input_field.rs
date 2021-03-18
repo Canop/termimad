@@ -170,8 +170,8 @@ impl InputField {
             return false;
         }
         loop {
-            self.content.remove(self.cursor_pos);
             self.cursor_pos -= 1;
+            self.content.remove(self.cursor_pos);
             if self.cursor_pos == 0 || !self.content[self.cursor_pos-1].is_alphanumeric() {
                 break;
             }

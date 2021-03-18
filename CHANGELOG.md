@@ -1,3 +1,7 @@
+<a name="v0.10.1"></a>
+### v0.10.1 - 2021-03-18
+- Fix a crash in `input_field.del_word_left()`
+
 <a name="v0.10.0"></a>
 ### v0.10.0 - 2021-02-15
 - Style characters can now be escaped with a '\' - Fix #24
