@@ -11,6 +11,8 @@ pub static TAB_REPLACEMENT: &str = "  ";
 /// The implementation here properly takes into account
 /// the width of special characters.
 ///
+/// Backspaces are considered as having a width of -1.
+///
 /// This implementation is based on a replacement of the
 /// tab character.
 #[derive(Debug, Clone, Copy)]
@@ -23,17 +25,21 @@ pub struct StrFit {
 impl StrFit {
     pub fn from(s: &str, cols_max: usize) -> Self {
         let mut bytes_count = 0;
-        let mut cols_count = 0;
+        let mut cols_count: i32 = 0;
         let mut has_tab = false;
         for (idx, c) in s.char_indices() {
-            let char_width = if '\t' == c {
-                has_tab = true;
-                TAB_REPLACEMENT.len()
-            } else {
-                UnicodeWidthChar::width(c).unwrap_or(0)
+            let char_width: i32 = match c {
+                '\t' => { // tab
+                    has_tab = true;
+                    TAB_REPLACEMENT.len() as i32
+                }
+                '\x08' => { // backspace
+                    -1
+                }
+                _ => UnicodeWidthChar::width(c).map(|w| w as i32).unwrap_or(0),
             };
             let next_str_width = cols_count + char_width;
-            if next_str_width > cols_max {
+            if next_str_width > 0 && next_str_width as usize > cols_max {
                 break;
             }
             cols_count = next_str_width;
@@ -41,7 +47,7 @@ impl StrFit {
         }
         Self {
             bytes_count,
-            cols_count,
+            cols_count: cols_count.max(0) as usize,
             has_tab,
         }
     }

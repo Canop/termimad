@@ -1,3 +1,7 @@
+<a name="v0.10.2"></a>
+### v0.10.2 - 2021-04-27
+- consider backspace as having a col width of -1 (they move the cursor to the left when printed in terminal)
+
 <a name="v0.10.1"></a>
 ### v0.10.1 - 2021-03-18
 - Fix a crash in `input_field.del_word_left()`
