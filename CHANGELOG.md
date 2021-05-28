@@ -1,3 +1,7 @@
+<a name="v0.10.3"></a>
+### v0.10.3 - 2021-05-28
+- fix a pb with wide chars in tables
+
 <a name="v0.10.2"></a>
 ### v0.10.2 - 2021-04-27
 - consider backspace as having a col width of -1 (they move the cursor to the left when printed in terminal)
