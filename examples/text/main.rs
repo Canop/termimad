@@ -1,5 +1,4 @@
 use crossterm::{execute, style::Color::*, terminal};
-use std::io::Write;
 use termimad::*;
 
 static MD: &str = r#"

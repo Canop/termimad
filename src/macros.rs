@@ -5,8 +5,6 @@
 /// Example:
 ///
 /// ```
-/// use lazy_static::lazy_static;
-/// use minimad::mad_inline;
 /// use termimad::*;
 ///
 /// let skin = MadSkin::default();
@@ -20,7 +18,7 @@
 #[macro_export]
 macro_rules! mad_print_inline {
     ($skin: expr, $md: literal $(, $value: expr )* $(,)? ) => {
-        $skin.print_composite(mad_inline!($md $(, $value)*));
+        $skin.print_composite(termimad::minimad::mad_inline!($md $(, $value)*));
     };
 }
 
@@ -29,8 +27,6 @@ macro_rules! mad_print_inline {
 /// Example:
 ///
 /// ```
-/// use lazy_static::lazy_static;
-/// use minimad::mad_inline;
 /// use termimad::*;
 ///
 /// let skin = MadSkin::default();
@@ -46,7 +42,7 @@ macro_rules! mad_print_inline {
 macro_rules! mad_write_inline {
     ($w: expr, $skin: expr, $md: literal $(, $value: expr )* $(,)? ) => {{
         use std::io::Write;
-        $skin.write_composite($w, mad_inline!($md $(, $value)*))
+        $skin.write_composite($w, termimad::minimad::mad_inline!($md $(, $value)*))
     }};
 }
 

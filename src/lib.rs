@@ -80,7 +80,6 @@ Example:
 
 ```
 # #[macro_use] extern crate minimad;
-# #[macro_use] extern crate lazy_static;
 # use termimad::*;
 # let skin = MadSkin::default();
 mad_print_inline!(
@@ -92,7 +91,7 @@ mad_print_inline!(
 ```
 
 Main difference with using `print!(format!( ... ))`:
-* the markdown parsing and template building are done only once (using `lazy_static` internally)
+* the markdown parsing and template building are done only once (using `once_cell` internally)
 * the given values aren't interpreted as markdown fragments and don't impact the style
 * arguments can be omited, repeated, given in any order
 * no support for fmt parameters or arguments other than `&str` *(in the current version)*
@@ -106,13 +105,6 @@ Note that there's no macro yet supporting templates for whole markdown *texts* b
 The repository contains several other examples, which hopefully cover the whole API while being simple enough. It's recommended you start by trying them or at least glance at their code.
 
 */
-
-#[macro_use]
-extern crate lazy_static;
-
-#[allow(unused_imports)]
-#[macro_use]
-extern crate minimad;
 
 mod area;
 mod code;
@@ -158,15 +150,16 @@ pub use views::{
     InputField, ListView, ListViewCell, ListViewColumn, MadView, ProgressBar, TextView,
 };
 
+pub use minimad;
+
 /// Return a reference to the global skin (modifiable).
 ///
 /// If you want a new default skin without messing with
 /// the other default printings, get a separate instance
 /// with `Skin::default()` instead.
 pub fn get_default_skin() -> &'static MadSkin {
-    lazy_static! {
-        static ref DEFAULT_SKIN: MadSkin = MadSkin::default();
-    }
+    use minimad::once_cell::sync::Lazy;
+    static DEFAULT_SKIN: Lazy<MadSkin> = Lazy::new(MadSkin::default);
     &DEFAULT_SKIN
 }
 

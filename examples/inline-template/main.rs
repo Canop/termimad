@@ -7,15 +7,8 @@ You execute this example with
 */
 use std::io::Write;
 use crossterm::style::{Attribute::*, Color::*};
-
-#[macro_use]
+use minimad::mad_inline;
 use termimad::*;
-
-#[macro_use]
-extern crate lazy_static;
-
-#[macro_use]
-extern crate minimad;
 
 fn main() -> Result<()> {
     let mut skin = MadSkin::default();

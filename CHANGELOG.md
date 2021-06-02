@@ -1,3 +1,7 @@
+<a name="v0.11.0"></a>
+### v0.11.0 - 2021-06-02
+- eases imports: it's no more needed to import the lazy_static crate and no import is needed for using macros
+
 <a name="v0.10.3"></a>
 ### v0.10.3 - 2021-05-28
 - fix a pb with wide chars in tables

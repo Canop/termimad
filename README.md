@@ -133,7 +133,7 @@ mad_print_inline!(
 ![mad_print_inline](doc/mad_print_inline.png)
 
 Main difference with using `skin.print_inline(format!( ... ))` to build some markdown and parse it:
-* the markdown parsing and template building are done only once (using `lazy_static` internally)
+* the markdown parsing and template building are done only once (using `once_cell` internally)
 * the given values aren't interpreted as markdown fragments and don't impact the style
 * arguments can be omited, repeated, given in any order
 * no support for fmt parameters or arguments other than `&str` *(in the current version)*

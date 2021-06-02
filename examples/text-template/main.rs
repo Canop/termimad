@@ -8,16 +8,8 @@ You execute this example with
 use {
     crossterm::style::Color::*,
     minimad::{TextTemplate, OwningTemplateExpander},
+    termimad::*,
 };
-
-#[macro_use]
-use termimad::*;
-
-#[macro_use]
-extern crate lazy_static;
-
-#[macro_use]
-extern crate minimad;
 
 static TEMPLATE: &str = r#"
 -----------
