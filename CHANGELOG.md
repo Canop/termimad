@@ -1,3 +1,7 @@
+<a name="v0.11.1"></a>
+### v0.11.1 - 2021-06-03
+- fix some problems (including a crash) with input_field.del_word_right
+
 <a name="v0.11.0"></a>
 ### v0.11.0 - 2021-06-02
 - eases imports: it's no more needed to import the lazy_static crate and no import is needed for using macros

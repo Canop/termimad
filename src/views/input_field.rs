@@ -158,7 +158,7 @@ impl InputField {
         }
         loop {
             self.cursor_pos += 1;
-            if self.cursor_pos >= self.content.len() - 1
+            if self.cursor_pos +1 >= self.content.len()
                 || !self.content[self.cursor_pos-1].is_alphanumeric() {
                 break;
             }
@@ -178,14 +178,30 @@ impl InputField {
         }
         true
     }
+    /// delete the word rigth of the cursor.
+    // I'm not yet sure of what should be the right behavior but all changes
+    // should be discussed from cases defined as in the unit tests below
     pub fn del_word_right(&mut self) -> bool {
+        if self.cursor_pos >= self.content.len() {
+            if self.cursor_pos == 0 {
+                return false;
+            }
+            self.cursor_pos -= 1;
+            return true;
+        }
         if self.cursor_pos == self.content.len() {
             return false;
         }
         loop {
             let deleted_is_an = self.content[self.cursor_pos].is_alphanumeric();
             self.content.remove(self.cursor_pos);
-            if self.cursor_pos >= self.content.len() - 1 || !deleted_is_an {
+            if !deleted_is_an {
+                break;
+            }
+            if self.cursor_pos == self.content.len() {
+                if self.cursor_pos > 0 {
+                    self.cursor_pos -= 1;
+                }
                 break;
             }
         }
@@ -316,5 +332,103 @@ impl InputField {
         self.display_on(&mut w)?;
         w.flush()?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod input_edit_tests {
+
+    use {
+        super::*,
+    };
+
+    /// make an input for tests from two strings:
+    /// - the content string (no wide chars)
+    /// - a cursor position specified as a string with a caret
+    fn make_input(value: &str, cursor_pos: &str) -> InputField {
+        let content: Vec<char> = value.chars().collect();
+        assert_eq!(content.len(), value.len()); // for the sake of those tests, no wide chars
+        let cursor_pos = cursor_pos.chars().position(|c| c=='^').unwrap();
+        InputField {
+            content,
+            cursor_pos,
+            area: Area::uninitialized(), // won't be needed in those tests
+            normal_style: CompoundStyle::default(),
+            cursor_style: CompoundStyle::default(),
+            focused: true,
+        }
+    }
+
+    fn check_eq(a: &InputField, b: &InputField) {
+        assert_eq!(a.cursor_pos, b.cursor_pos);
+        assert_eq!(a.content, b.content);
+    }
+
+    fn check(a: &InputField, value: &str, cursor_pos: &str) {
+        let b = make_input(value, cursor_pos);
+        check_eq(a, &b);
+    }
+
+    /// test the behavior of del_word_right
+    #[test]
+    fn test_del_word_right() {
+        let mut input = make_input(
+            "aaa bbb ccc",
+            "     ^     ",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "aaa bccc",
+            "     ^  ",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "aaa b",
+            "    ^",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "aaa ",
+            "   ^",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "aaa",
+            "   ^",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "aaa",
+            "  ^",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "aa",
+            " ^",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "a",
+            "^",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "",
+            "^",
+        );
+        input.del_word_right();
+        check(
+            &input,
+            "",
+            "^",
+        );
     }
 }
