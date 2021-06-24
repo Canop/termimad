@@ -31,6 +31,11 @@ impl<'s> FmtComposite<'s> {
             spacing: None,
         }
     }
+    pub fn from_compound(compound: Compound<'s>) -> Self {
+        let mut fc = Self::new();
+        fc.add_compound(compound);
+        fc
+    }
     /// Return the number of characters (usually spaces) to insert both
     /// sides of the composite
     #[inline(always)]

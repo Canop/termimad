@@ -103,7 +103,7 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
         .enumerate()
         .map(|(idx, width)| {
             let to_remove = if *width <= 3 {
-                3
+                0
             } else {
                 (width * excess / sum).min(width - 3)
             };
@@ -138,8 +138,24 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
         }
     }
 
-    //- general case, which could be improved
     cols.sort_by(|a, b| b.to_remove.cmp(&a.to_remove));
+
+    // we do a first reduction, if possible, on columns wider
+    // than 5
+    let excess_of_wide_cols: usize = widths.iter()
+        .filter(|&w| *w > 5)
+        .map(|w| w - 5)
+        .sum();
+    if excess_of_wide_cols + goal > sum {
+        for col in &mut cols {
+            let r = (sum-goal) * col.width / excess_of_wide_cols;
+            let r = r.min(excess);
+            excess -= r;
+            col.to_remove += r;
+        }
+    }
+
+    //- general case, which could be improved
     for col in &mut cols {
         if col.to_remove < 3 {
             excess += col.to_remove;

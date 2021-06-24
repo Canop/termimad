@@ -45,7 +45,30 @@ pub fn hard_wrap_composite<'s>(
     width: usize,
 ) -> Vec<FmtComposite<'s>> {
     assert!(width > 2);
+    debug_assert!(src_composite.visible_length > width); // or we shouldn't be called
     let mut composites = Vec::new();
+    let compounds = &src_composite.composite.compounds;
+    // we try to optimize for a quite frequent case: two parts with nothing or just space in
+    // between
+    if compounds.len() == 2
+        && compounds[0].char_length() < width
+        && compounds[1].char_length() < width
+    {
+        // clean cut of 2
+        composites.push(FmtComposite::from_compound(compounds[0].clone()));
+        composites.push(FmtComposite::from_compound(compounds[1].clone()));
+        return composites;
+    }
+    if compounds.len() == 3
+        && compounds[0].char_length() < width
+        && compounds[2].char_length() < width
+        && compounds[1].src.chars().all(char::is_whitespace)
+    {
+        // clean cut of 3
+        composites.push(FmtComposite::from_compound(compounds[0].clone()));
+        composites.push(FmtComposite::from_compound(compounds[2].clone()));
+        return composites;
+    }
     let max_cut_back = width / 5;
     let mut dst_composite = FmtComposite {
         composite: Composite {

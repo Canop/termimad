@@ -1,3 +1,7 @@
+<a name="v0.12.1"></a>
+### v0.12.1 - 2021-06-24
+- improved heuristics for table fitting & wrapping
+
 <a name="v0.12.0"></a>
 ### v0.12.0 - 2021-06-24
 - upgrade crossterm to 0.20 (beware that crossterm's API changed)
