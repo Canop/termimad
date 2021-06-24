@@ -56,21 +56,33 @@ impl CompoundStyle {
     /// Get an new instance of `CompoundStyle`
     pub fn with_fgbg(fg: Color, bg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ContentStyle::new().foreground(fg).background(bg),
+            object_style: ContentStyle {
+                foreground_color: Some(fg),
+                background_color: Some(bg),
+                attributes: Attributes::default(),
+            }
         }
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_fg(fg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ContentStyle::new().foreground(fg),
+            object_style: ContentStyle {
+                foreground_color: Some(fg),
+                background_color: None,
+                attributes: Attributes::default(),
+            }
         }
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_bg(bg: Color) -> CompoundStyle {
         CompoundStyle {
-            object_style: ContentStyle::new().background(bg),
+            object_style: ContentStyle {
+                foreground_color: None,
+                background_color: Some(bg),
+                attributes: Attributes::default(),
+            }
         }
     }
 
