@@ -1,6 +1,10 @@
-use crate::line::*;
-use crate::spacing::Spacing;
-use minimad::{Alignment, CompositeStyle};
+use {
+    crate::{
+        line::*,
+        spacing::Spacing,
+    },
+    minimad::{Alignment, CompositeStyle},
+};
 
 /// a sequence of lines whose line-style is Code
 #[derive(Debug)]

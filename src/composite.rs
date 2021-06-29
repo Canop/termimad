@@ -1,10 +1,13 @@
-use minimad::{Composite, Compound};
 
-use crate::{
-    Alignment,
-    MadSkin,
-    Spacing,
-    Fitter,
+use {
+    crate::{
+        Alignment,
+        MadSkin,
+        Spacing,
+        Fitter,
+    },
+    minimad::{Composite, Compound},
+    unicode_width::UnicodeWidthStr,
 };
 
 /// Wrap a Minimad Composite, which is a list of Compounds
@@ -48,7 +51,7 @@ impl<'s> FmtComposite<'s> {
     /// Add a compound and modifies `visible_length` accordingly
     #[inline(always)]
     pub fn add_compound(&mut self, compound: Compound<'s>) {
-        self.visible_length += compound.char_length();
+        self.visible_length += compound.src.width();
         self.composite.compounds.push(compound);
     }
     /// Ensure the cached visible_length is correct.
@@ -68,7 +71,7 @@ impl<'s> FmtComposite<'s> {
     /// The fitter may remove a part in the core of the composite if it looks
     /// good enough. In this specific case an ellipsis will replace the removed part.
     pub fn fit_width(&mut self, width: usize, align: Alignment, skin: &MadSkin) {
-        Fitter::default().fit(self, width, align, skin);
+        Fitter::for_align(align).fit(self, width, skin);
     }
     /// if the composite is smaller than the given width, pad it
     /// according to the alignment.

@@ -16,6 +16,7 @@ use crate::wrap;
 /// let text = FmtText::from(&skin, &my_markdown, Some(80));
 /// println!("{}", &text);
 /// ```
+#[derive(Debug)]
 pub struct FmtText<'k, 's> {
     pub skin: &'k MadSkin,
     pub lines: Vec<FmtLine<'s>>,

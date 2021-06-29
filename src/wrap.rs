@@ -1,11 +1,13 @@
-use crate::composite::FmtComposite;
-use crate::line::FmtLine;
-use minimad::{Composite, CompositeStyle};
+use {
+    crate::*,
+    minimad::*,
+    unicode_width::UnicodeWidthStr,
+};
 
 /// build a composite which can be a new line after wrapping.
 fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
     let style = match fc.composite.style {
-        CompositeStyle::ListItem => CompositeStyle::Paragraph,
+        minimad::CompositeStyle::ListItem => CompositeStyle::Paragraph,
         _ => fc.composite.style,
     };
     let visible_length = match style {
@@ -22,160 +24,80 @@ fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
     }
 }
 
-/// a place where a line break is OK
-#[derive(Debug, Clone, Copy)]
-struct BreakPoint {
-    idx: usize,
-    len: usize, // nb chars removed on break: 0 for start of compound, 1 for a space
-}
-impl BreakPoint {
-    fn on_start(idx: usize) -> Self {
-        Self { idx, len: 0 }
-    }
-    fn on_space(idx: usize) -> Self {
-        Self { idx, len: 1 }
+/// return the inherent widths related to the style, the one of the first line (for
+/// example with a bullet) and the ones for the next lines (for example with quotes)
+pub fn composite_style_widths(composite_style: CompositeStyle) -> (usize, usize) {
+    match composite_style {
+        CompositeStyle::Paragraph => (0, 0),
+        CompositeStyle::Header(_) => (0, 0),
+        CompositeStyle::ListItem => (2, 0),
+        CompositeStyle::Code => (0, 0),
+        CompositeStyle::Quote => (2, 2),
     }
 }
 
 /// cut the passed composite in several composites fitting the given *visible* width
 /// (which might be bigger or smaller than the length of the underlying string).
 /// width can't be less than 3.
-pub fn hard_wrap_composite<'s>(
-    src_composite: &FmtComposite<'s>,
+pub fn hard_wrap_composite<'s, 'c>(
+    src_composite: &'c FmtComposite<'s>,
     width: usize,
 ) -> Vec<FmtComposite<'s>> {
     assert!(width > 2);
     debug_assert!(src_composite.visible_length > width); // or we shouldn't be called
-    let mut composites = Vec::new();
-    let compounds = &src_composite.composite.compounds;
-    // we try to optimize for a quite frequent case: two parts with nothing or just space in
-    // between
-    if compounds.len() == 2
-        && compounds[0].char_length() < width
-        && compounds[1].char_length() < width
-    {
-        // clean cut of 2
-        composites.push(FmtComposite::from_compound(compounds[0].clone()));
-        composites.push(FmtComposite::from_compound(compounds[1].clone()));
-        return composites;
-    }
-    if compounds.len() == 3
-        && compounds[0].char_length() < width
-        && compounds[2].char_length() < width
-        && compounds[1].src.chars().all(char::is_whitespace)
-    {
-        // clean cut of 3
-        composites.push(FmtComposite::from_compound(compounds[0].clone()));
-        composites.push(FmtComposite::from_compound(compounds[2].clone()));
-        return composites;
-    }
-    let max_cut_back = width / 5;
+    let mut composites: Vec<FmtComposite<'s>> = Vec::new();
+    let (first_width, _other_widths) = composite_style_widths(src_composite.composite.style);
     let mut dst_composite = FmtComposite {
         composite: Composite {
             style: src_composite.composite.style,
             compounds: Vec::new(),
         },
-        visible_length: match src_composite.composite.style {
-            CompositeStyle::ListItem => 2,
-            CompositeStyle::Quote => 2,
-            _ => 0,
-        },
+        visible_length: first_width,
         spacing: src_composite.spacing,
     };
-    let mut ll = match src_composite.composite.style {
-        CompositeStyle::ListItem => 2, // space of the bullet
-        CompositeStyle::Quote => 2,    // space of the quote mark
-        _ => 0,
-    };
-    let mut ignored_cut_back: Option<(usize, BreakPoint)> = None;
-    for sc in &src_composite.composite.compounds {
-        ignored_cut_back = None;
-        let s = sc.as_str();
-        let cl = s.chars().count();
-        if ll + cl <= width {
-            // we add the compound as is to the current composite
-            dst_composite.add_compound(sc.clone());
-            ll += cl;
-            continue;
-        }
-        if ll + 1 >= width {
-            // we close the current composite
-            let new_dst_composite = follow_up_composite(&dst_composite);
-            composites.push(dst_composite);
-            dst_composite = new_dst_composite;
-            ll = 0;
-        }
-        let mut c_start = 0;
-        let mut last_break_point = Some(BreakPoint::on_start(0));
-        for (idx, char) in s.char_indices() {
-            let char_len = char.len_utf8();
-            ll += 1;
-            if char.is_whitespace() {
-                last_break_point = Some(BreakPoint::on_space(idx));
-            }
-            if ll >= width {
-                // we must cut
-                let mut cut = idx;
-                let mut loss = 0;
-                ignored_cut_back = None;
-                if idx + char_len < s.len() {
-                    if let Some(bp) = last_break_point {
-                        if bp.idx + max_cut_back >= idx {
-                            // the last break isn't too far, we'll cut there
-                            cut = bp.idx;
-                            if idx > bp.idx {
-                                loss = bp.len;
-                            }
-                        } else {
-                            ignored_cut_back = Some((idx, bp));
-                        }
-                    }
-                }
-                let s2 = sc.sub(c_start, cut);
-                dst_composite.add_compound(s2);
-                let new_dst_composite = follow_up_composite(&dst_composite);
-                composites.push(dst_composite);
-                dst_composite = new_dst_composite;
-                last_break_point = None;
-                c_start = cut + loss; // + char_len;
-                ll = idx - cut - loss;
-                if dst_composite.composite.is_quote() {
-                    ll += 2;
-                }
-            }
-        }
-        if c_start < s.len() {
-            let sc = sc.tail(c_start);
-            ll = sc.as_str().chars().count();
-            dst_composite.add_compound(sc);
-        } else {
-            ignored_cut_back = None;
-        }
-    }
-    if dst_composite.visible_length > 0 {
-        // now we try to see if we can move back the cut to the last break point
-        if let Some((idx, bp)) = ignored_cut_back {
-            let diff = idx - bp.idx;
-            if diff + dst_composite.visible_length - bp.len < width {
-                let last = composites
-                    .last_mut()
-                    .unwrap()
-                    .composite
-                    .compounds
-                    .last_mut().unwrap();
-                if last.as_str().len() > diff + bp.len {
-                    let mut tail = last.cut_tail(diff + bp.len);
-                    composites.last_mut().unwrap().visible_length -= diff + bp.len;
-                    if bp.len > 0 {
-                        tail = tail.tail_chars(bp.len);
-                    }
-                    dst_composite.composite.compounds.insert(0, tail);
-                    dst_composite.visible_length += diff;
-                }
-            }
-        }
+
+    // Strategy 1:
+    // we try to optimize for a quite frequent case: two parts with nothing or just space in
+    // between
+    let compounds = &src_composite.composite.compounds;
+    if
+        ( // clean cut of 2
+            compounds.len() == 2
+            && compounds[0].src.width() + first_width <= width
+            && compounds[1].src.width() + _other_widths <= width
+        )
+        ||
+        ( // clean cut of 3
+            compounds.len() == 3
+            && compounds[0].src.width() + first_width <= width
+            && compounds[2].src.width() + _other_widths <= width
+            && compounds[1].src.chars().all(char::is_whitespace)
+        )
+    {
+        dst_composite.add_compound(compounds[0].clone());
+        let mut new_dst_composite = follow_up_composite(&dst_composite);
         composites.push(dst_composite);
+        new_dst_composite.add_compound(compounds[compounds.len()-1].clone());
+        composites.push(new_dst_composite);
+        return composites;
     }
+
+    let mut tokens = tokenize(&src_composite.composite, width - first_width);
+    // Strategy 2:
+    // we try to cut along tokens, using spaces to break
+    for token in tokens.drain(..) {
+        if dst_composite.visible_length + token.width > width {
+            if !token.blank { // we skip blank composite at line change
+                let mut repl_composite = follow_up_composite(&dst_composite);
+                std::mem::swap(&mut dst_composite, &mut repl_composite);
+                composites.push(repl_composite);
+                dst_composite.add_compound(token.to_compound());
+            }
+        } else {
+            dst_composite.add_compound(token.to_compound());
+        }
+    }
+    composites.push(dst_composite);
     composites
 }
 
@@ -218,7 +140,6 @@ mod wrap_tests {
             skin::MadSkin,
             wrap::*,
         },
-        minimad::*,
     };
 
     fn visible_fmt_line_length(skin: &MadSkin, line: &FmtLine<'_>) -> usize {
@@ -253,10 +174,10 @@ mod wrap_tests {
 
     /// check line lenghts are what is expected
     fn check_line_lengths(skin: &MadSkin, src: &str, width: usize, lenghts: Vec<usize>) {
-        println!("input text:\n{}", &src);
+        println!("====\ninput text:\n{}", &src);
         let text = skin.text(src, Some(width));
         assert_eq!(text.lines.len(), lenghts.len(), "same number of lines");
-        println!("wrapped text:\n{}", &text);
+        println!("====\nwrapped text:\n{}", &text);
         for i in 0..lenghts.len() {
             assert_eq!(
                 visible_fmt_line_length(skin, &text.lines[i]),
@@ -281,8 +202,7 @@ mod wrap_tests {
         for width in 3..50 {
             check_no_overflow(skin, &src, width);
         }
-        //check_line_lengths(skin, &src, 25, vec![19, 19, 7, 20, 13, 12, 24, 22]);
-        check_line_lengths(skin, &src, 25, vec![19, 25, 20, 12, 12, 24, 22]);
+        check_line_lengths(skin, &src, 25, vec![25, 19, 25, 7, 12, 25, 21]);
     }
 
     #[test]
@@ -314,5 +234,16 @@ mod wrap_tests {
             first_compound(text.lines.into_iter().nth(1).unwrap()),
             Some(Compound::raw_str("wrapping").bold().italic()),
         );
+    }
+
+    #[test]
+    /// check that we're not wrapping outside of char boudaries
+    fn check_issue_23() {
+        let md: &str = "ZA\u{360}\u{321}\u{34a}\u{35d}LGΌ IS\u{36e}\u{302}\u{489}\u{32f}\u{348}\u{355}\u{339}\u{318}\u{331} T</b>O\u{345}\u{347}\u{339}\u{33a}Ɲ\u{334}ȳ\u{333} TH\u{318}<b>E\u{344}\u{309}\u{356} \u{360}P\u{32f}\u{34d}\u{32d}O\u{31a}\u{200b}N\u{310}Y\u{321} H\u{368}\u{34a}\u{33d}\u{305}\u{33e}\u{30e}\u{321}\u{338}\u{32a}\u{32f}E\u{33e}\u{35b}\u{36a}\u{344}\u{300}\u{301}\u{327}\u{358}\u{32c}\u{329} \u{367}\u{33e}\u{36c}\u{327}\u{336}\u{328}\u{331}\u{339}\u{32d}\u{32f}C\u{36d}\u{30f}\u{365}\u{36e}\u{35f}\u{337}\u{319}\u{332}\u{31d}\u{356}O\u{36e}\u{34f}\u{32e}\u{32a}\u{31d}\u{34d}";
+        let skin = MadSkin::default();
+        for w in 40..60 {
+            println!("wrapping on width {}", w);
+            let _text = FmtText::from(&skin, md, Some(w));
+        }
     }
 }

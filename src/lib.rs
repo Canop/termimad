@@ -126,6 +126,7 @@ mod str_fit;
 mod styled_char;
 mod tbl;
 mod text;
+mod tokens;
 mod views;
 mod wrap;
 
@@ -146,6 +147,7 @@ pub use str_fit::StrFit;
 pub use spacing::Spacing;
 pub use styled_char::StyledChar;
 pub use text::FmtText;
+use tokens::*;
 pub use views::{
     InputField, ListView, ListViewCell, ListViewColumn, MadView, ProgressBar, TextView,
 };

@@ -1,4 +1,3 @@
-
 use {
     crate::{
         area::{terminal_size, Area},
@@ -31,11 +30,12 @@ use {
         io::Write,
         collections::HashMap,
     },
+    unicode_width::UnicodeWidthStr,
 };
 
 /// A skin defining how a parsed mardkown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MadSkin {
     pub paragraph: LineStyle,
     pub bold: CompoundStyle,
@@ -131,7 +131,7 @@ impl MadSkin {
     /// Set a common foregreound color for all header levels
     ///
     /// (it's still possible to change them individually with
-    /// skin.headers[i])
+    /// `skin.headers[i]`)
     pub fn set_headers_fg(&mut self, c: Color) {
         for h in &mut self.headers {
             h.set_fg(c);
@@ -141,7 +141,7 @@ impl MadSkin {
     /// Set a common background color for all header levels
     ///
     /// (it's still possible to change them individually with
-    /// skin.headers[i])
+    /// `skin.headers[i]`)
     pub fn set_headers_bg(&mut self, c: Color) {
         for h in &mut self.headers {
             h.set_bg(c);
@@ -158,11 +158,15 @@ impl MadSkin {
 
     /// Return the number of visible chars in a composite
     pub fn visible_composite_length(&self, composite: &Composite<'_>) -> usize {
+        let compounds_width: usize = composite.compounds
+            .iter()
+            .map(|c| c.src.width())
+            .sum();
         (match composite.style {
             CompositeStyle::ListItem => 2, // space of the bullet
             CompositeStyle::Quote => 2,    // space of the quoting char
             _ => 0,
-        }) + composite.char_length()
+        }) + compounds_width
     }
 
     pub fn visible_line_length(&self, line: &Line<'_>) -> usize {
@@ -294,7 +298,9 @@ impl MadSkin {
 
     /// write a composite filling the given width
     ///
-    /// Ellision or truncation may occur, but no wrap
+    /// Ellision or truncation may occur, but no wrap.
+    /// Use Alignement::Unspecified for a smart internal
+    /// ellision
     pub fn write_composite_fill<W>(
         &self,
         w: &mut W,

@@ -1,3 +1,7 @@
+<a name="v0.13.0"></a>
+### v0.13.0 - 2021-06-29
+- support wide chars everywhere, rewritten algorithms for markdown wrapping and fitting
+
 <a name="v0.12.1"></a>
 ### v0.12.1 - 2021-06-24
 - improved heuristics for table fitting & wrapping

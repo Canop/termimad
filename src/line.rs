@@ -6,6 +6,7 @@ use crate::tbl::{FmtTableRow, FmtTableRule, RelativePosition};
 
 /// A line in a text. This structure should normally not be
 /// used outside of the lib.
+#[derive(Debug)]
 pub enum FmtLine<'s> {
     Normal(FmtComposite<'s>),
     TableRow(FmtTableRow<'s>),

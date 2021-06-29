@@ -12,8 +12,7 @@
 [s4]: https://miaou.dystroy.org/static/shields/room.svg
 [l4]: https://miaou.dystroy.org/3
 
-
-A simple library to display static or dynamic Markdown snippets in your terminal application, with skin isolation.
+A library to display static or dynamic Markdown snippets in your terminal application, with skin isolation.
 
 Based on [crossterm](https://github.com/TimonPost/crossterm) so works on most terminals (even on windows).
 
@@ -237,20 +236,22 @@ You may also be interested in `OwningTemplateExpander`: an alternative expander 
 ## Advices to get started
 
 * Start by reading the examples (in `/examples`): they cover almost the whole API, including templates, how to use an alternate screen or scroll the page, etc.
-* If you want to see how some file would look with Termimad, you may try the cli [Clima](https://github.com/Canop/clima).
 * Be careful that some colors aren't displayable on all terminals. The default color set of your application should not include arbitrary RGB colors.
-* If a feature is missing, or you don't know how to use some part, come and ping me on my chat during West European hours.
 * The event / event-source part of Termimad is currently tailored for a short number of applications. If you use it or want to use it, please come and tell me so that your needs are taken into account!
+* If your goal is to format some CLI application output, for example a few tables, have a look at [lfs](https://github.com/Canop/lfs) which is one of the simplest possible uses
+* If a feature is missing, or you don't know how to use some part, come and ping me on my chat during West European hours.
 
 
-## Applications using termimad
+## Open-source applications using termimad
 
-* [broot](https://github.com/Canop/broot) is a file manager and uses termimad for its help screen and status information
+* [broot](https://github.com/Canop/broot) is a file manager and uses termimad for its help screen, status information and event management
 
-* [whalespotter](https://github.com/Canop/whalespotter) has been designed specifically to showcase Termimad components in a real application.
-
-* [lfs](https://github.com/Canop/lfs) is a linux utility displaying file system. Termimad templates are used to show the data in tables
+* [lfs](https://github.com/Canop/lfs) is a linux utility displaying file systems. Termimad templates are used to show the data in tables
 
 * [Rhit](https://github.com/Canop/rhit) is a nginx log analyzer. Termimad templates are used to show the data in tables
+
+* [bacon](https://github.com/Canop/bacon) is a background Rust compiler. It uses Termimad for display and event management
+
+* [lapin](https://github.com/Canop/lapin) is a terminal game. It uses Termimad for display and event management
 
 If you're the author of another application using Termimad, please tell me.
