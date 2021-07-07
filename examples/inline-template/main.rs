@@ -25,7 +25,8 @@ fn main() -> Result<()> {
     println!();
 
     // with interpolation
-    mad_print_inline!(&skin, "*count:* **$0**", "27"); // note that only &str is supported now
+    // Any value accepting to_string() is supported
+    mad_print_inline!(&skin, "*count:* **$0**", 27);
     println!();
 
     // another one: see that the arguments aren't interpreted as markdown,
@@ -45,11 +46,10 @@ fn main() -> Result<()> {
         "Pizza weight: π * z * z * a", // the stars don't mess with the markdown
     ];
     for (idx, string) in user_supplied_strings.iter().enumerate() {
-        let idx = idx.to_string(); // the macro only accepts &str arguments
         mad_print_inline!(
             &skin,
             "Exhibit $0 : *$1*",
-            &idx,
+            idx,
             string,
         );
         println!();

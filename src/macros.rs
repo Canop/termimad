@@ -17,9 +17,21 @@
 /// ```
 #[macro_export]
 macro_rules! mad_print_inline {
-    ($skin: expr, $md: literal $(, $value: expr )* $(,)? ) => {
-        $skin.print_composite(termimad::minimad::mad_inline!($md $(, $value)*));
-    };
+    ($skin: expr, $md: literal $(, $value: expr )* $(,)? ) => {{
+        let vals: Vec<String> = vec![$($value.to_string(),)*];
+        #[allow(unused_variables)]
+        #[allow(unused_mut)]
+        let mut i: usize = 0;
+        use minimad::once_cell::sync::Lazy;
+        static TEMPLATE: Lazy<minimad::InlineTemplate<'static>> = Lazy::new(|| {
+            minimad::InlineTemplate::from($md)
+        });
+        let mut composite = TEMPLATE.raw_composite();
+        for (arg_idx, val) in vals.iter().enumerate() {
+            TEMPLATE.apply(&mut composite, arg_idx, val);
+        }
+        $skin.print_composite(composite)
+    }};
 }
 
 /// write a markdown template, with other arguments taking `$0` to `$9` places in the template.
@@ -42,7 +54,17 @@ macro_rules! mad_print_inline {
 macro_rules! mad_write_inline {
     ($w: expr, $skin: expr, $md: literal $(, $value: expr )* $(,)? ) => {{
         use std::io::Write;
-        $skin.write_composite($w, termimad::minimad::mad_inline!($md $(, $value)*))
+        let vals: Vec<String> = vec![$($value.to_string(),)*];
+        let mut i: usize = 0;
+        use minimad::once_cell::sync::Lazy;
+        static TEMPLATE: Lazy<minimad::InlineTemplate<'static>> = Lazy::new(|| {
+            minimad::InlineTemplate::from($md)
+        });
+        let mut composite = TEMPLATE.raw_composite();
+        for (arg_idx, val) in vals.iter().enumerate() {
+            TEMPLATE.apply(&mut composite, arg_idx, val);
+        }
+        $skin.write_composite($w, composite)
     }};
 }
 

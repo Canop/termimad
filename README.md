@@ -12,7 +12,7 @@
 [s4]: https://miaou.dystroy.org/static/shields/room.svg
 [l4]: https://miaou.dystroy.org/3
 
-A library to display static or dynamic Markdown snippets in your terminal application, with skin isolation.
+A CLI utilities library leveraging Markdown to format terminal rendering, allowing separation of structure, data and skin.
 
 Based on [crossterm](https://github.com/TimonPost/crossterm) so works on most terminals (even on windows).
 
