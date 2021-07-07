@@ -56,7 +56,7 @@ will give different results depending on the width:
 
 ```toml
 [dependencies]
-termimad = "0.10"
+termimad = "0.14"
 ```
 
 ### With the default skin:
@@ -247,7 +247,7 @@ let choice = ask!(skin, "Do you want to drink something ?", ('n') {
         Some("water")
     }
     ('b', "Could I get a **b**eer glass ?") => {
-        mad_print_inline!(skin, "We have no glass. Would a *bottle* be ok ?\n");
+        mad_print_inline!(skin, "We have no glass, so here's a *bottle*.\n");
         Some("beer")
     }
     ('n', "*No*, thank you.") => {
