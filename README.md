@@ -233,6 +233,32 @@ You'll find more text template functions in the documentation and in the example
 
 You may also be interested in `OwningTemplateExpander`: an alternative expander owning the values which may be handy when you build them while iterating in sub templates.
 
+### Asking questions
+
+A frequent need in CLI apps is to ask the user to select an answer.
+The `Question` API and the `ask!` macros cover most basic needs.
+
+Here's an example of asking with a default choice (that you get by hitting *enter*) and a returned value:
+
+```rust
+let choice = ask!(skin, "Do you want to drink something ?", ('n') {
+    ('w', "I'd like some **w**ater, please.") => {
+        mad_print_inline!(skin, "*Wait a minute, please, I'll fetch some.*\n");
+        Some("water")
+    }
+    ('b', "Could I get a **b**eer glass ?") => {
+        mad_print_inline!(skin, "We have no glass. Would a *bottle* be ok ?\n");
+        Some("beer")
+    }
+    ('n', "*No*, thank you.") => {
+        None
+    }
+});
+dbg!(choice);
+```
+
+![ask example](doc/ask.png)
+
 ## Advices to get started
 
 * Start by reading the examples (in `/examples`): they cover almost the whole API, including templates, how to use an alternate screen or scroll the page, etc.

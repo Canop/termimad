@@ -1,6 +1,8 @@
-### next
+<a name="v0.14.0"></a>
+### v0.14.0 - 2021-07-07
+- `ask!` macro and `Question` API
 - the `mad_print_inline` and `mad_write_inline` macros now accept any argument supporting `to_string()` and not just `&str`
-- fix a bug making tables sometimes exceed the goal width
+- fix a bug making tables sometimes exceed the width limit
 
 <a name="v0.13.0"></a>
 ### v0.13.0 - 2021-06-29

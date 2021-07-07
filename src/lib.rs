@@ -98,14 +98,13 @@ Main difference with using `print!(format!( ... ))`:
 
 You'll find more examples and advice in the *templates* example.
 
-Note that there's no macro yet supporting templates for whole markdown *texts* but they should be available soon.
-
 # Examples
 
 The repository contains several other examples, which hopefully cover the whole API while being simple enough. It's recommended you start by trying them or at least glance at their code.
 
 */
 
+mod ask;
 mod area;
 mod code;
 mod color;
@@ -130,6 +129,7 @@ mod tokens;
 mod views;
 mod wrap;
 
+pub use ask::*;
 pub use area::{compute_scrollbar, terminal_size, Area};
 pub use color::{ansi, gray, rgb};
 pub use composite::FmtComposite;
