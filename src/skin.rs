@@ -23,6 +23,8 @@ use {
         Compound,
         Line,
         MAX_HEADER_DEPTH,
+        OwningTemplateExpander,
+        TextTemplate,
         TextTemplateExpander,
     },
     std::{
@@ -275,6 +277,18 @@ impl MadSkin {
     pub fn print_expander(&self, expander: TextTemplateExpander<'_, '_>) {
         let (width, _) = terminal_size();
         let text = expander.expand();
+        let fmt_text = FmtText::from_text(&self, text, Some(width as usize));
+        print!("{}", fmt_text);
+    }
+
+    /// do a `print!` of the given owning expander
+    pub fn print_owning_expander(
+        &self,
+        expander: &OwningTemplateExpander<'_>,
+        template: &TextTemplate<'_>,
+    ) {
+        let (width, _) = terminal_size();
+        let text = expander.expand(template);
         let fmt_text = FmtText::from_text(&self, text, Some(width as usize));
         print!("{}", fmt_text);
     }
