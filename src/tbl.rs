@@ -136,9 +136,11 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
 
     if excess > 0 {
         for col in cols.iter_mut() {
-            if col.width > 3 {
-                col.to_remove = (col.width * excess / sum).min(col.width - 3);
-                excess -= col.to_remove;
+            let w = col.width - col.to_remove;
+            if w > 3 {
+                let dr = (w * excess / sum).min(w - 3);
+                col.to_remove += dr;
+                excess -= dr;
             };
         }
     }
@@ -366,6 +368,22 @@ mod col_reduction_tests {
         reduce_col_widths(&mut widths, 148);
         for &width in &widths {
             assert!(width > 2);
+        }
+    }
+    #[test]
+    fn test_col_reduction_bug_unpublished_01() {
+        let widths = vec![ 3, 4, 11, 5, 15, 4, 9, 5, 4, 47 ];
+        let sum: usize = widths.iter().sum();
+        for goal in 30..sum {
+            let mut widths = widths.clone();
+            reduce_col_widths(&mut widths, goal);
+            println!("widths after reduction: {:?}", &widths);
+            for &width in &widths {
+                assert!(width > 2);
+            }
+            let sum: usize = widths.iter().sum();
+            dbg!(sum);
+            assert!(sum<=goal);
         }
     }
 }

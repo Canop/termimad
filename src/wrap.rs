@@ -158,7 +158,7 @@ mod wrap_tests {
         println!("------- test wrapping with width: {}", width);
         for line in &text.lines {
             let len = visible_fmt_line_length(skin, &line);
-            print!(
+            println!(
                 "len:{: >4}  | {}",
                 len,
                 DisplayableLine {

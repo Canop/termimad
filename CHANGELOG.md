@@ -1,3 +1,7 @@
+### next
+- the `mad_print_inline` and `mad_write_inline` macros now accept any argument supporting `to_string()` and not just `&str`
+- fix a bug making tables sometimes exceed the goal width
+
 <a name="v0.13.0"></a>
 ### v0.13.0 - 2021-06-29
 - support wide chars everywhere, rewritten algorithms for markdown wrapping and fitting
