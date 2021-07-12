@@ -85,7 +85,7 @@ impl StyledChar {
     where
         W: std::io::Write,
     {
-        w.queue(PrintStyledContent(self.styled_char.clone()))?;
+        w.queue(PrintStyledContent(self.styled_char))?;
         Ok(())
     }
 }

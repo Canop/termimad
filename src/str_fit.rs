@@ -78,7 +78,7 @@ impl StrFit {
     /// if it's very big
     /// In case there's no tab in the input string, we can return a pointer over
     /// part of the original str)
-    pub fn make_cow<'a>(s: &'a str, cols_max: usize) -> (Cow<'a, str>, usize) {
+    pub fn make_cow(s: &str, cols_max: usize) -> (Cow<str>, usize) {
         let fit = StrFit::from(s, cols_max);
         if fit.has_tab {
             // we can't just borrow, as we insert chars

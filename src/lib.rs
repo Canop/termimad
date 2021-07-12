@@ -83,10 +83,10 @@ Example:
 # use termimad::*;
 # let skin = MadSkin::default();
 mad_print_inline!(
-	&skin,
-	"**$0 formula:** *$1*", // the markdown template, interpreted once
-	"Disk",  // fills $0
-	"2*π*r", // fills $1. Note that the stars don't mess the markdown
+    &skin,
+    "**$0 formula:** *$1*", // the markdown template, interpreted once
+    "Disk",  // fills $0
+    "2*π*r", // fills $1. Note that the stars don't mess the markdown
 );
 ```
 

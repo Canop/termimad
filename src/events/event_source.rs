@@ -73,7 +73,7 @@ impl EventSource {
             // return true when we must close the source
             let send_and_wait = |event| {
                 internal_event_count.fetch_add(1, Ordering::SeqCst);
-                if let Err(_) = tx_events.send(event) {
+                if tx_events.send(event).is_err() {
                     true // broken channel
                 } else {
                     match rx_quit.recv() {
@@ -94,7 +94,7 @@ impl EventSource {
                             // it's a proper sequence ending, we send it as such
                             let mut seq = current_escape_sequence.take().unwrap();
                             seq.keys.push(key);
-                            if let Err(_) = tx_seqs.try_send(seq) {
+                            if tx_seqs.try_send(seq).is_err() {
                                 // there's probably just nobody listening on
                                 // this zero size bounded channel
                             }

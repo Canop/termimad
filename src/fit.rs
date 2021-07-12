@@ -86,10 +86,8 @@ impl Zone {
                         }
                         byte_start = None;
                     }
-                } else {
-                    if byte_start.is_none() {
-                        byte_start = Some(byte_idx);
-                    }
+                } else if byte_start.is_none() {
+                    byte_start = Some(byte_idx);
                 }
             }
             if let Some(byte_start_idx) = byte_start {

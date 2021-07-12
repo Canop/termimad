@@ -9,10 +9,10 @@
 ///
 /// let skin = MadSkin::default();
 /// mad_print_inline!(
-/// 	&skin,
-/// 	"**$0 formula:** *$1*", // the markdown template, interpreted once
-/// 	"Disk",  // fills $0
-/// 	"2*π*r", // fills $1. Note that the stars don't mess the markdown
+///     &skin,
+///     "**$0 formula:** *$1*", // the markdown template, interpreted once
+///     "Disk",  // fills $0
+///     "2*π*r", // fills $1. Note that the stars don't mess the markdown
 /// );
 /// ```
 #[macro_export]
@@ -43,11 +43,11 @@ macro_rules! mad_print_inline {
 ///
 /// let skin = MadSkin::default();
 /// mad_write_inline!(
-/// 	&mut std::io::stdout(),
-/// 	&skin,
-/// 	"**$0 formula:** *$1*", // the markdown template, interpreted once
-/// 	"Disk",  // fills $0
-/// 	"2*π*r", // fills $1. Note that the stars don't mess the markdown
+///     &mut std::io::stdout(),
+///     &skin,
+///     "**$0 formula:** *$1*", // the markdown template, interpreted once
+///     "Disk",  // fills $0
+///     "2*π*r", // fills $1. Note that the stars don't mess the markdown
 /// ).unwrap();
 /// ```
 #[macro_export]

@@ -280,4 +280,6 @@ dbg!(choice);
 
 * [lapin](https://github.com/Canop/lapin) is a terminal game. It uses Termimad for display and event management
 
+* [backdown](https://github.com/Canop/backdown) is a file deduplicator. It uses Termimad to print on screen and ask questions
+
 If you're the author of another application using Termimad, please tell me.

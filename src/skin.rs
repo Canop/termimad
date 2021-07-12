@@ -260,7 +260,7 @@ impl MadSkin {
         let text = self.area_text(markdown, area);
         let mut view = TextView::from(&area, &text);
         view.show_scrollbar = false;
-        Ok(view.write_on(w)?)
+        view.write_on(w)
     }
 
     /// do a `print!` of the given src interpreted as a markdown span

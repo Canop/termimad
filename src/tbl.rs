@@ -281,10 +281,8 @@ impl Table {
                     } else if ir == self.start + self.height - 1 {
                         rule.position = RelativePosition::Bottom;
                     }
-                    for ic in 0..nbcols {
-                        rule.widths[ic] = widths[ic];
-                        current_aligns[ic] = rule.aligns[ic];
-                    }
+                    rule.widths[..nbcols].clone_from_slice(&widths[..nbcols]);
+                    current_aligns[..nbcols].clone_from_slice(&rule.aligns[..nbcols]);
                 }
                 _ => {
                     panic!("It should be a table part");
