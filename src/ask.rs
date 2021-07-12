@@ -94,7 +94,7 @@ impl Question {
                     return Ok(input);
                 }
             }
-            println!("answer {:?} not understoord", input);
+            println!("answer {:?} not understood", input);
         }
     }
 }
