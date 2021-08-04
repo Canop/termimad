@@ -46,7 +46,7 @@ pub fn find_blocks(lines: &[FmtLine<'_>]) -> Vec<CodeBlock> {
     let mut blocks: Vec<CodeBlock> = Vec::new();
     let mut current: Option<CodeBlock> = None;
     for (idx, line) in lines.iter().enumerate() {
-        if let Some(ll) = code_line_length(&line) {
+        if let Some(ll) = code_line_length(line) {
             match current.as_mut() {
                 Some(b) => {
                     b.height += 1;

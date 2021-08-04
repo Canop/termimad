@@ -70,7 +70,7 @@ impl Question {
     /// try again.
     pub fn ask(&self, skin: &MadSkin) -> io::Result<String> {
         if let Some(md) = &self.md {
-            skin.print_text(&md);
+            skin.print_text(md);
         }
         for a in &self.answers {
             if self.default_answer.as_ref() == Some(&a.key) {

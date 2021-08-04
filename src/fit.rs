@@ -260,7 +260,7 @@ impl Fitter {
         }
 
         if excess == 0 {
-            fc.recompute_width(&skin);
+            fc.recompute_width(skin);
             return;
         }
 
@@ -336,7 +336,7 @@ impl Fitter {
             compounds.push(Compound::raw_str(ELLIPSIS));
         }
 
-        fc.recompute_width(&skin);
+        fc.recompute_width(skin);
     }
 
 }

@@ -258,7 +258,7 @@ impl MadSkin {
         W: std::io::Write,
     {
         let text = self.area_text(markdown, area);
-        let mut view = TextView::from(&area, &text);
+        let mut view = TextView::from(area, &text);
         view.show_scrollbar = false;
         view.write_on(w)
     }
@@ -277,7 +277,7 @@ impl MadSkin {
     pub fn print_expander(&self, expander: TextTemplateExpander<'_, '_>) {
         let (width, _) = terminal_size();
         let text = expander.expand();
-        let fmt_text = FmtText::from_text(&self, text, Some(width as usize));
+        let fmt_text = FmtText::from_text(self, text, Some(width as usize));
         print!("{}", fmt_text);
     }
 
@@ -289,7 +289,7 @@ impl MadSkin {
     ) {
         let (width, _) = terminal_size();
         let text = expander.expand(template);
-        let fmt_text = FmtText::from_text(&self, text, Some(width as usize));
+        let fmt_text = FmtText::from_text(self, text, Some(width as usize));
         print!("{}", fmt_text);
     }
 
@@ -443,7 +443,7 @@ impl MadSkin {
                 self.paragraph.repeat_space(f, lpo)?;
                 for cell in cells {
                     write!(f, "{}", self.table.compound_style.apply_to("│"))?;
-                    self.write_fmt_composite(f, &cell, None, false)?;
+                    self.write_fmt_composite(f, cell, None, false)?;
                 }
                 write!(f, "{}", self.table.compound_style.apply_to("│"))?;
                 if with_right_completion {
