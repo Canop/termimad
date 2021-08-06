@@ -1,3 +1,7 @@
+<a name="v0.14.1"></a>
+### v0.14.1 - 2021-08-06
+- change default skin to ensure it's readable whatever the terminal theme
+
 <a name="v0.14.0"></a>
 ### v0.14.0 - 2021-07-07
 - `ask!` macro and `Question` API

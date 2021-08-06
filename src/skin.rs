@@ -69,10 +69,10 @@ impl Default for MadSkin {
     fn default() -> Self {
         let mut skin = Self {
             paragraph: LineStyle::default(),
-            bold: CompoundStyle::new(Some(Color::White), None, Attribute::Bold.into()),
+            bold: CompoundStyle::with_attr(Attribute::Bold),
             italic: CompoundStyle::with_attr(Attribute::Italic),
             strikeout: CompoundStyle::with_attr(Attribute::CrossedOut),
-            inline_code: CompoundStyle::with_bg(gray(3)),
+            inline_code: CompoundStyle::with_fgbg(gray(17), gray(3)),
             code_block: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
@@ -90,15 +90,12 @@ impl Default for MadSkin {
             #[cfg(feature="special-renders")]
             special_chars: HashMap::new(),
         };
-        skin.code_block.set_bg(gray(3));
+        skin.code_block.set_fgbg(gray(17), gray(3));
         for h in &mut skin.headers {
             h.add_attr(Attribute::Underlined);
         }
         skin.headers[0].add_attr(Attribute::Bold);
         skin.headers[0].align = Alignment::Center;
-        skin.headers[0].set_fg(gray(22));
-        skin.headers[1].set_fg(gray(21));
-        skin.headers[2].set_fg(gray(20));
         skin
     }
 }
