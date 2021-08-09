@@ -65,7 +65,12 @@ pub struct MadSkin {
 impl Default for MadSkin {
     /// Build a customizable skin.
     ///
-    /// It's initialized with sensible gray level settings.
+    /// It's initialized with sensible gray level settings which should work
+    /// whatever the terminal colors.
+    ///
+    /// If you want a default skin and you already know if your terminal
+    /// is light or dark, you may use [MadSkin::default_light]
+    /// or [MadSkin::default_dark].
     fn default() -> Self {
         let mut skin = Self {
             paragraph: LineStyle::default(),
@@ -127,7 +132,38 @@ impl MadSkin {
             special_chars: HashMap::new(),
         }
     }
-    /// Set a common foregreound color for all header levels
+
+    /// Build a customizable skin with gray levels suitable when the terminal has
+    /// a dark background
+    ///
+    /// To determine whether the terminal is in light mode, you may use
+    /// the [terminal-light](https://docs.rs/terminal-light/) crate.
+    pub fn default_dark() -> Self {
+        let mut skin = Self::default();
+        skin.code_block.set_fgbg(gray(20), gray(5));
+        skin.inline_code.set_fgbg(gray(20), gray(5));
+        skin.headers[0].set_fg(gray(22));
+        skin.headers[1].set_fg(gray(21));
+        skin.headers[2].set_fg(gray(20));
+        skin
+    }
+
+    /// Build a customizable skin with gray levels suitable when the terminal has
+    /// a light background
+    ///
+    /// To determine whether the terminal is in light mode, you may use
+    /// the [terminal-light](https://docs.rs/terminal-light/) crate.
+    pub fn default_light() -> Self {
+        let mut skin = Self::default();
+        skin.code_block.set_fgbg(gray(3), gray(20));
+        skin.inline_code.set_fgbg(gray(4), gray(20));
+        skin.headers[0].set_fg(gray(0));
+        skin.headers[1].set_fg(gray(2));
+        skin.headers[2].set_fg(gray(4));
+        skin
+    }
+
+    /// Set a common foreground color for all header levels
     ///
     /// (it's still possible to change them individually with
     /// `skin.headers[i]`)
