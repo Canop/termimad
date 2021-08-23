@@ -1,3 +1,7 @@
+<a name="v0.14.3"></a>
+### v0.14.3 - 2021-08-23
+- password mode in input field
+
 <a name="v0.14.2"></a>
 ### v0.14.2 - 2021-08-09
 - add `MadSkin::default_dark` and `MadSkin::default_light`, two default skins suitable for specific kind of terminals

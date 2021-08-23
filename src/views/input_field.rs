@@ -33,6 +33,10 @@ pub struct InputField {
     pub area: Area,
     normal_style: CompoundStyle,
     cursor_style: CompoundStyle,
+
+    /// when true, the display will have stars instead of the normal chars
+    pub password_mode: bool,
+
     pub focused: bool,
 }
 
@@ -49,6 +53,7 @@ impl InputField {
             cursor_pos: 0,
             normal_style,
             cursor_style,
+            password_mode: false,
             focused,
         }
     }
@@ -315,7 +320,11 @@ impl InputField {
                     self.normal_style.queue(w, ' ')?;
                 }
             } else {
-                let c = self.content[idx];
+                let c = if self.password_mode {
+                    '*'
+                } else {
+                    self.content[idx]
+                };
                 if self.focused && (self.cursor_pos == idx) {
                     self.cursor_style.queue(w, c)?;
                 } else {
@@ -356,6 +365,7 @@ mod input_edit_tests {
             normal_style: CompoundStyle::default(),
             cursor_style: CompoundStyle::default(),
             focused: true,
+            password_mode: false,
         }
     }
 
