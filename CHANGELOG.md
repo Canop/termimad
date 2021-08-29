@@ -1,3 +1,9 @@
+<a name="v0.15.0"></a>
+### v0.15.0 - 2021-08-29
+- organize and augment the utilities dedicated to writing text, formatted or not, in a limited size area
+- remove the Result type
+- upgrade crossterm to 0.21
+
 <a name="v0.14.3"></a>
 ### v0.14.3 - 2021-08-23
 - password mode in input field

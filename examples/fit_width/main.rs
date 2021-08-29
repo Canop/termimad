@@ -52,7 +52,7 @@ fn make_all_lines(skin: &MadSkin, width: usize) -> Vec<FmtComposite<'static>> {
     lines
 }
 
-fn run_app(skin: &MadSkin) -> Result<()> {
+fn run_app(skin: &MadSkin) -> Result<(), Error> {
     let mut w = stderr(); // we could also have used stdout
     let w = &mut w;
     w.execute(EnterAlternateScreen)?;
@@ -99,7 +99,7 @@ fn make_skin() -> MadSkin {
     skin
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Error> {
     let skin = make_skin();
     run_app(&skin)
 }

@@ -138,7 +138,7 @@ mod wrap_tests {
         crate::{
             displayable_line::DisplayableLine,
             skin::MadSkin,
-            wrap::*,
+            fit::wrap::*,
         },
     };
 

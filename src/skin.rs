@@ -163,6 +163,31 @@ impl MadSkin {
         skin
     }
 
+    /// Change the background of most styles (the ones which commonly
+    /// have a default or uniform baground, don't change code styles
+    /// for example).
+    ///
+    /// This is convenient for default skins but personal skins often
+    /// need more precise background definitions.
+    pub fn set_bg(&mut self, bg: Color) {
+        self.paragraph.compound_style.set_bg(bg);
+        self.bold.set_bg(bg);
+        self.italic.set_bg(bg);
+        self.strikeout.set_bg(bg);
+        self.set_headers_bg(bg);
+        self.table.compound_style.set_bg(bg);
+        self.bullet.set_bg(bg);
+        self.quote_mark.set_bg(bg);
+        self.horizontal_rule.set_bg(bg);
+        self.ellipsis.set_bg(bg);
+        #[cfg(feature="special-renders")]
+        {
+            for (_, sc) in self.special_chars.iter_mut() {
+                sc.set_bg(bg);
+            }
+        }
+    }
+
     /// Set a common foreground color for all header levels
     ///
     /// (it's still possible to change them individually with

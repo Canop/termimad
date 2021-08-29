@@ -64,7 +64,7 @@ const MODULES: &'static [Module] = &[
     Module { name: "umask", key: "mod", count: 2, description: "my mask" },
 ];
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Error> {
     // fill an expander with data
     let mut expander = OwningTemplateExpander::new();
     expander

@@ -5,7 +5,7 @@ use {
 
 pub static TAB_REPLACEMENT: &str = "  ";
 
-/// information about the fitting of a string into a given
+/// Information about the fitting of a string into a given
 /// width in cols.
 ///
 /// The implementation here properly takes into account
@@ -61,6 +61,7 @@ impl StrFit {
 
     /// return both the longest fitting string and the number of cols
     /// it takes on screen.
+    ///
     /// We don't build a string around the whole str, which could be costly
     /// if it's very big
     pub fn make_string(s: &str, cols_max: usize) -> (String, usize) {
@@ -74,6 +75,7 @@ impl StrFit {
     }
     /// return both the longest fitting string and the number of cols
     /// it takes on screen.
+    ///
     /// We don't build a string around the whole str, which could be costly
     /// if it's very big
     /// In case there's no tab in the input string, we can return a pointer over

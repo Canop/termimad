@@ -5,12 +5,14 @@ and displaying short snippets (called "inline").
 You execute this example with
      cargo run --example inline-template
 */
-use std::io::Write;
-use crossterm::style::{Attribute::*, Color::*};
-use minimad::mad_inline;
-use termimad::*;
+use {
+    crossterm::style::{Attribute::*, Color::*},
+    std::io::Write,
+    minimad::mad_inline,
+    termimad::*,
+};
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Error> {
     let mut skin = MadSkin::default();
     skin.paragraph.set_bg(ansi(17));
     skin.bold.set_fg(Yellow);

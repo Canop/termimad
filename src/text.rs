@@ -1,12 +1,14 @@
-use std::fmt;
-
-use minimad::Text;
-
-use crate::code;
-use crate::line::FmtLine;
-use crate::skin::MadSkin;
-use crate::tbl;
-use crate::wrap;
+use {
+    crate::{
+        code,
+        line::FmtLine,
+        skin::MadSkin,
+        tbl,
+        fit::wrap,
+    },
+    minimad::Text,
+    std::fmt,
+};
 
 /// a formatted text, implementing Display
 /// ```

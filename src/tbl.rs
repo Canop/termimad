@@ -5,7 +5,7 @@ use {
         line::FmtLine,
         skin::MadSkin,
         spacing::Spacing,
-        wrap,
+        fit::wrap,
     },
     minimad::{Alignment, TableRow},
     std::cmp,

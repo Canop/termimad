@@ -176,11 +176,11 @@ impl CompoundStyle {
 
     /// write the string with this style on the given
     /// writer
-    pub fn queue_str<W>(&self, w: &mut W, s: &str) -> Result<()>
+    pub fn queue_str<W, S: Into<String>>(&self, w: &mut W, s: S) -> Result<()>
     where
         W: std::io::Write,
     {
-        self.queue(w, s.to_string())
+        self.queue(w, s.into())
     }
 
     pub fn queue_fg<W>(&self, w: &mut W) -> Result<()>

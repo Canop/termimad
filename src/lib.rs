@@ -121,38 +121,37 @@ mod macros;
 mod scrollbar_style;
 mod skin;
 mod spacing;
-mod str_fit;
 mod styled_char;
 mod tbl;
 mod text;
 mod tokens;
 mod views;
-mod wrap;
 
-pub use ask::*;
-pub use area::{compute_scrollbar, terminal_size, Area};
-pub use color::{ansi, gray, rgb};
-pub use composite::FmtComposite;
-pub use compound_style::CompoundStyle;
-pub use errors::{Error, Result};
-pub use events::{Event, EventSource};
-pub use fit::Fitter;
-pub use inline::FmtInline;
-pub use line::FmtLine;
-pub use line_style::LineStyle;
-pub use minimad::Alignment;
-pub use scrollbar_style::ScrollBarStyle;
-pub use skin::MadSkin;
-pub use str_fit::StrFit;
-pub use spacing::Spacing;
-pub use styled_char::StyledChar;
-pub use text::FmtText;
-use tokens::*;
-pub use views::{
-    InputField, ListView, ListViewCell, ListViewColumn, MadView, ProgressBar, TextView,
+pub use {
+    ask::*,
+    area::{compute_scrollbar, terminal_size, Area},
+    color::{ansi, gray, rgb},
+    composite::FmtComposite,
+    compound_style::CompoundStyle,
+    errors::Error,
+    events::{Event, EventSource},
+    fit::*,
+    inline::FmtInline,
+    line::FmtLine,
+    line_style::LineStyle,
+    minimad::Alignment,
+    scrollbar_style::ScrollBarStyle,
+    skin::MadSkin,
+    spacing::Spacing,
+    styled_char::StyledChar,
+    text::FmtText,
+    views::{
+        InputField, ListView, ListViewCell, ListViewColumn, MadView, ProgressBar, TextView,
+    },
 };
-
 pub use minimad;
+
+use tokens::*;
 
 /// Return a reference to the global skin (modifiable).
 ///

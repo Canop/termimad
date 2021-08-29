@@ -70,6 +70,9 @@ impl InputField {
     pub fn get_content(&self) -> String {
         self.content.iter().collect()
     }
+    pub fn is_empty(&self) -> bool {
+        self.content.is_empty()
+    }
     /// tell whether the content of the input is equal
     ///  to the argument
     pub fn is_content(&self, s: &str) -> bool {

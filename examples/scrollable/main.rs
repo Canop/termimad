@@ -28,7 +28,7 @@ fn view_area() -> Area {
     area
 }
 
-fn run_app(skin: MadSkin) -> Result<()> {
+fn run_app(skin: MadSkin) -> Result<(), Error> {
     let mut w = stderr(); // we could also have used stdout
     queue!(w, EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
@@ -72,7 +72,7 @@ fn make_skin() -> MadSkin {
     skin
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Error> {
     let skin = make_skin();
     run_app(skin)
 }

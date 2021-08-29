@@ -42,7 +42,7 @@ Hit any key to quit this screen:
 * or anything else to print this text (so that you may copy-paste)
 "#;
 
-fn run_app<W>(skin: MadSkin, w: &mut W) -> Result<Option<char>>
+fn run_app<W>(skin: MadSkin, w: &mut W) -> Result<Option<char>, Error>
 where
     W: std::io::Write,
 {

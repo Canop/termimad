@@ -8,7 +8,7 @@ use {
     termimad::*,
 };
 
-fn run_app(skin: &MadSkin) -> Result<()> {
+fn run_app(skin: &MadSkin) -> Result<(), Error> {
     // using the struct api
     let mut q = Question::new("Do you want some beer ?");
     q.add_answer('y', "**Y**es, I *do* want some");
@@ -59,7 +59,7 @@ fn make_skin() -> MadSkin {
     skin
 }
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Error> {
     let skin = make_skin();
     run_app(&skin)
 }
