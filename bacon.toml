@@ -2,13 +2,18 @@
 # This is a configuration file for the bacon tool
 # More info at https://github.com/Canop/bacon
 
-default_job = "check"
+default_job = "check-all"
 
 [jobs]
 
 [jobs.check]
-command = ["cargo", "check", "--tests", "--color", "always"]
+command = ["cargo", "check", "--color", "always"]
 need_stdout = false
+
+[jobs.check-all]
+command = ["cargo", "check", "--all-targets", "--color", "always"]
+need_stdout = false
+watch = ["tests", "benches", "examples"]
 
 [jobs.light]
 command = ["cargo", "check", "--color", "always"]

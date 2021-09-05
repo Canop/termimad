@@ -1,3 +1,12 @@
+<a name="v0.16.0"></a>
+### v0.16.0 - 2021-09-05
+- some scroll API now use unsigned ints instead of i32
+- input fields much improved. Can now be several lines - see examples/inputs
+- the API of InputFields changed - but adapting user code should be straighforward:
+	- Replace `set_content(&str)` with `set_str(AsRef<str>)` or `clear()`.
+	- Use `set_focus(bool)` instead of the `focused` field (now private).
+	- Use `area()` and `set_area(Area)` instead of the `area` field (now private).
+
 <a name="v0.15.0"></a>
 ### v0.15.0 - 2021-08-29
 - organize and augment the utilities dedicated to writing text, formatted or not, in a limited size area

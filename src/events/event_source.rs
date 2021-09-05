@@ -41,6 +41,9 @@ struct TimedClick {
 ///  sharable event count, protected by an Arc. This makes
 ///  it easy for background computation to stop (or check if
 ///  they should) when a user event is produced.
+///
+/// The event source isn't tick based. It makes it possible to
+/// built TUI with no CPU consumption while idle.
 pub struct EventSource {
     rx_events: Receiver<Event>,
     rx_seqs: Receiver<EscapeSequence>,

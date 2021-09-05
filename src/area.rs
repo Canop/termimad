@@ -1,4 +1,7 @@
-use crossterm::terminal;
+use {
+    crossterm::terminal,
+    std::convert::{TryFrom, TryInto},
+};
 
 /// A default width which is used when we failed measuring the real terminal width
 const DEFAULT_TERMINAL_WIDTH: u16 = 50;
@@ -19,8 +22,10 @@ pub struct Area {
     pub height: u16,
 }
 
-fn div_ceil(a: i32, b: i32) -> i32 {
-    a / b + if a % b != 0 { 1 } else { 0 }
+impl Default for Area {
+    fn default() -> Self {
+        Self::uninitialized()
+    }
 }
 
 impl Area {
@@ -56,6 +61,14 @@ impl Area {
         }
     }
 
+    pub fn right(&self) -> u16 {
+        self.left + self.width
+    }
+
+    pub fn bottom(&self) -> u16 {
+        self.top + self.height
+    }
+
     /// tell whether the char at (x,y) is in the area
     pub fn contains(&self, x: u16, y: u16) -> bool {
         x >= self.left
@@ -87,36 +100,58 @@ impl Area {
     ///  a tupple with the top and bottom of the vertical
     ///  scrollbar. Return none when the content fits
     ///  the available space.
-    pub fn scrollbar(
+    pub fn scrollbar<U>(
         &self,
-        scroll: i32, // 0 for no scroll, positive if scrolled
-        content_height: i32,
-    ) -> Option<(u16, u16)> {
-        compute_scrollbar(scroll, content_height, i32::from(self.height), self.top)
+        scroll: U, // number of lines hidden on top
+        content_height: U,
+    ) -> Option<(u16, u16)>
+    where U: Into<usize>
+    {
+        compute_scrollbar(scroll, content_height, u16::from(self.height), self.top)
     }
 }
 
-pub fn compute_scrollbar(
-    scroll: i32,           // 0 for no scroll, positive if scrolled
-    content_height: i32,   // number of lines of the content
-    available_height: i32, // for an area it's usually its height
-    top: u16,
-) -> Option<(u16, u16)> {
-    let h = available_height;
-    if content_height <= h {
+/// Compute the min and max y (from the top of the terminal, both inclusive)
+/// for the thumb part of the scrollbar which would represent the scrolled
+/// content in the available height.
+///
+/// If you represent some data in an Area, you should directly use the
+/// scrollbar method of Area.
+pub fn compute_scrollbar<U1, U2>(
+    scroll: U1,           // 0 for no scroll, positive if scrolled
+    content_height: U1,   // number of lines of the content
+    available_height: U2, // for an area it's usually its height
+    top: U2,              // distance from the top of the screen
+) -> Option<(U2, U2)>
+where
+    U1: Into<usize>, // the type in which you store your content length and content scroll
+    U2: Into<usize> + TryFrom<usize>, // the drawing type (u16 for an area)
+    <U2 as TryFrom<usize>>::Error: std::fmt::Debug,
+{
+    let scroll: usize = scroll.into();
+    let content_height: usize = content_height.into();
+    let available_height: usize = available_height.into();
+    let top: usize = top.into();
+    if content_height <= available_height {
         return None;
     }
-    let sc = div_ceil(scroll * h, content_height);
-    let hidden_tail = content_height - scroll - h;
-    let se = div_ceil(hidden_tail * h, content_height);
-    Some((
-        sc as u16,
-        if h > sc + se {
-            top + (h - se) as u16
-        } else {
-            top + sc as u16 + 1
-        },
-    ))
+    let mut track_before = scroll * available_height / content_height;
+    if track_before == 0 && scroll > 0 {
+        track_before = 1;
+    }
+    let thumb_height = available_height * available_height / content_height;
+    let scrollbar_top = top + track_before;
+    let mut scrollbar_bottom = scrollbar_top + thumb_height;
+    if scroll + available_height < content_height && available_height > 3 {
+        scrollbar_bottom = scrollbar_bottom
+            .min(top + available_height - 2)
+            .max(scrollbar_top);
+    }
+    // by construction those two conversions are OK
+    // (or it's a bug, which, well, is possible...)
+    let scrollbar_top = scrollbar_top.try_into().unwrap();
+    let scrollbar_bottom = scrollbar_bottom.try_into().unwrap();
+    Some((scrollbar_top, scrollbar_bottom))
 }
 
 /// Return a (width, height) with the dimensions of the available

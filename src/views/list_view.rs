@@ -50,7 +50,7 @@ pub struct ListView<'t, T> {
     columns: Vec<ListViewColumn<'t, T>>,
     rows: Vec<Row<T>>,
     pub area: Area,
-    scroll: i32, // 0 for no scroll, positive if scrolled
+    scroll: usize,
     pub skin: &'t MadSkin,
     filter: Option<Box<dyn Fn(&T) -> bool>>, // a function determining if the row must be displayed
     displayed_rows_count: usize,
@@ -131,8 +131,12 @@ impl<'t, T> ListView<'t, T> {
     }
     /// return the height which is available for rows
     #[inline(always)]
-    pub fn tbody_height(&self) -> i32 {
-        i32::from(self.area.height) - 2
+    pub fn tbody_height(&self) -> u16 {
+        if self.area.height > 2 {
+            self.area.height - 2
+        } else {
+            self.area.height
+        }
     }
     /// return an option which when filled contains
     ///  a tupple with the top and bottom of the vertical
@@ -141,8 +145,8 @@ impl<'t, T> ListView<'t, T> {
     #[inline(always)]
     pub fn scrollbar(&self) -> Option<(u16, u16)> {
         compute_scrollbar(
-            self.scroll,
-            self.displayed_rows_count as i32,
+            self.scroll as u16,
+            self.displayed_rows_count as u16,
             self.tbody_height(),
             self.area.top,
         )
@@ -324,24 +328,37 @@ impl<'t, T> ListView<'t, T> {
     }
     /// return true if the last line of the list is visible
     pub fn do_scroll_show_bottom(&self) -> bool {
-        self.scroll + self.tbody_height() >= self.displayed_rows_count as i32
+        self.scroll + self.tbody_height() as usize >= self.displayed_rows_count
     }
     /// ensure the last line is visible
     pub fn scroll_to_bottom(&mut self) {
-        self.scroll = (self.displayed_rows_count as i32 - self.tbody_height()).max(0);
+        let body_height = self.tbody_height() as usize;
+        self.scroll = if self.displayed_rows_count > body_height {
+            self.displayed_rows_count - body_height
+        } else {
+            0
+        }
     }
     /// set the scroll amount.
     /// lines_count can be negative
     pub fn try_scroll_lines(&mut self, lines_count: i32) {
-        self.scroll = (self.scroll + lines_count)
-            .min(self.displayed_rows_count as i32 - self.tbody_height() + 1)
-            .max(0);
+        if lines_count < 0 {
+            let lines_count = -lines_count as usize;
+                self.scroll = if lines_count >= self.scroll {
+                0
+            } else {
+                self.scroll - lines_count
+            };
+        } else {
+            self.scroll = (self.scroll + lines_count as usize)
+                .min(self.displayed_rows_count - self.tbody_height() as usize + 1);
+        }
         self.make_selection_visible();
     }
     /// set the scroll amount.
     /// pages_count can be negative
     pub fn try_scroll_pages(&mut self, pages_count: i32) {
-        self.try_scroll_lines(pages_count * self.tbody_height())
+        self.try_scroll_lines(pages_count * self.tbody_height() as i32)
     }
     /// try to select the next visible line
     pub fn try_select_next(&mut self, up: bool) {
@@ -395,15 +412,15 @@ impl<'t, T> ListView<'t, T> {
     /// This is automatically called by try_scroll
     ///  and try select functions
     pub fn make_selection_visible(&mut self) {
-        if self.displayed_rows_count as i32 <= self.tbody_height() {
+        let tbody_height = self.tbody_height() as usize;
+        if self.displayed_rows_count <= tbody_height {
             return; // there's no scroll
         }
-        if let Some(selection) = self.selection {
-            let sel = selection as i32;
+        if let Some(sel) = self.selection {
             if sel <= self.scroll {
-                self.scroll = (sel - 2).max(0);
-            } else if sel >= self.scroll + self.tbody_height() - 1 {
-                self.scroll = (sel - self.tbody_height() + 2) as i32;
+                self.scroll = if sel > 2 { sel - 2 } else { 0 };
+            } else if sel + 1 >= self.scroll + tbody_height {
+                self.scroll = sel - tbody_height + 2;
             }
         }
     }

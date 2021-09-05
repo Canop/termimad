@@ -1,5 +1,10 @@
-use crate::color::*;
-use crate::styled_char::StyledChar;
+use {
+    crate::{
+        color::*,
+        styled_char::StyledChar,
+    },
+    crossterm::style::Color,
+};
 
 /// A scrollbar style defined by two styled chars, one
 ///  for the track, and one for the thumb.
@@ -19,6 +24,10 @@ impl ScrollBarStyle {
             track: StyledChar::from_fg_char(gray(5), char),
             thumb: StyledChar::from_fg_char(gray(21), char),
         }
+    }
+    pub fn set_bg(&mut self, bg: Color) {
+        self.track.set_bg(bg);
+        self.thumb.set_bg(bg);
     }
 }
 

@@ -1,15 +1,22 @@
-use std::io::{stdout, Write};
-
-use crossterm::{
-    cursor::MoveTo,
-    queue,
-    terminal::{Clear, ClearType},
+use {
+    crate::{
+        area::Area,
+        displayable_line::DisplayableLine,
+        errors::Result,
+        text::FmtText,
+    },
+    crossterm::{
+        cursor::MoveTo,
+        event::{
+            KeyCode,
+            KeyEvent,
+            KeyModifiers,
+        },
+        queue,
+        terminal::{Clear, ClearType},
+    },
+    std::io::{stdout, Write},
 };
-
-use crate::area::Area;
-use crate::displayable_line::DisplayableLine;
-use crate::errors::Result;
-use crate::text::FmtText;
 
 /// A scrollable text, in a specific area.
 ///
@@ -31,6 +38,10 @@ use crate::text::FmtText;
 /// view.write().unwrap();
 /// ```
 ///
+/// This struct is just a very thin wrapper and may
+/// be created dynamically for renderings or event
+/// handling.
+///
 /// If the text and skin are constant, you might prefer to
 /// use a MadView instead of a TextView: the MadView owns
 /// the mardkown string and ensures the formatted text
@@ -38,7 +49,7 @@ use crate::text::FmtText;
 pub struct TextView<'a, 't> {
     area: &'a Area,
     text: &'t FmtText<'t, 't>,
-    pub scroll: i32, // 0 for no scroll, positive if scrolled
+    pub scroll: usize, // number of lines hidden at start
     pub show_scrollbar: bool,
 }
 
@@ -54,19 +65,20 @@ impl<'a, 't> TextView<'a, 't> {
         }
     }
 
-    #[inline(always)]
-    pub fn content_height(&self) -> i32 {
-        self.text.lines.len() as i32
+    pub fn content_height(&self) -> usize {
+        self.text.lines.len()
     }
 
     /// return an option which when filled contains
     ///  a tupple with the top and bottom of the vertical
     ///  scrollbar. Return none when the content fits
     ///  the available space (or if show_scrollbar is false).
-    #[inline(always)]
     pub fn scrollbar(&self) -> Option<(u16, u16)> {
         if self.show_scrollbar {
-            self.area.scrollbar(self.scroll, self.content_height())
+            self.area.scrollbar(
+                self.scroll as u16,
+                self.content_height() as u16,
+            )
         } else {
             None
         }
@@ -81,24 +93,25 @@ impl<'a, 't> TextView<'a, 't> {
     }
 
     /// display the text in the area, taking the scroll into account.
-    pub fn write_on<W>(&self, w: &mut W) -> Result<()>
-    where
-        W: std::io::Write,
-    {
+    pub fn write_on<W: Write>(&self, w: &mut W) -> Result<()> {
         let scrollbar = self.scrollbar();
         let sx = self.area.left + self.area.width;
-        let mut i = self.scroll as usize;
-        for y in 0..self.area.height {
-            queue!(w, MoveTo(self.area.left, self.area.top + y))?;
-            if i < self.text.lines.len() {
-                let dl = DisplayableLine::new(self.text.skin, &self.text.lines[i], self.text.width);
+        let mut lines = self.text.lines.iter().skip(self.scroll as usize);
+        for j in 0..self.area.height {
+            let y = self.area.top + j;
+            queue!(w, MoveTo(self.area.left, y))?;
+            if let Some(line) = lines.next() {
+                let dl = DisplayableLine::new(
+                    self.text.skin,
+                    line,
+                    self.text.width,
+                );
                 write!(w, "{}", &dl)?;
-                i += 1;
             }
             self.text.skin.paragraph.compound_style.queue_bg(w)?;
             queue!(w, Clear(ClearType::UntilNewLine))?;
             if let Some((sctop, scbottom)) = scrollbar {
-                queue!(w, MoveTo(sx, self.area.top + y))?;
+                queue!(w, MoveTo(sx, y))?;
                 if sctop <= y && y <= scbottom {
                     write!(w, "{}", self.text.skin.scrollbar.thumb)?;
                 } else {
@@ -111,22 +124,99 @@ impl<'a, 't> TextView<'a, 't> {
 
     /// set the scroll position but makes it fit into allowed positions.
     /// Return the actual scroll.
-    pub fn set_scroll(&mut self, scroll: i32) -> i32 {
-        self.scroll = scroll
-            .min(self.content_height() - i32::from(self.area.height) + 1)
-            .max(0);
+    pub fn set_scroll(&mut self, scroll: usize) -> usize {
+        let area_height = self.area.height as usize;
+        self.scroll = if self.content_height() > area_height {
+            scroll.min(self.content_height() - area_height)
+        } else {
+            0
+        };
         self.scroll
     }
 
-    /// change the scroll position
+    /// Change the scroll position.
+    ///
     /// lines_count can be negative
-    pub fn try_scroll_lines(&mut self, lines_count: i32) -> i32{
-        self.set_scroll(self.scroll + lines_count)
+    pub fn try_scroll_lines(&mut self, lines_count: i32) {
+        if lines_count < 0 {
+            let lines_count = -lines_count as usize;
+                self.scroll = if lines_count >= self.scroll {
+                0
+            } else {
+                self.scroll - lines_count
+            };
+        } else {
+            self.set_scroll(self.scroll + lines_count as usize);
+        }
     }
 
     /// change the scroll position
     /// pages_count can be negative
-    pub fn try_scroll_pages(&mut self, pages_count: i32) -> i32{
+    pub fn try_scroll_pages(&mut self, pages_count: i32) {
         self.try_scroll_lines(pages_count * i32::from(self.area.height))
+    }
+
+    pub fn line_up(&mut self) -> bool {
+        if self.scroll > 0 {
+            self.scroll -= 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn line_down(&mut self) -> bool {
+        let content_height = self.content_height();
+        let page_height = self.area.height as usize;
+        if self.scroll + page_height < content_height {
+            self.scroll += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn page_up(&mut self) -> bool {
+        let page_height = self.area.height as usize;
+        if self.scroll > page_height {
+            self.scroll -= page_height;
+            true
+        } else if self.scroll > 0 {
+            self.scroll = 0;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn page_down(&mut self) -> bool {
+        let content_height = self.content_height();
+        let page_height = self.area.height as usize;
+        if self.scroll + 2 * page_height < content_height {
+            self.scroll += page_height;
+            true
+        } else if self.scroll + page_height < content_height {
+            self.scroll = content_height - page_height;
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Apply an event being a key: page_up, page_down, up and down.
+    ///
+    /// Return true when the event led to a change, false when it
+    /// was discarded.
+    pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
+        if key.modifiers != KeyModifiers::NONE {
+            return false;
+        }
+        match key.code {
+            KeyCode::Up => self.line_up(),
+            KeyCode::Down => self.line_down(),
+            KeyCode::PageUp => self.page_up(),
+            KeyCode::PageDown => self.page_down(),
+            _ => false,
+        }
     }
 }

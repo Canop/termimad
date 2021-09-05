@@ -1,7 +1,13 @@
-use crate::area::Area;
-use crate::errors::Result;
-use crate::skin::MadSkin;
-use crate::views::TextView;
+use {
+    crate::{
+        area::Area,
+        errors::Result,
+        skin::MadSkin,
+        views::TextView,
+    },
+    crossterm::event::KeyEvent,
+    std::io::Write,
+};
 
 /// A MadView is like a textview but it owns everything, from the
 ///  source markdown to the area and the skin, which often makes it more convenient
@@ -11,7 +17,7 @@ pub struct MadView {
     markdown: String,
     area: Area,
     pub skin: MadSkin,
-    pub scroll: i32,
+    pub scroll: usize,
 }
 
 impl MadView {
@@ -29,10 +35,7 @@ impl MadView {
     pub fn write(&self) -> Result<()> {
         self.write_on(&mut std::io::stdout())
     }
-    pub fn write_on<W>(&self, w: &mut W) -> Result<()>
-    where
-        W: std::io::Write,
-    {
+    pub fn write_on<W: Write>(&self, w: &mut W) -> Result<()> {
         let text = self.skin.area_text(&self.markdown, &self.area);
         let mut text_view = TextView::from(&self.area, &text);
         text_view.scroll = self.scroll;
@@ -66,5 +69,23 @@ impl MadView {
     /// lines_count can be negative
     pub fn try_scroll_pages(&mut self, pages_count: i32) {
         self.try_scroll_lines(pages_count * i32::from(self.area.height));
+    }
+    /// Apply an event being a key: page_up, page_down, up and down.
+    ///
+    /// Return true when the event led to a change, false when it
+    /// was discarded.
+    ///
+    /// It's possible to handle the key yourself and call the try_scroll
+    /// methods.
+    pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
+        let text = self.skin.area_text(&self.markdown, &self.area);
+        let mut text_view = TextView::from(&self.area, &text);
+        text_view.scroll = self.scroll;
+        if text_view.apply_key_event(key) {
+            self.scroll = text_view.scroll;
+            true
+        } else {
+            false
+        }
     }
 }

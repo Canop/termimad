@@ -146,7 +146,8 @@ pub use {
     styled_char::StyledChar,
     text::FmtText,
     views::{
-        InputField, ListView, ListViewCell, ListViewColumn, MadView, ProgressBar, TextView,
+        InputField, ListView, ListViewCell, ListViewColumn,
+        MadView, ProgressBar, TextView,
     },
 };
 pub use minimad;
@@ -155,8 +156,8 @@ use tokens::*;
 
 /// Return a reference to the global skin (modifiable).
 ///
-/// If you want a new default skin without messing with
-/// the other default printings, get a separate instance
+/// If you want a new default skin so that you can set
+/// colors or styles, get a separate instance
 /// with `Skin::default()` instead.
 pub fn get_default_skin() -> &'static MadSkin {
     use minimad::once_cell::sync::Lazy;
