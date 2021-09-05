@@ -116,6 +116,7 @@ impl InputField {
         self.area.left = x;
         self.area.top = y;
         self.area.width = w;
+        self.fix_scroll();
     }
     pub fn set_area(&mut self, area: Area) {
         self.area = area;
