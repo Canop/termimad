@@ -5,6 +5,7 @@ use {
         QueueableCommand,
         style::Print,
     },
+    std::io::Write,
 };
 
 const FILLING_STRING_CHAR_LEN: usize = 1000;
@@ -27,13 +28,11 @@ impl Filling {
             char_size,
         }
     }
-    pub fn queue_unstyled<W>(
+    pub fn queue_unstyled<W: Write>(
         &self,
         w: &mut W,
         mut len: usize,
-    ) -> Result<(), Error>
-    where W: std::io::Write
-    {
+    ) -> Result<(), Error> {
         while len > 0 {
             let sl = len.min(FILLING_STRING_CHAR_LEN);
             w.queue(Print(&self.filling_string[0..sl * self.char_size]))?;
@@ -41,14 +40,12 @@ impl Filling {
         }
         Ok(())
     }
-    pub fn queue_styled<W>(
+    pub fn queue_styled<W: Write>(
         &self,
         w: &mut W,
         cs: &CompoundStyle,
         mut len: usize,
-    ) -> Result<(), Error>
-    where W: std::io::Write
-    {
+    ) -> Result<(), Error> {
         while len > 0 {
             let sl = len.min(FILLING_STRING_CHAR_LEN);
             cs.queue_str(w, &self.filling_string[0..sl * self.char_size])?;

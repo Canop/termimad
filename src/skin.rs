@@ -15,7 +15,10 @@ use {
         text::FmtText,
         views::TextView,
     },
-    crossterm::style::{Attribute, Color},
+    crossterm::{
+        queue,
+        style::{Attribute, Color, Print},
+    },
     minimad::{
         Alignment,
         Composite,
@@ -163,12 +166,36 @@ impl MadSkin {
         skin
     }
 
+    /// Change the foreground of most styles (the ones which commonly
+    /// have a default or uniform baground, don't change code styles
+    /// for example).
+    ///
+    /// This can be used either as a first step in skin customization
+    /// or as the only change done to a default skin.
+    pub fn set_fg(&mut self, fg: Color) {
+        self.paragraph.compound_style.set_fg(fg);
+        self.bold.set_fg(fg);
+        self.italic.set_fg(fg);
+        self.strikeout.set_fg(fg);
+        self.set_headers_fg(fg);
+        self.bullet.set_fg(fg);
+        self.quote_mark.set_fg(fg);
+        self.horizontal_rule.set_fg(fg);
+        self.ellipsis.set_fg(fg);
+        #[cfg(feature="special-renders")]
+        {
+            for (_, sc) in self.special_chars.iter_mut() {
+                sc.set_fg(fg);
+            }
+        }
+    }
+
     /// Change the background of most styles (the ones which commonly
     /// have a default or uniform baground, don't change code styles
     /// for example).
     ///
-    /// This is convenient for default skins but personal skins often
-    /// need more precise background definitions.
+    /// This can be used either as a first step in skin customization
+    /// or as the only change done to a default skin.
     pub fn set_bg(&mut self, bg: Color) {
         self.paragraph.compound_style.set_bg(bg);
         self.bold.set_bg(bg);
@@ -180,6 +207,7 @@ impl MadSkin {
         self.quote_mark.set_bg(bg);
         self.horizontal_rule.set_bg(bg);
         self.ellipsis.set_bg(bg);
+        self.scrollbar.set_bg(bg);
         #[cfg(feature="special-renders")]
         {
             for (_, sc) in self.special_chars.iter_mut() {
@@ -311,10 +339,13 @@ impl MadSkin {
         Ok(())
     }
 
-    pub fn write_in_area_on<W>(&self, w: &mut W, markdown: &str, area: &Area) -> Result<()>
-    where
-        W: std::io::Write,
-    {
+    /// queue the rendered markdown in the specified area, without flush
+    pub fn write_in_area_on<W: Write>(
+        &self,
+        w: &mut W,
+        markdown: &str,
+        area: &Area,
+    ) -> Result<()> {
         let text = self.area_text(markdown, area);
         let mut view = TextView::from(area, &text);
         view.show_scrollbar = false;
@@ -362,10 +393,10 @@ impl MadSkin {
     where
         W: std::io::Write,
     {
-        Ok(write!(w, "{}", FmtInline{
+        Ok(queue!(w, Print(FmtInline{
             skin: self,
             composite: FmtComposite::from(composite, self),
-        })?)
+        }))?)
     }
 
     /// write a composite filling the given width
@@ -385,28 +416,22 @@ impl MadSkin {
     {
         let mut fc = FmtComposite::from(composite, self);
         fc.fill_width(width, align, self);
-        Ok(write!(w, "{}", FmtInline{
+        Ok(queue!(w, Print(FmtInline{
             skin: self,
             composite: fc,
-        })?)
+        }))?)
     }
 
     /// parse the given src as a markdown snippet and write it on
     /// the given `Write`
-    pub fn write_inline_on<W>(&self, w: &mut W, src: &str) -> Result<()>
-    where
-        W: std::io::Write,
-    {
-        Ok(write!(w, "{}", self.inline(src))?)
+    pub fn write_inline_on<W: Write>(&self, w: &mut W, src: &str) -> Result<()> {
+        Ok(queue!(w, Print(self.inline(src)))?)
     }
 
     /// parse the given src as a markdown text and write it on
     /// the given `Write`
-    pub fn write_text_on<W>(&self, w: &mut W, src: &str) -> Result<()>
-    where
-        W: std::io::Write,
-    {
-        Ok(write!(w, "{}", self.term_text(src))?)
+    pub fn write_text_on<W: Write>(&self, w: &mut W, src: &str) -> Result<()> {
+        Ok(queue!(w, Print(self.term_text(src)))?)
     }
 
     /// parse the given src as a markdown snippet and write it on stdout

@@ -40,7 +40,7 @@ impl MadView {
         let mut text_view = TextView::from(&self.area, &text);
         text_view.scroll = self.scroll;
         text_view.write_on(w)?;
-        Ok(w.flush()?)
+        Ok(())
     }
     /// sets the new area. If it's the same as the precedent one,
     ///  this operation does nothing. The scroll is kept if possible.

@@ -119,8 +119,10 @@ impl InputField {
         self.fix_scroll();
     }
     pub fn set_area(&mut self, area: Area) {
-        self.area = area;
-        self.fix_scroll();
+        if &self.area != &area {
+            self.area = area;
+            self.fix_scroll();
+        }
     }
     pub fn area(&self) -> &Area {
         &self.area
@@ -132,6 +134,7 @@ impl InputField {
     /// Tell the input to be or not focused
     pub fn set_focus(&mut self, b: bool) {
         self.focused = b;
+        // there's no reason to change the scroll when unfocusing
         if self.focused {
             self.fix_scroll();
         }
@@ -195,6 +198,8 @@ impl InputField {
     wrap_content_fun!(move_right);
     wrap_content_fun!(move_to_start);
     wrap_content_fun!(move_to_end);
+    wrap_content_fun!(move_to_line_start);
+    wrap_content_fun!(move_to_line_end);
     wrap_content_fun!(move_word_left);
     wrap_content_fun!(move_word_right);
     wrap_content_fun!(del_char_left);
@@ -202,12 +207,8 @@ impl InputField {
     wrap_content_fun!(del_word_right);
 
     pub fn page_up(&mut self) -> bool {
-        let page_height = self.area.height as usize;
-        if self.scroll.y > page_height {
-            self.scroll.y -= page_height;
-            true
-        } else if self.scroll.y > 0 {
-            self.scroll.y = 0;
+        if self.content.move_lines_up(self.area.height as usize) {
+            self.fix_scroll();
             true
         } else {
             false
@@ -215,13 +216,8 @@ impl InputField {
     }
 
     pub fn page_down(&mut self) -> bool {
-        let content_height = self.content.line_count();
-        let page_height = self.area.height as usize;
-        if self.scroll.y + 2 * page_height < content_height {
-            self.scroll.y += page_height;
-            true
-        } else if self.scroll.y + page_height < content_height {
-            self.scroll.y = content_height - page_height;
+        if self.content.move_lines_down(self.area.height as usize) {
+            self.fix_scroll();
             true
         } else {
             false
@@ -263,8 +259,8 @@ impl InputField {
             return false;
         }
         match code {
-            KeyCode::Home => self.move_to_start(),
-            KeyCode::End => self.move_to_end(),
+            KeyCode::Home => self.move_to_line_start(),
+            KeyCode::End => self.move_to_line_end(),
             KeyCode::Char(c) => self.put_char(c),
             KeyCode::Up => self.move_up(),
             KeyCode::Down => self.move_down(),
@@ -313,9 +309,6 @@ impl InputField {
     }
 
     fn fix_scroll(&mut self) {
-        if !self.focused {
-            return;
-        }
         let mut width = self.area.width as usize;
         let height = self.area.height as usize;
         let lines = &self.content.lines();
@@ -325,51 +318,58 @@ impl InputField {
         } else {
             self.scroll.y = 0;
         }
-        if self.focused {
+        let pos = self.content.cursor_pos();
+
+        if has_y_scroll {
+            if self.scroll.y + height > lines.len() {
+                self.scroll.y = lines.len() - height;
+            }
+            if self.focused {
                 // we must ensure the cursor is visible
-                let pos = self.content.cursor_pos();
-                if has_y_scroll {
-                    if self.scroll.y > pos.y {
-                        self.scroll.y = pos.y;
-                        if self.scroll.y > 0 && height > 4 {
-                            self.scroll.y -= 1;
-                        }
-                    } else if pos.y >= self.scroll.y + height {
-                        self.scroll.y = pos.y - height + 1;
-                        if pos.y + 1 < lines.len() {
-                            self.scroll.y += 1;
-                        }
+                if self.scroll.y > pos.y {
+                    self.scroll.y = pos.y;
+                    if self.scroll.y > 0 && height > 4 {
+                        self.scroll.y -= 1;
+                    }
+                } else if pos.y >= self.scroll.y + height {
+                    self.scroll.y = pos.y - height + 1;
+                    if pos.y + 1 < lines.len() {
+                        self.scroll.y -= 1;
                     }
                 }
-                let line_len = self.content.current_line().chars.len();
-                if line_len >= width {
-                    // we don't show ellipsis if the width is below 4
-                    // so we need less margin
-                    if width < 4 {
-                        if pos.x < 2 {
-                            self.scroll.x = 0;
-                        } else if pos.x < self.scroll.x + 1 {
-                            self.scroll.x = pos.x - 1;
-                        } else if pos.x > self.scroll.x + width {
-                            self.scroll.x = pos.x + 1 - width;
-                        }
-                    } else {
-                        if pos.x < self.scroll.x + 2 {
-                            if pos.x < 2 {
-                                self.scroll.x = 0;
-                            } else {
-                                self.scroll.x = pos.x - 2;
-                            }
-                        } else if pos.x > self.scroll.x + width - 2 {
-                            self.scroll.x = pos.x + 2 - width;
-                        }
+            }
+        }
 
+        let line_len = self.content.current_line().chars.len();
+        if line_len +1 <= width {
+            self.scroll.x = 0;
+        } else {
+            if self.focused {
+                // we don't show ellipsis if the width is below 4
+                // so we need less margin
+                if width < 4 {
+                    if pos.x < 2 {
+                        self.scroll.x = 0;
+                    } else if pos.x < self.scroll.x + 1 {
+                        self.scroll.x = pos.x - 1;
+                    } else if pos.x > self.scroll.x + width {
+                        self.scroll.x = pos.x + 1 - width;
                     }
                 } else {
-                    self.scroll.x = 0;
+                    if pos.x < self.scroll.x + 2 {
+                        if pos.x < 2 {
+                            self.scroll.x = 0;
+                        } else {
+                            self.scroll.x = pos.x - 2;
+                        }
+                    } else if pos.x > self.scroll.x + width - 2 {
+                        self.scroll.x = pos.x + 2 - width;
+                    }
                 }
-        } else {
-
+            }
+            if self.scroll.x + width > line_len + 1 {
+                self.scroll.x = line_len + 1 - width;
+            }
         }
     }
 

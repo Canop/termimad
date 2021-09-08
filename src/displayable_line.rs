@@ -1,7 +1,10 @@
-use std::fmt;
-
-use crate::line::FmtLine;
-use crate::skin::MadSkin;
+use {
+    crate::{
+        line::FmtLine,
+        skin::MadSkin,
+    },
+    std::fmt,
+};
 
 /// A facility to write just a line of a text.
 ///

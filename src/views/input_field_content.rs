@@ -215,9 +215,24 @@ impl InputFieldContent {
             false
         }
     }
-    pub fn move_up(&mut self) -> bool {
+    pub fn move_lines_up(&mut self, lines: usize) -> bool {
         if self.pos.y > 0 {
-            self.pos.y -= 1;
+            self.pos.y -= lines.min(self.pos.y);
+            let line_len = self.lines[self.pos.y].chars.len();
+            if self.pos.x > line_len {
+                self.pos.x = line_len;
+            }
+            true
+        } else {
+            false
+        }
+    }
+    pub fn move_up(&mut self) -> bool {
+        self.move_lines_up(1)
+    }
+    pub fn move_lines_down(&mut self, lines: usize) -> bool {
+        if self.pos.y + 1 < self.lines.len() {
+            self.pos.y += lines.min(self.lines.len() - self.pos.y - 1);
             let line_len = self.lines[self.pos.y].chars.len();
             if self.pos.x > line_len {
                 self.pos.x = line_len;
@@ -228,16 +243,7 @@ impl InputFieldContent {
         }
     }
     pub fn move_down(&mut self) -> bool {
-        if self.pos.y + 1 < self.lines.len() {
-            self.pos.y += 1;
-            let line_len = self.lines[self.pos.y].chars.len();
-            if self.pos.x > line_len {
-                self.pos.x = line_len;
-            }
-            true
-        } else {
-            false
-        }
+        self.move_lines_down(1)
     }
     pub fn move_left(&mut self) -> bool {
         if self.pos.x > 0 {
@@ -263,6 +269,23 @@ impl InputFieldContent {
         } else {
             self.pos = pos;
             true
+        }
+    }
+    pub fn move_to_line_end(&mut self) -> bool {
+        let line_len = self.lines[self.pos.y].chars.len();
+        if self.pos.x < line_len {
+            self.pos.x = line_len;
+            true
+        } else {
+            false
+        }
+    }
+    pub fn move_to_line_start(&mut self) -> bool {
+        if self.pos.x > 0 {
+            self.pos.x = 0;
+            true
+        } else {
+            false
         }
     }
     pub fn move_word_left(&mut self) -> bool {

@@ -1,8 +1,9 @@
-use crossterm::style::{Attribute, Color};
-use minimad::Alignment;
-use std::fmt;
-
-use crate::compound_style::CompoundStyle;
+use {
+    crate::compound_style::CompoundStyle,
+    crossterm::style::{Attribute, Color},
+    minimad::Alignment,
+    std::fmt,
+};
 
 /// A style applicable to a type of line.
 ///

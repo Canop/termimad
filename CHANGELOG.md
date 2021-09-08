@@ -1,3 +1,9 @@
+<a name="v0.16.1"></a>
+### v0.16.1 - 2021-09-08
+- Home and End key now move to start and end of lines (i.e. no more of text) in multi-lines input fields
+- several improvements and small fixes in input fields and scrolling
+- TextView and MadView don't erase right of their area anymore
+
 <a name="v0.16.0"></a>
 ### v0.16.0 - 2021-09-05
 - some scroll API now use unsigned ints instead of i32

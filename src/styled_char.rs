@@ -7,7 +7,10 @@ use {
         QueueableCommand,
         style::{Color, PrintStyledContent, StyledContent},
     },
-    std::fmt::{self, Display},
+    std::{
+        fmt::{self, Display},
+        io::Write,
+    },
 };
 
 /// A modifiable character which can be easily written or repeated. Can
@@ -71,20 +74,14 @@ impl StyledChar {
         }
         self.compound_style.apply_to(s)
     }
-    pub fn queue_repeat<W>(&self, w: &mut W, count: usize) -> Result<()>
-    where
-        W: std::io::Write,
-    {
+    pub fn queue_repeat<W: Write>(&self, w: &mut W, count: usize) -> Result<()> {
         let mut s = String::new();
         for _ in 0..count {
             s.push(self.nude_char);
         }
         self.compound_style.queue(w, s)
     }
-    pub fn queue<W>(&self, w: &mut W) -> Result<()>
-    where
-        W: std::io::Write,
-    {
+    pub fn queue<W: Write>(&self, w: &mut W) -> Result<()> {
         w.queue(PrintStyledContent(self.styled_char))?;
         Ok(())
     }

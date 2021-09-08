@@ -19,7 +19,7 @@ use crossterm::{
     },
     style::Color::*,
 };
-use std::io::{stderr, Write};
+use std::io::{stdout, Write};
 use termimad::*;
 
 fn view_area() -> Area {
@@ -29,7 +29,7 @@ fn view_area() -> Area {
 }
 
 fn run_app(skin: MadSkin) -> Result<(), Error> {
-    let mut w = stderr(); // we could also have used stdout
+    let mut w = stdout(); // we could also have used stderr
     queue!(w, EnterAlternateScreen)?;
     terminal::enable_raw_mode()?;
     queue!(w, Hide)?; // hiding the cursor
@@ -164,4 +164,5 @@ It's a little out of context but it shows how a wide table can be wrapped in a t
 | code bloc | yes |with tabs. Fences not supported
 | crossed text |  ~~not yet~~ | wait... now it works!
 | phpbb like links | no | (because it's preferable to show an URL in a terminal)
+
 "#;

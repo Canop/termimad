@@ -4,6 +4,7 @@ use {
         displayable_line::DisplayableLine,
         errors::Result,
         text::FmtText,
+        SPACE_FILLING,
     },
     crossterm::{
         cursor::MoveTo,
@@ -13,7 +14,8 @@ use {
             KeyModifiers,
         },
         queue,
-        terminal::{Clear, ClearType},
+        QueueableCommand,
+        style::Print,
     },
     std::io::{stdout, Write},
 };
@@ -95,27 +97,29 @@ impl<'a, 't> TextView<'a, 't> {
     /// display the text in the area, taking the scroll into account.
     pub fn write_on<W: Write>(&self, w: &mut W) -> Result<()> {
         let scrollbar = self.scrollbar();
-        let sx = self.area.left + self.area.width;
         let mut lines = self.text.lines.iter().skip(self.scroll as usize);
+        let mut width = self.area.width as usize;
+        if scrollbar.is_some() {
+            width -= 1;
+        }
         for j in 0..self.area.height {
             let y = self.area.top + j;
-            queue!(w, MoveTo(self.area.left, y))?;
+            w.queue(MoveTo(self.area.left, y))?;
             if let Some(line) = lines.next() {
                 let dl = DisplayableLine::new(
                     self.text.skin,
                     line,
-                    self.text.width,
+                    Some(width),
                 );
-                write!(w, "{}", &dl)?;
+                queue!(w, Print(&dl))?;
+            } else {
+                SPACE_FILLING.queue_styled(w, &self.text.skin.paragraph.compound_style, width)?;
             }
-            self.text.skin.paragraph.compound_style.queue_bg(w)?;
-            queue!(w, Clear(ClearType::UntilNewLine))?;
             if let Some((sctop, scbottom)) = scrollbar {
-                queue!(w, MoveTo(sx, y))?;
                 if sctop <= y && y <= scbottom {
-                    write!(w, "{}", self.text.skin.scrollbar.thumb)?;
+                    self.text.skin.scrollbar.thumb.queue(w)?;
                 } else {
-                    write!(w, "{}", self.text.skin.scrollbar.track)?;
+                    self.text.skin.scrollbar.track.queue(w)?;
                 }
             }
         }
