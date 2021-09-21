@@ -13,7 +13,6 @@ pub struct Pos {
 pub struct Line {
     pub chars: Vec<char>,
 }
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InputFieldContent {
     /// the cursor's position
@@ -21,6 +20,38 @@ pub struct InputFieldContent {
     /// never empty
     lines: Vec<Line>,
 }
+
+pub struct Chars<'c> {
+    content: &'c InputFieldContent,
+    pos: Pos,
+}
+impl Iterator for Chars<'_> {
+    type Item = char;
+    fn next(&mut self) -> Option<char> {
+        let line = &self.content.lines[self.pos.y];
+        if self.pos.x < line.chars.len() {
+            self.pos.x += 1;
+            Some(line.chars[self.pos.x - 1])
+        } else if self.pos.y + 1 < self.content.lines.len() {
+            self.pos.y += 1;
+            self.pos.x = 0;
+            Some('\n')
+        } else {
+            None
+        }
+    }
+}
+impl<'c> IntoIterator for &'c InputFieldContent {
+    type Item = char;
+    type IntoIter = Chars<'c>;
+    fn into_iter(self) -> Self::IntoIter {
+        Chars {
+            content: self,
+            pos: Pos::default(),
+        }
+    }
+}
+
 
 impl fmt::Display for Line {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -153,11 +184,18 @@ impl InputFieldContent {
             self.insert_char(c);
         }
     }
-    /// tell whether the content of the input is equal to the argument
+    /// Tell whether the content of the input is equal to the argument,
+    /// comparing char by char
     pub fn is_str(&self, s: &str) -> bool {
-        // TODO compare without building a string
-        let str_content = self.to_string();
-        str_content == s
+        let mut ia = self.into_iter();
+        let mut ib = s.chars();
+        loop {
+            match (ia.next(), ib.next()) {
+                (Some(a), Some(b)) if a == b => { continue }
+                (None, None) => { return true; }
+                _ => { return false; }
+            }
+        }
     }
     /// change the content to the new one and put the cursor at the end **if** the
     ///  content is different from the previous one.
@@ -362,12 +400,23 @@ impl InputFieldContent {
 
 }
 
+#[test]
+fn test_char_iterator() {
+    let texts = vec![
+        "this has\nthree lines\n",
+        "",
+        "123",
+        "\n\n",
+    ];
+    for text in texts {
+        assert!(InputFieldContent::from(text).is_str(text));
+    }
+}
+
 #[cfg(test)]
 mod input_content_edit_monoline_tests {
 
-    use {
-        super::*,
-    };
+    use super::*;
 
     /// make an input for tests from two strings:
     /// - the content string (no wide chars)
