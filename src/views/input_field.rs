@@ -191,6 +191,11 @@ impl InputField {
     pub fn del_char_below(&mut self) -> bool {
         self.content.del_char_below()
     }
+    /// Insert the string on cursor point, as if it was typed
+    pub fn insert_str<S: AsRef<str>>(&mut self, s: S) {
+        self.content.insert_str(s);
+        self.fix_scroll();
+    }
 
     wrap_content_fun!(move_up);
     wrap_content_fun!(move_down);

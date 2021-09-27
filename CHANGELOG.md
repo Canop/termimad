@@ -1,3 +1,7 @@
+<a name="v0.16.2"></a>
+### v0.16.2 - 2021-09-27
+- insert_str function in InputField
+
 <a name="v0.16.1"></a>
 ### v0.16.1 - 2021-09-08
 - Home and End key now move to start and end of lines (i.e. no more of text) in multi-lines input fields
