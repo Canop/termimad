@@ -84,7 +84,7 @@ impl<'t, T> ListViewColumn<'t, T> {
             extract,
         }
     }
-    pub fn with_align(mut self, align: Alignment) -> Self {
+    pub const fn with_align(mut self, align: Alignment) -> Self {
         self.spacing.align = align;
         self
     }
@@ -131,7 +131,7 @@ impl<'t, T> ListView<'t, T> {
     }
     /// return the height which is available for rows
     #[inline(always)]
-    pub fn tbody_height(&self) -> u16 {
+    pub const fn tbody_height(&self) -> u16 {
         if self.area.height > 2 {
             self.area.height - 2
         } else {
@@ -327,7 +327,7 @@ impl<'t, T> ListView<'t, T> {
         Ok(())
     }
     /// return true if the last line of the list is visible
-    pub fn do_scroll_show_bottom(&self) -> bool {
+    pub const fn do_scroll_show_bottom(&self) -> bool {
         self.scroll + self.tbody_height() as usize >= self.displayed_rows_count
     }
     /// ensure the last line is visible
@@ -427,7 +427,7 @@ impl<'t, T> ListView<'t, T> {
     pub fn get_selection(&self) -> Option<&T> {
         self.selection.map(|sel| &self.rows[sel].data)
     }
-    pub fn has_selection(&self) -> bool {
+    pub const fn has_selection(&self) -> bool {
         self.selection.is_some()
     }
     pub fn unselect(&mut self) {

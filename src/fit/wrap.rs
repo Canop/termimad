@@ -5,7 +5,7 @@ use {
 };
 
 /// build a composite which can be a new line after wrapping.
-fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
+const fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
     let style = match fc.composite.style {
         minimad::CompositeStyle::ListItem => CompositeStyle::Paragraph,
         _ => fc.composite.style,
@@ -26,7 +26,7 @@ fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
 
 /// return the inherent widths related to the style, the one of the first line (for
 /// example with a bullet) and the ones for the next lines (for example with quotes)
-pub fn composite_style_widths(composite_style: CompositeStyle) -> (usize, usize) {
+pub const fn composite_style_widths(composite_style: CompositeStyle) -> (usize, usize) {
     match composite_style {
         CompositeStyle::Paragraph => (0, 0),
         CompositeStyle::Header(_) => (0, 0),

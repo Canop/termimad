@@ -265,7 +265,7 @@ impl MadSkin {
     }
 
     /// return the style to apply to a given line
-    fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
+    const fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
         match style {
             CompositeStyle::Code => &self.code_block,
             CompositeStyle::Header(level) if *level <= MAX_HEADER_DEPTH as u8 => {

@@ -27,7 +27,7 @@ impl CodeBlock {
     }
 }
 
-fn code_line_length(line: &FmtLine<'_>) -> Option<usize> {
+const fn code_line_length(line: &FmtLine<'_>) -> Option<usize> {
     match line {
         FmtLine::Normal(fc) => match fc.composite.style {
             CompositeStyle::Code => Some(fc.visible_length),

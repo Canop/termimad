@@ -39,7 +39,7 @@ impl CompoundStyle {
     }
 
     /// Get an new instance of `CompoundStyle`
-    pub fn new(
+    pub const fn new(
         foreground_color: Option<Color>,
         background_color: Option<Color>,
         attributes: Attributes,
@@ -136,12 +136,12 @@ impl CompoundStyle {
     }
 
     #[inline(always)]
-    pub fn get_fg(&self) -> Option<Color> {
+    pub const fn get_fg(&self) -> Option<Color> {
         self.object_style.foreground_color
     }
 
     #[inline(always)]
-    pub fn get_bg(&self) -> Option<Color> {
+    pub const fn get_bg(&self) -> Option<Color> {
         self.object_style.background_color
     }
 

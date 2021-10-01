@@ -31,7 +31,7 @@ impl Default for Area {
 impl Area {
     /// build a new area. You'll need to set the position and size
     /// before you can use it
-    pub fn uninitialized() -> Area {
+    pub const fn uninitialized() -> Area {
         Area {
             left: 0,
             top: 0,
@@ -41,7 +41,7 @@ impl Area {
     }
 
     /// build a new area.
-    pub fn new(left: u16, top: u16, width: u16, height: u16) -> Area {
+    pub const fn new(left: u16, top: u16, width: u16, height: u16) -> Area {
         Area {
             left,
             top,
@@ -61,16 +61,16 @@ impl Area {
         }
     }
 
-    pub fn right(&self) -> u16 {
+    pub const fn right(&self) -> u16 {
         self.left + self.width
     }
 
-    pub fn bottom(&self) -> u16 {
+    pub const fn bottom(&self) -> u16 {
         self.top + self.height
     }
 
     /// tell whether the char at (x,y) is in the area
-    pub fn contains(&self, x: u16, y: u16) -> bool {
+    pub const fn contains(&self, x: u16, y: u16) -> bool {
         x >= self.left
             && x < self.left + self.width
             && y >= self.top
@@ -107,7 +107,7 @@ impl Area {
     ) -> Option<(u16, u16)>
     where U: Into<usize>
     {
-        compute_scrollbar(scroll, content_height, u16::from(self.height), self.top)
+        compute_scrollbar(scroll, content_height, self.height, self.top)
     }
 }
 

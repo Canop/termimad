@@ -41,7 +41,7 @@ impl StyledChar {
         self.nude_char = nude_char;
         self.styled_char = self.compound_style.apply_to(self.nude_char);
     }
-    pub fn get_char(&self) -> char {
+    pub const fn get_char(&self) -> char {
         self.nude_char
     }
     /// Change the fg color, keeping the char, bg color and attributes
@@ -49,7 +49,7 @@ impl StyledChar {
         self.compound_style.set_fg(color);
         self.styled_char = self.compound_style.apply_to(self.nude_char);
     }
-    pub fn get_fg(&self) -> Option<Color> {
+    pub const fn get_fg(&self) -> Option<Color> {
         self.compound_style.get_fg()
     }
     /// Change the bg color, keeping the char, fg color and attributes
@@ -57,7 +57,7 @@ impl StyledChar {
         self.compound_style.set_bg(color);
         self.styled_char = self.compound_style.apply_to(self.nude_char);
     }
-    pub fn get_bg(&self) -> Option<Color> {
+    pub const fn get_bg(&self) -> Option<Color> {
         self.compound_style.get_bg()
     }
     /// Change the style (colors, attributes) of the styled char

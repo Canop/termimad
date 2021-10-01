@@ -13,7 +13,7 @@ impl ProgressBar {
     /// create a bar of a given char length.
     /// `part` must be in `[0,1]`.
     /// `chars_len` is the max width of the bar in characters
-    pub fn new(part: f32, chars_len: usize) -> Self {
+    pub const fn new(part: f32, chars_len: usize) -> Self {
         Self { part, chars_len }
     }
 }

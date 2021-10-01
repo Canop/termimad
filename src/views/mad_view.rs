@@ -22,7 +22,7 @@ pub struct MadView {
 
 impl MadView {
     /// make a displayed text, that is a text in an area
-    pub fn from(markdown: String, area: Area, skin: MadSkin) -> MadView {
+    pub const fn from(markdown: String, area: Area, skin: MadSkin) -> MadView {
         MadView {
             markdown,
             area,

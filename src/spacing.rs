@@ -18,7 +18,7 @@ impl Spacing {
     /// compute the number of chars to add left and write of inner_width
     /// to fill outer_width
     #[inline(always)]
-    pub fn completions(align: Alignment, inner_width: usize, outer_width: usize) -> (usize, usize) {
+    pub const fn completions(align: Alignment, inner_width: usize, outer_width: usize) -> (usize, usize) {
         if inner_width >= outer_width {
             return (0, 0);
         }
@@ -32,7 +32,7 @@ impl Spacing {
         }
     }
     #[inline(always)]
-    pub fn optional_completions(
+    pub const fn optional_completions(
         align: Alignment,
         inner_width: usize,
         outer_width: Option<usize>,
@@ -43,7 +43,7 @@ impl Spacing {
         }
     }
     #[inline(always)]
-    pub fn completions_for(&self, inner_width: usize) -> (usize, usize) {
+    pub const fn completions_for(&self, inner_width: usize) -> (usize, usize) {
         Spacing::completions(self.align, inner_width, self.width)
     }
     pub fn write_counted_str<W>(

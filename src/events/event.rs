@@ -8,7 +8,6 @@ use {
 };
 
 /// a valid user event
-///
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Event {
 
@@ -92,7 +91,7 @@ impl Event {
         )
     }
     /// In case the event is mouse related, give the position
-    pub fn mouse_pos(self) -> Option<(u16, u16)> {
+    pub const fn mouse_pos(self) -> Option<(u16, u16)> {
         match self {
             Event::Click(x, y, _) => Some((x, y)),
             Event::RightClick(x, y, _) => Some((x, y)),

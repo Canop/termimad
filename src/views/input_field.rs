@@ -124,11 +124,11 @@ impl InputField {
             self.fix_scroll();
         }
     }
-    pub fn area(&self) -> &Area {
+    pub const fn area(&self) -> &Area {
         &self.area
     }
     /// return the current scrolling state on both axis
-    pub fn scroll(&self) -> Pos {
+    pub const fn scroll(&self) -> Pos {
         self.scroll
     }
     /// Tell the input to be or not focused
@@ -139,7 +139,7 @@ impl InputField {
             self.fix_scroll();
         }
     }
-    pub fn focused(&self) -> bool {
+    pub const fn focused(&self) -> bool {
         self.focused
     }
     pub fn set_normal_style(&mut self, style: CompoundStyle) {
@@ -150,7 +150,7 @@ impl InputField {
     pub fn set_unfocused_style(&mut self, style: CompoundStyle) {
         self.unfocused_style = style;
     }
-    pub fn content(&self) -> &InputFieldContent {
+    pub const fn content(&self) -> &InputFieldContent {
         &self.content
     }
     pub fn get_content(&self) -> String {
@@ -346,7 +346,7 @@ impl InputField {
         }
 
         let line_len = self.content.current_line().chars.len();
-        if line_len +1 <= width {
+        if line_len < width {
             self.scroll.x = 0;
         } else {
             if self.focused {
@@ -460,7 +460,7 @@ impl InputField {
                 SPACE_FILLING.queue_styled(w, &normal_style, width)?;
             }
             if let Some((sctop, scbottom)) = scrollbar {
-                let y = u16::from(j) + self.area.top;
+                let y = j + self.area.top;
                 if sctop <= y && y <= scbottom {
                     scrollbar_style.thumb.queue(w)?;
                 } else {

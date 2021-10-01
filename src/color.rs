@@ -5,7 +5,7 @@ use crossterm::style::Color;
 /// ```
 /// let gold = termimad::rgb(255, 187, 0);
 /// ```
-pub fn rgb(r: u8, g: u8, b: u8) -> Color {
+pub const fn rgb(r: u8, g: u8, b: u8) -> Color {
     Color::Rgb { r, g, b }
 }
 
@@ -16,7 +16,7 @@ pub fn gray(level: u8) -> Color {
 }
 
 /// Build an [ANSI color](https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit)
-pub fn ansi(level: u8) -> Color {
+pub const fn ansi(level: u8) -> Color {
     Color::AnsiValue(level)
 }
 

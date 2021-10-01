@@ -42,7 +42,7 @@ impl<'s> FmtComposite<'s> {
     /// Return the number of characters (usually spaces) to insert both
     /// sides of the composite
     #[inline(always)]
-    pub fn completions(&self) -> (usize, usize) {
+    pub const fn completions(&self) -> (usize, usize) {
         match &self.spacing {
             Some(spacing) => spacing.completions_for(self.visible_length),
             None => (0, 0),

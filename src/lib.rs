@@ -154,7 +154,7 @@ pub use minimad;
 
 use tokens::*;
 
-/// Return a reference to the global skin (modifiable).
+/// Return a reference to the global skin
 ///
 /// If you want a new default skin so that you can set
 /// colors or styles, get a separate instance

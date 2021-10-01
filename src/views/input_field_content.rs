@@ -106,7 +106,7 @@ impl InputFieldContent {
     pub fn lines(&self) -> &[Line] {
         &self.lines
     }
-    pub fn cursor_pos(&self) -> Pos {
+    pub const fn cursor_pos(&self) -> Pos {
         self.pos
     }
     /// Set the cursor position.
