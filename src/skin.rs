@@ -382,6 +382,20 @@ impl MadSkin {
         print!("{}", fmt_text);
     }
 
+    /// do a `print!` of the given owning expander
+    pub fn print_owning_expander_md<T: Into<String>>(
+        &self,
+        expander: &OwningTemplateExpander<'_>,
+        template: T,
+    ) {
+        let (width, _) = terminal_size();
+        let template_md: String = template.into();
+        let template = TextTemplate::from(&*template_md);
+        let text = expander.expand(&template);
+        let fmt_text = FmtText::from_text(self, text, Some(width as usize));
+        print!("{}", fmt_text);
+    }
+
     pub fn print_composite(&self, composite: Composite<'_>) {
         print!("{}", FmtInline{
             skin: self,

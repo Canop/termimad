@@ -1,3 +1,7 @@
+<a name="v0.16.3"></a>
+### v0.16.3 - 2021-10-16
+- Minimad's new TableBuilder, a facility to build text templates for tables
+
 <a name="v0.16.2"></a>
 ### v0.16.2 - 2021-09-27
 - insert_str function in InputField

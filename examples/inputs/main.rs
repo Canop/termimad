@@ -41,6 +41,10 @@ use {
     termimad::*,
 };
 
+// Those 2 lines will be usable when crossterm merges KeyEvent::new being made const
+// pub const CONTROL_C: KeyEvent = KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL);
+// pub const CONTROL_Q: KeyEvent = KeyEvent::new(KeyCode::Char('q'), KeyModifiers::CONTROL);
+
 pub const CONTROL_C: KeyEvent = KeyEvent { code: KeyCode::Char('c'), modifiers: KeyModifiers::CONTROL };
 pub const CONTROL_Q: KeyEvent = KeyEvent { code: KeyCode::Char('q'), modifiers: KeyModifiers::CONTROL };
 
