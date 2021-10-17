@@ -173,6 +173,8 @@ impl InputFieldContent {
     pub fn insert_char(&mut self, c: char) {
         if c == '\n' {
             self.insert_new_line();
+        } else if c == '\r' {
+            // skipping
         } else {
             self.lines[self.pos.y].chars.insert(self.pos.x, c);
             self.pos.x += 1;
