@@ -210,6 +210,8 @@ impl InputField {
     wrap_content_fun!(del_char_left);
     wrap_content_fun!(del_word_left);
     wrap_content_fun!(del_word_right);
+    wrap_content_fun!(move_current_line_up);
+    wrap_content_fun!(move_current_line_down);
 
     pub fn page_up(&mut self) -> bool {
         if self.content.move_lines_up(self.area.height as usize) {

@@ -245,6 +245,38 @@ impl InputFieldContent {
             false
         }
     }
+    /// Swap two lines. Return false if one of the indices is out of
+    /// range or if the two indices are the same
+    pub fn swap_lines(&mut self, ya: usize, yb: usize) -> bool {
+        if ya != yb && ya < self.lines.len() && yb < self.lines.len() {
+            self.lines.swap(ya, yb);
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Swap the current line with the line before, if possible
+    pub fn move_current_line_up(&mut self) -> bool {
+        if self.pos.y > 0 {
+            if self.swap_lines(self.pos.y - 1, self.pos.y) {
+                self.pos.y -= 1;
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Swap the current line with the line after, if possible
+    pub fn move_current_line_down(&mut self) -> bool {
+        if self.swap_lines(self.pos.y + 1, self.pos.y) {
+            self.pos.y += 1;
+            true
+        } else {
+            false
+        }
+    }
+
     /// Move the cursor to the right (or to the line below
     /// if it's a the end of a non-last line)
     pub fn move_right(&mut self) -> bool {
