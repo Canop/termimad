@@ -23,7 +23,7 @@ macro_rules! mad_print_inline {
         #[allow(unused_mut)]
         let mut i: usize = 0;
         use $crate::minimad::{once_cell::sync::Lazy, InlineTemplate};
-        static TEMPLATE: Lazy<minimad::InlineTemplate<'static>> = Lazy::new(|| {
+        static TEMPLATE: Lazy<InlineTemplate<'static>> = Lazy::new(|| {
             InlineTemplate::from($md)
         });
         let mut composite = TEMPLATE.raw_composite();
@@ -57,7 +57,7 @@ macro_rules! mad_write_inline {
         let vals: Vec<String> = vec![$($value.to_string(),)*];
         let mut i: usize = 0;
         use $crate::minimad::{once_cell::sync::Lazy, InlineTemplate};
-        static TEMPLATE: Lazy<minimad::InlineTemplate<'static>> = Lazy::new(|| {
+        static TEMPLATE: Lazy<InlineTemplate<'static>> = Lazy::new(|| {
             InlineTemplate::from($md)
         });
         let mut composite = TEMPLATE.raw_composite();
