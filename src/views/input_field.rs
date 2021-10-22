@@ -459,7 +459,7 @@ impl InputField {
                     }
                 }
             } else {
-                SPACE_FILLING.queue_styled(w, &normal_style, width)?;
+                SPACE_FILLING.queue_styled(w, normal_style, width)?;
             }
             if let Some((sctop, scbottom)) = scrollbar {
                 let y = j + self.area.top;

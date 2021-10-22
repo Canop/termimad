@@ -1,3 +1,8 @@
+<a name="v0.16.4"></a>
+### v0.16.4 - 2021-10-22
+- Remove the need to explicitly import minimad for crates using mad_print_inline!
+- InputField: remove `\r` from edited strings
+
 <a name="v0.16.3"></a>
 ### v0.16.3 - 2021-10-16
 - Minimad's new TableBuilder, a facility to build text templates for tables
