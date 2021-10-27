@@ -313,8 +313,9 @@ impl InputFieldContent {
                 if min.x == 0 {
                     // we remove the whole line
                     self.lines.drain(min.y..min.y+1);
+                } else {
+                    self.lines[min.y].chars.drain(min.x..);
                 }
-                self.lines[min.y].chars.drain(min.x..);
             } else {
                 self.lines[min.y].chars.drain(min.x..max.x+1);
             }

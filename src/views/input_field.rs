@@ -116,10 +116,12 @@ impl InputField {
     ///
     /// Makes most sense for monoline inputs
     pub fn change_area(&mut self, x: u16, y: u16, w: u16) {
-        self.area.left = x;
-        self.area.top = y;
-        self.area.width = w;
-        self.fix_scroll();
+        if self.area.left != x || self.area.top != y || self.area.width != w {
+            self.area.left = x;
+            self.area.top = y;
+            self.area.width = w;
+            self.fix_scroll();
+        }
     }
     pub fn set_area(&mut self, area: Area) {
         if &self.area != &area {
@@ -136,6 +138,9 @@ impl InputField {
     }
     /// Tell the input to be or not focused
     pub fn set_focus(&mut self, b: bool) {
+        if self.focused == b {
+            return;
+        }
         self.focused = b;
         // there's no reason to change the scroll when unfocusing
         if self.focused {
@@ -369,7 +374,12 @@ impl InputField {
                         self.content.make_selection();
                         self.content.set_cursor_pos(Pos { x, y });
                     }
-                    // TODO mouse wheel
+                    MouseEventKind::ScrollDown => {
+                        self.scroll_down();
+                    }
+                    MouseEventKind::ScrollUp => {
+                        self.scroll_up();
+                    }
                     _ => {}
                 }
             } else if matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
@@ -399,6 +409,26 @@ impl InputField {
                 }
             }
             _ => false,
+        }
+    }
+
+    pub fn scroll_up(&mut self) -> bool {
+        if self.scroll.y > 0 {
+            self.scroll.y -= 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn scroll_down(&mut self) -> bool {
+        let height = self.area.height as usize;
+        let lines_len = self.content.line_count();
+        if self.scroll.y + height < lines_len {
+            self.scroll.y += 1;
+            true
+        } else {
+            false
         }
     }
 
