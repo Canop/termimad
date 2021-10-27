@@ -1,33 +1,40 @@
 use {
+    super::{Pos, Range},
     std::{
         fmt,
     },
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub struct Pos {
-    pub x: usize,
-    pub y: usize,
-}
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct Line {
     pub chars: Vec<char>,
 }
+/// an iterator over the chars of an InputFieldContent or
+/// of a selection
+pub struct Chars<'c> {
+    content: &'c InputFieldContent,
+    pos: Pos,
+    end: Pos,
+}
+/// the content of an InputField.
+///
+/// Doesn't know about rendering, styles, areas, etc.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InputFieldContent {
     /// the cursor's position
     pos: Pos,
-    /// never empty
+    /// the other end of the selection, if any
+    selection_tail: Option<Pos>,
+    /// text lines, always at least one
     lines: Vec<Line>,
 }
 
-pub struct Chars<'c> {
-    content: &'c InputFieldContent,
-    pos: Pos,
-}
 impl Iterator for Chars<'_> {
     type Item = char;
     fn next(&mut self) -> Option<char> {
+        if self.pos > self.end {
+            return None;
+        }
         let line = &self.content.lines[self.pos.y];
         if self.pos.x < line.chars.len() {
             self.pos.x += 1;
@@ -48,10 +55,10 @@ impl<'c> IntoIterator for &'c InputFieldContent {
         Chars {
             content: self,
             pos: Pos::default(),
+            end: self.end(),
         }
     }
 }
-
 
 impl fmt::Display for Line {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -66,9 +73,10 @@ impl fmt::Display for Line {
 impl Default for InputFieldContent {
     fn default() -> Self {
         Self {
+            pos: Pos::default(),
+            selection_tail: None,
             // there's always a line
             lines: vec![Line::default()],
-            pos: Pos::default(),
         }
     }
 }
@@ -121,11 +129,60 @@ impl InputFieldContent {
             self.pos.x = new_pos.x.min(self.lines[self.pos.y].chars.len());
         }
     }
+    /// Set the selection tail to the current pos if there's no selection
+    pub fn make_selection(&mut self) {
+        if self.selection_tail.is_none() {
+            self.selection_tail = Some(self.pos);
+        }
+    }
+    pub fn unselect(&mut self) {
+        self.selection_tail = None;
+    }
+    pub fn set_selection_tail(&mut self, sel_tail: Pos) {
+        if sel_tail.y >= self.lines.len() {
+            self.selection_tail = Some(self.end());
+        } else {
+            self.selection_tail = Some(Pos {
+                y: sel_tail.y,
+                x: sel_tail.x.min(self.lines[self.pos.y].chars.len()),
+            });
+        }
+    }
+    pub fn selection(&self) -> Range {
+        if let Some(sel_tail) = self.selection_tail {
+            if sel_tail < self.pos {
+                Range { min: sel_tail, max: self.pos }
+            } else {
+                Range { min: self.pos, max: sel_tail }
+            }
+        } else {
+            Range { min: self.pos, max: self.pos }
+        }
+    }
+    /// return an iterator over the characters of the
+    /// selection (including some newline chars maybe)
+    pub fn selection_chars(&self) -> Chars<'_> {
+        let Range { min, max } = self.selection();
+        Chars {
+            content: self,
+            pos: min,
+            end: max,
+        }
+    }
+    pub fn selection_string(&self) -> String {
+        self.selection_chars().collect()
+    }
     pub fn is_empty(&self) -> bool {
         match self.lines.len() {
             1 => self.lines[0].chars.is_empty(),
             _ => false,
         }
+    }
+    pub fn has_selection(&self) -> bool {
+        self.selection_tail.is_some()
+    }
+    pub fn has_wide_selection(&self) -> bool {
+        self.selection_tail.map_or(false, |sel_tail| sel_tail != self.pos)
     }
     /// return the position on end, where the cursor should be put
     /// initially
@@ -199,7 +256,7 @@ impl InputFieldContent {
             }
         }
     }
-    /// change the content to the new one and put the cursor at the end **if** the
+    /// Change the content to the new one and put the cursor at the end **if** the
     ///  content is different from the previous one.
     ///
     ///  Don't move the cursor if the string content didn't change.
@@ -210,7 +267,7 @@ impl InputFieldContent {
         self.clear();
         self.insert_str(s);
     }
-    /// remove the char left of the cursor, if any.
+    /// Remove the char left of the cursor, if any.
     pub fn del_char_left(&mut self) -> bool {
         if self.pos.x > 0 {
             self.pos.x -= 1;
@@ -244,6 +301,42 @@ impl InputFieldContent {
         } else {
             false
         }
+    }
+
+    pub fn del_selection(&mut self) -> bool {
+        let Range { min, max } = self.selection();
+        if min.y == max.y {
+            if min.x == max.x {
+                return self.del_char_below();
+            }
+            if max.x == self.lines[min.y].chars.len() {
+                if min.x == 0 {
+                    // we remove the whole line
+                    self.lines.drain(min.y..min.y+1);
+                }
+                self.lines[min.y].chars.drain(min.x..);
+            } else {
+                self.lines[min.y].chars.drain(min.x..max.x+1);
+            }
+        } else {
+            let min_y = if min.x > 0 {
+                self.lines[min.y].chars.truncate(min.x);
+                min.y + 1
+            } else {
+                min.y
+            };
+            let max_y = if max.x < self.lines[max.y].chars.len() {
+                self.lines[max.y].chars.drain(0..max.x);
+                max.y - 1
+            } else {
+                max.y
+            };
+            if max_y > min_y {
+                self.lines.drain(min_y..(max_y+1).min(self.lines.len()));
+            }
+        }
+        self.set_cursor_pos(min);
+        true
     }
     /// Swap two lines. Return false if one of the indices is out of
     /// range or if the two indices are the same
@@ -283,10 +376,15 @@ impl InputFieldContent {
         if self.pos.x < self.lines[self.pos.y].chars.len() {
             self.pos.x += 1;
             true
+        } else if self.pos.y < self.lines.len() - 1 {
+            self.pos.y += 1;
+            self.pos.x = 0;
+            true
         } else {
             false
         }
     }
+    /// Move the cursor up
     pub fn move_lines_up(&mut self, lines: usize) -> bool {
         if self.pos.y > 0 {
             self.pos.y -= lines.min(self.pos.y);
@@ -299,9 +397,11 @@ impl InputFieldContent {
             false
         }
     }
+    /// Move the cursor one line up
     pub fn move_up(&mut self) -> bool {
         self.move_lines_up(1)
     }
+    /// Move the cursor down
     pub fn move_lines_down(&mut self, lines: usize) -> bool {
         if self.pos.y + 1 < self.lines.len() {
             self.pos.y += lines.min(self.lines.len() - self.pos.y - 1);
@@ -320,6 +420,10 @@ impl InputFieldContent {
     pub fn move_left(&mut self) -> bool {
         if self.pos.x > 0 {
             self.pos.x -= 1;
+            true
+        } else if self.pos.y > 0 {
+            self.pos.y -= 1;
+            self.pos.x = self.lines[self.pos.y].chars.len();
             true
         } else {
             false

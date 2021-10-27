@@ -7,6 +7,9 @@ use {
             KeyCode,
             KeyEvent,
             KeyModifiers,
+            MouseButton,
+            MouseEvent,
+            MouseEventKind,
         },
         queue,
         style::{
@@ -159,6 +162,26 @@ impl InputField {
     pub fn is_empty(&self) -> bool {
         self.content.is_empty()
     }
+    pub fn copy_selection(&mut self) -> String {
+        self.content.selection_string()
+    }
+    pub fn cut_selection(&mut self) -> String {
+        let s = self.content.selection_string();
+        self.content.del_selection();
+        self.fix_scroll();
+        s
+    }
+    /// Write the given string in place of the selection, or
+    /// insert the string if there's no wide selection.
+    ///
+    /// This is the usual behavior for pasting a string.
+    pub fn replace_selection<S: AsRef<str>>(&mut self, s: S) {
+        if self.content.has_wide_selection() {
+            self.content.del_selection();
+        }
+        self.content.insert_str(s);
+        self.fix_scroll();
+    }
     /// tell whether the content of the input is equal
     ///  to the argument
     pub fn is_content(&self, s: &str) -> bool {
@@ -187,10 +210,7 @@ impl InputField {
         self.content.clear();
         self.fix_scroll();
     }
-    /// remove the char at cursor position, if any
-    pub fn del_char_below(&mut self) -> bool {
-        self.content.del_char_below()
-    }
+
     /// Insert the string on cursor point, as if it was typed
     pub fn insert_str<S: AsRef<str>>(&mut self, s: S) {
         self.content.insert_str(s);
@@ -207,6 +227,8 @@ impl InputField {
     wrap_content_fun!(move_to_line_end);
     wrap_content_fun!(move_word_left);
     wrap_content_fun!(move_word_right);
+    wrap_content_fun!(del_char_below);
+    wrap_content_fun!(del_selection);
     wrap_content_fun!(del_char_left);
     wrap_content_fun!(del_word_left);
     wrap_content_fun!(del_word_right);
@@ -251,7 +273,8 @@ impl InputField {
             KeyModifiers as Mod,
         };
         match (key.code, key.modifiers) {
-            (code, Mod::NONE) | (code, Mod::SHIFT) => self.apply_keycode_event(code),
+            (code, Mod::NONE) => self.apply_keycode_event(code, false),
+            (code, Mod::SHIFT) => self.apply_keycode_event(code, true),
             _ => false,
         }
     }
@@ -261,27 +284,49 @@ impl InputField {
     /// You don't usually call this function but the more
     /// general `apply_event`. This one is useful when you
     /// manage events mostly yourselves.
-    pub fn apply_keycode_event(&mut self, code: KeyCode) -> bool {
-        if !self.focused {
-            return false;
-        }
-        match code {
-            KeyCode::Home => self.move_to_line_start(),
-            KeyCode::End => self.move_to_line_end(),
-            KeyCode::Char(c) => self.put_char(c),
-            KeyCode::Up => self.move_up(),
-            KeyCode::Down => self.move_down(),
-            KeyCode::Left => self.move_left(),
-            KeyCode::PageUp => self.page_up(),
-            KeyCode::PageDown => self.page_down(),
-            KeyCode::Right => self.move_right(),
-            KeyCode::Backspace => self.del_char_left(),
-            KeyCode::Delete => self.del_char_below(),
-            _ => false,
+    pub fn apply_keycode_event(
+        &mut self,
+        code: KeyCode,
+        shift: bool,
+    ) -> bool {
+        if code == KeyCode::Backspace {
+            if self.content.has_wide_selection() {
+                self.content.del_selection();
+                self.content.unselect();
+                true
+            } else {
+                self.content.del_char_left()
+            }
+        } else if code == KeyCode::Delete {
+            if self.content.has_wide_selection() {
+                self.content.del_selection();
+                self.content.unselect();
+                true
+            } else {
+                self.content.del_char_below()
+            }
+        } else {
+            if shift {
+                self.content.make_selection();
+            } else {
+                self.content.unselect();
+            }
+            match code {
+                KeyCode::Home => self.move_to_line_start(),
+                KeyCode::End => self.move_to_line_end(),
+                KeyCode::Char(c) => self.put_char(c),
+                KeyCode::Up => self.move_up(),
+                KeyCode::Down => self.move_down(),
+                KeyCode::Left => self.move_left(),
+                KeyCode::PageUp => self.page_up(),
+                KeyCode::PageDown => self.page_down(),
+                KeyCode::Right => self.move_right(),
+                _ => false,
+            }
         }
     }
 
-    /// Apply a click event
+    /// Apply a simple left click event
     pub fn apply_click_event(&mut self, x: u16, y: u16) -> bool {
         if self.area.contains(x, y) {
             if self.focused {
@@ -298,18 +343,60 @@ impl InputField {
         }
     }
 
-    /// apply the passed event to change the state (content, cursor)
+    /// Apply a mouse event
+    pub fn apply_mouse_event(
+        &mut self,
+        mouse_event: MouseEvent,
+        _is_double_click: bool,
+    ) -> bool {
+        let MouseEvent { kind, column, row, modifiers } = mouse_event;
+        if self.area.contains(column, row) {
+            if self.focused {
+                let x = (column - self.area.left) as usize + self.scroll.x;
+                let y = (row - self.area.top) as usize + self.scroll.y;
+                match kind {
+                    MouseEventKind::Down(MouseButton::Left) => {
+                        // FIXME Crossterm doesn't seem to send shift modifier with up or down
+                        // mouse events
+                        if modifiers == KeyModifiers::SHIFT {
+                            self.content.make_selection();
+                        } else {
+                            self.content.unselect();
+                        }
+                        self.content.set_cursor_pos(Pos { x, y });
+                    }
+                    MouseEventKind::Drag(MouseButton::Left) => {
+                        self.content.make_selection();
+                        self.content.set_cursor_pos(Pos { x, y });
+                    }
+                    // TODO mouse wheel
+                    _ => {}
+                }
+            } else if matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
+                self.focused = true;
+            }
+            true
+        } else {
+            false
+        }
+    }
+
+    /// apply the termimad event to change the state (content, cursor)
     ///
     /// Return true when the event was used.
     pub fn apply_event(&mut self, event: &Event) -> bool {
         match event {
-            Event::Click(x, y, ..) => {
+            Event::Click(x, y, _) => {
                 self.apply_click_event(*x, *y)
             }
-            Event::Key(KeyEvent{code, modifiers})
-                if (modifiers.is_empty()||*modifiers==KeyModifiers::SHIFT)
-            => {
-                self.apply_keycode_event(*code)
+            Event::Key(KeyEvent{code, modifiers}) if self.focused => {
+                if modifiers.is_empty() {
+                    self.apply_keycode_event(*code, false)
+                } else if *modifiers == KeyModifiers::SHIFT {
+                    self.apply_keycode_event(*code, true)
+                } else {
+                    false
+                }
             }
             _ => false,
         }
@@ -420,6 +507,8 @@ impl InputField {
             .enumerate()
             .skip(self.scroll.y);
 
+        let selection = self.content.selection();
+
         for j in 0..self.area.height {
             queue!(w, cursor::MoveTo(self.area.left, j + self.area.top))?;
             if let Some((y, chars)) = numbered_lines.next() {
@@ -451,7 +540,7 @@ impl InputField {
                         } else {
                             chars[idx]
                         };
-                        if self.focused && pos.x == idx && pos.y == y {
+                        if self.focused && selection.contains(idx, y) {
                             self.cursor_style.queue(w, c)?;
                         } else {
                             normal_style.queue(w, c)?;

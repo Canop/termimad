@@ -1,7 +1,8 @@
 use {
+    crate::clipboard,
     anyhow::{self},
     crossterm::{
-        event::{KeyCode, KeyEvent, KeyModifiers},
+        event::{KeyCode, KeyEvent, KeyModifiers, MouseEvent},
         queue,
         terminal::{
             Clear,
@@ -14,8 +15,11 @@ use {
 
 pub const ESC: KeyEvent = KeyEvent { code: KeyCode::Esc, modifiers: KeyModifiers::NONE };
 pub const TAB: KeyEvent = KeyEvent { code: KeyCode::Tab, modifiers: KeyModifiers::NONE };
+pub const CONTROL_C: KeyEvent = KeyEvent { code: KeyCode::Char('c'), modifiers: KeyModifiers::CONTROL };
+pub const CONTROL_V: KeyEvent = KeyEvent { code: KeyCode::Char('v'), modifiers: KeyModifiers::CONTROL };
+pub const CONTROL_X: KeyEvent = KeyEvent { code: KeyCode::Char('x'), modifiers: KeyModifiers::CONTROL };
 
-/// The view covering the whole termina, with its widgets and current state
+/// The view covering the whole terminal, with its widgets and current state
 pub struct View {
     area: Area,
     drawable: bool, // is the area big enough
@@ -110,7 +114,7 @@ impl View {
     pub fn resize(&mut self, area: Area) {
         self.drawable = area.width >= 20 && area.height >= 15;
         if self.drawable {
-            let h = 2 + (area.height - 15) / 2;
+            let h = 4 + (area.height - 15) / 2;
             let intro_area = Area::new(1, 1, area.width - 3, h);
             self.introduction.resize(&intro_area);
             let y = intro_area.bottom() + 2;
@@ -137,17 +141,27 @@ impl View {
             self.focus_next();
             true
         } else if let Some(input) = self.focused_input() {
-            input.apply_key_event(key)
+            input.apply_key_event(key) || {
+                if key == CONTROL_C {
+                    clipboard::copy_from_input(input)
+                } else if key == CONTROL_X {
+                    clipboard::cut_from_input(input)
+                } else if key == CONTROL_V {
+                    clipboard::paste_into_input(input)
+                } else {
+                    false
+                }
+            }
         } else {
             self.introduction.apply_key_event(key)
         }
     }
-    pub fn apply_click_event(&mut self, x: u16, y: u16) {
-        if self.login_input.apply_click_event(x, y) {
+    pub fn apply_mouse_event(&mut self, mouse_event: MouseEvent) {
+        if self.login_input.apply_mouse_event(mouse_event, false) {
             self.set_focus(Focus::Login);
-        } else if self.password_input.apply_click_event(x, y) {
+        } else if self.password_input.apply_mouse_event(mouse_event, false) {
             self.set_focus(Focus::Password);
-        } else if self.comments_input.apply_click_event(x, y) {
+        } else if self.comments_input.apply_mouse_event(mouse_event, false) {
             self.set_focus(Focus::Comments);
         } else {
             self.set_focus(Focus::Introduction);
@@ -180,9 +194,9 @@ static MD_INTRO: &str = r#"# Scrollable Texts and Inputs
 
 This example demonstrates scrollable texts, simple and multiline inputs, and automatically adapting to terminal resizing.
 
+- use **ctrl**-**Q** to quit the application
 - use the mouse or the **tab** key to give the focus to a widget
 - use the **page-up** and **page-down** keys to scroll multi-line inputs when necessary
-- use **ctrl**-**C** to quit the application
 "#;
 
 static MD_COMMENTS_LABEL: &str = r#"## Comments:

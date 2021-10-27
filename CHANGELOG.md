@@ -1,3 +1,6 @@
+### next
+- InputField: selection & selection based operation (cut, copy, paste)
+
 <a name="v0.16.4"></a>
 ### v0.16.4 - 2021-10-22
 - Remove the need to explicitly import minimad for crates using mad_print_inline!

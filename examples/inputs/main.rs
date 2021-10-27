@@ -1,14 +1,3 @@
-//! This example demonstrates
-//!  - a responsive layout
-//!  - a scrollable markdown text
-//!  - a single line input field
-//!  - a password input
-//!  - a textarea
-//!  - handling key and mouse events
-//!  - managing the focus of widgets
-//!  - managing a terminal properly configured in "alternate" mode
-//!  - logging events in a file (useful for event handling debugging)
-//!
 //! run this example with
 //!   cargo run --example inputs
 //!
@@ -18,6 +7,7 @@
 #[macro_use]
 extern crate cli_log;
 
+mod clipboard;
 mod view;
 
 use {
@@ -29,7 +19,7 @@ use {
             DisableMouseCapture, EnableMouseCapture,
             Event,
             KeyCode, KeyEvent, KeyModifiers,
-            MouseEvent, MouseEventKind, MouseButton,
+            MouseEvent, MouseEventKind,
         },
         terminal::{
             self,
@@ -45,7 +35,6 @@ use {
 // pub const CONTROL_C: KeyEvent = KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL);
 // pub const CONTROL_Q: KeyEvent = KeyEvent::new(KeyCode::Char('q'), KeyModifiers::CONTROL);
 
-pub const CONTROL_C: KeyEvent = KeyEvent { code: KeyCode::Char('c'), modifiers: KeyModifiers::CONTROL };
 pub const CONTROL_Q: KeyEvent = KeyEvent { code: KeyCode::Char('q'), modifiers: KeyModifiers::CONTROL };
 
 fn main() -> anyhow::Result<()> {
@@ -73,26 +62,30 @@ fn run_in_alternate<W: Write>(w: &mut W) -> anyhow::Result<()> {
     let mut view = view::View::new(Area::full_screen());
     view.queue_on(w)?;
     w.flush()?;
+    // the clipboard backend depends on the system and varies in
+    // capacity
+    info!("clipboard backend type: {}", terminal_clipboard::get_type());
     loop {
         // this simple application uses crossterm event source. If you need to deal
         // with your own events or do tasks in background, you might prefer to use
         // the termimad EventSource instead (see broot or bacon as examples).
-        let redraw = match event::read() {
+        let event = event::read();
+        //debug!("event: {:?}", event);
+        let redraw = match event {
             Ok(Event::Key(key)) => {
                 debug!("key event: {:?}", key);
-                if key == CONTROL_Q || key == CONTROL_C {
+                if key == CONTROL_Q {
                     break; // quit
                 }
                 view.apply_key_event(key);
                 true
             }
-            Ok(Event::Mouse(MouseEvent {
-                kind: MouseEventKind::Down(MouseButton::Left),
-                column,
-                row,
-                modifiers: KeyModifiers::NONE,
-            })) => {
-                view.apply_click_event(column, row);
+            Ok(Event::Mouse(MouseEvent { kind: MouseEventKind::Moved, .. })) => {
+                // we don't want to refresh the terminal on each mouse move
+                false
+            }
+            Ok(Event::Mouse(mouse_event)) => {
+                view.apply_mouse_event(mouse_event);
                 true
             }
             Ok(Event::Resize(width, height)) => {

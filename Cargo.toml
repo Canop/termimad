@@ -16,10 +16,12 @@ crossterm = "0.21.0"
 crossbeam = "0.8"
 thiserror = "1.0"
 unicode-width = "0.1.8"
+# cli-log = "2.0"
 
 [dev-dependencies]
 anyhow = "1.0"
 cli-log = "2.0"
+terminal-clipboard = "0.3"
 
 [features]
 special-renders = []
@@ -28,3 +30,4 @@ default = ["special-renders"]
 [patch.crates-io]
 # minimad = { path = "../minimad" }
 # crossterm = { path = "../crossterm" }
+# terminal-clipboard = { path = "../terminal-clipboard" }
