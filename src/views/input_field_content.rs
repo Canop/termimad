@@ -178,7 +178,7 @@ impl InputFieldContent {
             _ => false,
         }
     }
-    pub fn has_selection(&self) -> bool {
+    pub const fn has_selection(&self) -> bool {
         self.selection_tail.is_some()
     }
     pub fn has_wide_selection(&self) -> bool {
@@ -283,6 +283,26 @@ impl InputFieldContent {
             false
         }
     }
+
+    /// make the word around the current pos, if any, the current selection
+    pub fn select_word_around(&mut self) -> bool {
+        let chars = &self.lines[self.pos.y].chars;
+        let mut start = self.pos.x;
+        if start >= chars.len() || !is_word_char(chars[start]) {
+            return false;
+        }
+        while start > 0 && is_word_char(chars[start-1]) {
+            start -= 1;
+        }
+        let mut end = self.pos.x;
+        while end + 1 < chars.len() && is_word_char(chars[end+1]) {
+            end += 1;
+        }
+        self.selection_tail = Some(Pos::new(start, self.pos.y));
+        self.pos.x = end;
+        true
+    }
+
     /// Remove the char at cursor position, if any.
     ///
     /// Cursor position is unchanged
@@ -337,6 +357,7 @@ impl InputFieldContent {
             }
         }
         self.set_cursor_pos(min);
+        self.selection_tail = None;
         true
     }
     /// Swap two lines. Return false if one of the indices is out of
@@ -662,3 +683,7 @@ mod input_content_edit_monoline_tests {
     }
 }
 
+
+fn is_word_char(c: char) -> bool {
+    c.is_alphanumeric() || c == '_'
+}

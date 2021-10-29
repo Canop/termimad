@@ -1,5 +1,11 @@
-### next
+*If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
+
+<a name="v0.17.0"></a>
+### v0.17.0 - 2021-10-29
+Several event related API have changed in a breaking way in this release
+- EventSource now emits instances of TimedEvent, which wrap crossterm events
 - InputField: selection & selection based operation (cut, copy, paste)
+- InputField: double click selects the word around
 
 <a name="v0.16.4"></a>
 ### v0.16.4 - 2021-10-22

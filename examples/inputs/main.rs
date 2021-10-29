@@ -15,11 +15,8 @@ use {
     crossterm::{
         cursor,
         event::{
-            self,
             DisableMouseCapture, EnableMouseCapture,
-            Event,
             KeyCode, KeyEvent, KeyModifiers,
-            MouseEvent, MouseEventKind,
         },
         terminal::{
             self,
@@ -62,43 +59,20 @@ fn run_in_alternate<W: Write>(w: &mut W) -> anyhow::Result<()> {
     let mut view = view::View::new(Area::full_screen());
     view.queue_on(w)?;
     w.flush()?;
-    // the clipboard backend depends on the system and varies in
-    // capacity
     info!("clipboard backend type: {}", terminal_clipboard::get_type());
-    loop {
-        // this simple application uses crossterm event source. If you need to deal
-        // with your own events or do tasks in background, you might prefer to use
-        // the termimad EventSource instead (see broot or bacon as examples).
-        let event = event::read();
-        //debug!("event: {:?}", event);
-        let redraw = match event {
-            Ok(Event::Key(key)) => {
-                debug!("key event: {:?}", key);
-                if key == CONTROL_Q {
-                    break; // quit
-                }
-                view.apply_key_event(key);
-                true
-            }
-            Ok(Event::Mouse(MouseEvent { kind: MouseEventKind::Moved, .. })) => {
-                // we don't want to refresh the terminal on each mouse move
-                false
-            }
-            Ok(Event::Mouse(mouse_event)) => {
-                view.apply_mouse_event(mouse_event);
-                true
-            }
-            Ok(Event::Resize(width, height)) => {
-                view.resize(Area::new(0, 0, width, height));
-                true
-            }
-            _ => {
-                false
-            }
-        };
-        if redraw {
+    let event_source = EventSource::new()?;
+    for timed_event in event_source.receiver() {
+        let mut quit = false;
+        debug!("event: {:?}", timed_event);
+        if timed_event.is_key(CONTROL_Q) {
+            quit = true;
+        } else if view.apply_timed_event(timed_event) {
             view.queue_on(w)?;
             w.flush()?;
+        }
+        event_source.unblock(quit); // Don't forget to unblock the event source
+        if quit {
+            break;
         }
     }
     Ok(())

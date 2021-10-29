@@ -1,9 +1,9 @@
 mod escape_sequence;
-mod event;
 mod event_source;
+mod timed_event;
 
 pub use {
     escape_sequence::EscapeSequence,
-    event::Event,
-    event_source::EventSource,
+    event_source::{EventSource, EventSourceOptions},
+    timed_event::TimedEvent,
 };
