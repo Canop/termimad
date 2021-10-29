@@ -24,13 +24,13 @@ pub struct Range {
 }
 
 impl Pos {
-    pub fn new(x: usize, y: usize) -> Pos {
+    pub const fn new(x: usize, y: usize) -> Pos {
         Self { x, y }
     }
 }
 
 impl Range {
-    pub fn contains(&self, x: usize, y: usize) -> bool {
+    pub const fn contains(&self, x: usize, y: usize) -> bool {
         if self.min.y == self.max.y {
             y == self.min.y && self.min.x <= x && x <= self.max.x
         } else if y < self.min.y {
@@ -45,7 +45,7 @@ impl Range {
             true
         }
     }
-    pub fn contains_pos(&self, pos: Pos) -> bool {
+    pub const fn contains_pos(&self, pos: Pos) -> bool {
         self.contains(pos.x, pos.y)
     }
 }

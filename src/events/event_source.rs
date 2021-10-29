@@ -1,6 +1,6 @@
 use {
     super::{
-        Event,
+        TimedEvent,
         EscapeSequence,
     },
     crate::{
@@ -10,9 +10,13 @@ use {
     crossterm::{
         self,
         event::{
+            Event,
             KeyCode,
             KeyEvent,
             KeyModifiers,
+            MouseButton,
+            MouseEvent,
+            MouseEventKind,
         },
         terminal,
     },
@@ -35,6 +39,13 @@ struct TimedClick {
     y: u16,
 }
 
+pub struct EventSourceOptions {
+    /// whether to filter out simple mouse moves (default true)
+    pub discard_mouse_move: bool,
+    /// whether to filter out mouse drag (default false)
+    pub discard_mouse_drag: bool,
+}
+
 /// a thread backed event listener emmiting events on a channel.
 ///
 /// Additionnally to emmitting events, this source updates a
@@ -45,24 +56,40 @@ struct TimedClick {
 /// The event source isn't tick based. It makes it possible to
 /// built TUI with no CPU consumption while idle.
 pub struct EventSource {
-    rx_events: Receiver<Event>,
+    rx_events: Receiver<TimedEvent>,
     rx_seqs: Receiver<EscapeSequence>,
     tx_quit: Sender<bool>,
     event_count: Arc<AtomicUsize>,
 }
 
+
+impl Default for EventSourceOptions {
+    fn default() -> Self {
+        Self {
+            discard_mouse_move: true,
+            discard_mouse_drag: false,
+        }
+    }
+}
+
 impl EventSource {
+    /// create a new source with default options
+    ///
+    /// If desired, mouse support must be enabled and disabled in crossterm.
+    pub fn new() -> Result<Self, Error> {
+        Self::with_options(EventSourceOptions::default())
+    }
+
     /// create a new source
     ///
     /// If desired, mouse support must be enabled and disabled in crossterm.
-    pub fn new() -> Result<EventSource, Error> {
+    pub fn with_options(options: EventSourceOptions) -> Result<Self, Error> {
         let (tx_events, rx_events) = unbounded();
         let (tx_seqs, rx_seqs) = bounded(ESCAPE_SEQUENCE_CHANNEL_SIZE);
         let (tx_quit, rx_quit) = unbounded();
         let event_count = Arc::new(AtomicUsize::new(0));
         let internal_event_count = Arc::clone(&event_count);
         terminal::enable_raw_mode()?;
-        let mut last_click: Option<TimedClick> = None;
         let seq_start = KeyEvent {
             code: KeyCode::Char('_'),
             modifiers: KeyModifiers::ALT,
@@ -72,6 +99,7 @@ impl EventSource {
             modifiers: KeyModifiers::ALT,
         };
         thread::spawn(move || {
+            let mut last_up: Option<TimedClick> = None;
             let mut current_escape_sequence: Option<EscapeSequence> = None;
             // return true when we must close the source
             let send_and_wait = |event| {
@@ -112,7 +140,7 @@ impl EventSource {
                     // we send all previous events independently before sending this one
                     let seq = current_escape_sequence.take().unwrap();
                     for key in seq.keys {
-                        if send_and_wait(Event::Key(key)) {
+                        if send_and_wait(TimedEvent::new(Event::Key(key))) {
                             return;
                         }
                     }
@@ -124,24 +152,40 @@ impl EventSource {
                         continue;
                     }
                 }
-                if let Some(mut event) = Event::from_crossterm_event(ct_event) {
-                    // save the event, and maybe change it
-                    // (may change a click into a double-click)
-                    if let Event::Click(x, y, ..) = event {
-                        if let Some(TimedClick { time, x: last_x, y: last_y }) = last_click {
+                if let Event::Mouse(mouse_event) = ct_event {
+                    if options.discard_mouse_move && mouse_event.kind == MouseEventKind::Moved {
+                        continue;
+                    }
+                    if options.discard_mouse_drag && matches!(mouse_event.kind, MouseEventKind::Drag(_)) {
+                        continue;
+                    }
+                }
+                let mut timed_event = TimedEvent::new(ct_event);
+                if let Event::Mouse(MouseEvent { kind, column, row, .. }) = timed_event.event {
+                    if matches!(
+                        kind,
+                        MouseEventKind::Down(MouseButton::Left) | MouseEventKind::Up(MouseButton::Left)
+                    ) {
+                        if let Some(TimedClick { time, x, y }) = last_up {
                             if
-                                last_x == x && last_y == y
-                                && time.elapsed() < DOUBLE_CLICK_MAX_DURATION
+                                column == x && row == y
+                                && timed_event.time - time < DOUBLE_CLICK_MAX_DURATION
                             {
-                                event = Event::DoubleClick(x, y);
+                                timed_event.double_click = true;
                             }
                         }
-                        last_click = Some(TimedClick { time: Instant::now(), x, y });
+                        if kind == MouseEventKind::Up(MouseButton::Left) {
+                            last_up = Some(TimedClick {
+                                time: timed_event.time,
+                                x: column,
+                                y: row,
+                            });
+                        }
                     }
-                    // we send the event to the receiver in the main event loop
-                    if send_and_wait(event) {
-                        return;
-                    }
+                }
+                // we send the event to the receiver in the main event loop
+                if send_and_wait(timed_event) {
+                    return;
                 }
             }
         });
@@ -168,7 +212,7 @@ impl EventSource {
     }
 
     /// return a new receiver for the channel emmiting events
-    pub fn receiver(&self) -> Receiver<Event> {
+    pub fn receiver(&self) -> Receiver<TimedEvent> {
         self.rx_events.clone()
     }
 

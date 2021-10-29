@@ -2,7 +2,7 @@ use {
     crate::clipboard,
     anyhow::{self},
     crossterm::{
-        event::{KeyCode, KeyEvent, KeyModifiers, MouseEvent},
+        event::{Event, KeyCode, KeyEvent, KeyModifiers, MouseEvent},
         queue,
         terminal::{
             Clear,
@@ -111,7 +111,10 @@ impl View {
     pub fn focus_next(&mut self) {
         self.set_focus(self.focus.next());
     }
-    pub fn resize(&mut self, area: Area) {
+    pub fn resize(&mut self, area: Area) -> bool {
+        if self.area == area {
+            return false;
+        }
         self.drawable = area.width >= 20 && area.height >= 15;
         if self.drawable {
             let h = 4 + (area.height - 15) / 2;
@@ -132,6 +135,7 @@ impl View {
             );
         }
         self.area = area;
+        true
     }
     pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
         if key == ESC {
@@ -156,15 +160,23 @@ impl View {
             self.introduction.apply_key_event(key)
         }
     }
-    pub fn apply_mouse_event(&mut self, mouse_event: MouseEvent) {
-        if self.login_input.apply_mouse_event(mouse_event, false) {
+    pub fn apply_mouse_event(&mut self, mouse_event: MouseEvent, double_click: bool) -> bool {
+        if self.login_input.apply_mouse_event(mouse_event, double_click) {
             self.set_focus(Focus::Login);
-        } else if self.password_input.apply_mouse_event(mouse_event, false) {
+        } else if self.password_input.apply_mouse_event(mouse_event, double_click) {
             self.set_focus(Focus::Password);
-        } else if self.comments_input.apply_mouse_event(mouse_event, false) {
+        } else if self.comments_input.apply_mouse_event(mouse_event, double_click) {
             self.set_focus(Focus::Comments);
         } else {
             self.set_focus(Focus::Introduction);
+        }
+        true
+    }
+    pub fn apply_timed_event(&mut self, timed_event: TimedEvent) -> bool {
+        match timed_event.event {
+            Event::Key(key) => self.apply_key_event(key),
+            Event::Mouse(me) => self.apply_mouse_event(me, timed_event.double_click),
+            Event::Resize(w, h) => self.resize(Area::new(0, 0, w, h)),
         }
     }
     /// draw the view (not flushing)

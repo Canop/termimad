@@ -134,7 +134,7 @@ pub use {
     composite::FmtComposite,
     compound_style::CompoundStyle,
     errors::Error,
-    events::{Event, EventSource},
+    events::{TimedEvent, EventSource, EventSourceOptions},
     fit::*,
     inline::FmtInline,
     line::FmtLine,

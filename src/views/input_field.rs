@@ -4,6 +4,7 @@ use {
     crossterm::{
         cursor,
         event::{
+            Event,
             KeyCode,
             KeyEvent,
             KeyModifiers,
@@ -124,7 +125,7 @@ impl InputField {
         }
     }
     pub fn set_area(&mut self, area: Area) {
-        if &self.area != &area {
+        if self.area != area {
             self.area = area;
             self.fix_scroll();
         }
@@ -239,6 +240,7 @@ impl InputField {
     wrap_content_fun!(del_word_right);
     wrap_content_fun!(move_current_line_up);
     wrap_content_fun!(move_current_line_down);
+    wrap_content_fun!(select_word_around);
 
     pub fn page_up(&mut self) -> bool {
         if self.content.move_lines_up(self.area.height as usize) {
@@ -297,7 +299,6 @@ impl InputField {
         if code == KeyCode::Backspace {
             if self.content.has_wide_selection() {
                 self.content.del_selection();
-                self.content.unselect();
                 true
             } else {
                 self.content.del_char_left()
@@ -305,7 +306,6 @@ impl InputField {
         } else if code == KeyCode::Delete {
             if self.content.has_wide_selection() {
                 self.content.del_selection();
-                self.content.unselect();
                 true
             } else {
                 self.content.del_char_below()
@@ -352,13 +352,15 @@ impl InputField {
     pub fn apply_mouse_event(
         &mut self,
         mouse_event: MouseEvent,
-        _is_double_click: bool,
+        is_double_click: bool,
     ) -> bool {
         let MouseEvent { kind, column, row, modifiers } = mouse_event;
         if self.area.contains(column, row) {
             if self.focused {
                 let x = (column - self.area.left) as usize + self.scroll.x;
                 let y = (row - self.area.top) as usize + self.scroll.y;
+                // We handle the selection click on down, so that it's set at the
+                // start of drag.
                 match kind {
                     MouseEventKind::Down(MouseButton::Left) => {
                         // FIXME Crossterm doesn't seem to send shift modifier with up or down
@@ -369,6 +371,10 @@ impl InputField {
                             self.content.unselect();
                         }
                         self.content.set_cursor_pos(Pos { x, y });
+                    }
+                    MouseEventKind::Up(MouseButton::Left) if is_double_click => {
+                        self.content.set_cursor_pos(Pos { x, y });
+                        self.content.select_word_around();
                     }
                     MouseEventKind::Drag(MouseButton::Left) => {
                         self.content.make_selection();
@@ -391,25 +397,32 @@ impl InputField {
         }
     }
 
-    /// apply the termimad event to change the state (content, cursor)
+    /// apply the event to change the state (content, cursor)
     ///
     /// Return true when the event was used.
-    pub fn apply_event(&mut self, event: &Event) -> bool {
+    pub fn apply_event(&mut self, event: Event, is_double_click: bool) -> bool {
         match event {
-            Event::Click(x, y, _) => {
-                self.apply_click_event(*x, *y)
+            Event::Mouse(mouse_event) => {
+                self.apply_mouse_event(mouse_event, is_double_click)
             }
             Event::Key(KeyEvent{code, modifiers}) if self.focused => {
                 if modifiers.is_empty() {
-                    self.apply_keycode_event(*code, false)
-                } else if *modifiers == KeyModifiers::SHIFT {
-                    self.apply_keycode_event(*code, true)
+                    self.apply_keycode_event(code, false)
+                } else if modifiers == KeyModifiers::SHIFT {
+                    self.apply_keycode_event(code, true)
                 } else {
                     false
                 }
             }
             _ => false,
         }
+    }
+
+    /// apply the event to change the state (content, cursor, focus)
+    ///
+    /// Return true when the event was used.
+    pub fn apply_timed_event(&mut self, event: TimedEvent) -> bool {
+        self.apply_event(event.event, event.double_click)
     }
 
     pub fn scroll_up(&mut self) -> bool {
