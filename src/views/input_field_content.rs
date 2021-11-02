@@ -318,6 +318,10 @@ impl InputFieldContent {
         } else if self.pos.x < line_len {
             self.lines[self.pos.y].chars.remove(self.pos.x);
             true
+        } else if self.lines.len() > self.pos.y + 1 {
+            let mut removed_line = self.lines.remove(self.pos.y + 1);
+            self.lines[self.pos.y].chars.append(&mut removed_line.chars);
+            true
         } else {
             false
         }
