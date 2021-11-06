@@ -1,6 +1,7 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-### next
+<a name="v0.17.1"></a>
+### v0.17.1 - 2021-11-06
 - InputField: fix suppr key at end of line not joining lines
 
 <a name="v0.17.0"></a>
