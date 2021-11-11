@@ -85,6 +85,9 @@ impl StyledChar {
         w.queue(PrintStyledContent(self.styled_char))?;
         Ok(())
     }
+    pub fn blend_with<C: Into<coolor::Color>>(&mut self, color: C, weight: f32) {
+        self.compound_style.blend_with(color, weight);
+    }
 }
 
 impl Display for StyledChar {

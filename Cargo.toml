@@ -1,6 +1,6 @@
 [package]
 name = "termimad"
-version = "0.17.1"
+version = "0.18.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 repository = "https://github.com/Canop/termimad"
 description = "Markdown Renderer for the Terminal"
@@ -10,8 +10,13 @@ license = "MIT"
 categories = ["command-line-interface", "text-processing", "template-engine"]
 readme = "README.md"
 
+[features]
+special-renders = []
+default = ["special-renders"]
+
 [dependencies]
 minimad = "0.9.0"
+coolor = { version="0.3", features=["crossterm"] }
 crossterm = "0.21.0"
 crossbeam = "0.8"
 thiserror = "1.0"
@@ -23,11 +28,8 @@ anyhow = "1.0"
 cli-log = "2.0"
 terminal-clipboard = "0.3"
 
-[features]
-special-renders = []
-default = ["special-renders"]
-
 [patch.crates-io]
-# minimad = { path = "../minimad" }
+# coolor = { path = "../coolor" }
 # crossterm = { path = "../crossterm" }
+# minimad = { path = "../minimad" }
 # terminal-clipboard = { path = "../terminal-clipboard" }

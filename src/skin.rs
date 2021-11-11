@@ -166,6 +166,28 @@ impl MadSkin {
         skin
     }
 
+    /// Blend the foreground and background colors (if any) into the given dest color,
+    /// with a weight in `[0..1]`.
+    ///
+    /// The `dest` color can be for example a [crossterm] color or a [coolor] one.
+    /// A `weight` of 0 lets the skin unchanged.
+    pub fn blend_with<C: Into<coolor::Color> + Copy>(&mut self, color: C, weight: f32) {
+        self.paragraph.compound_style.blend_with(color, weight);
+        self.bold.blend_with(color, weight);
+        self.italic.blend_with(color, weight);
+        self.inline_code.blend_with(color, weight);
+        self.code_block.blend_with(color, weight);
+        self.table.compound_style.blend_with(color, weight);
+        self.strikeout.blend_with(color, weight);
+        for h in &mut self.headers {
+            h.blend_with(color, weight);
+        }
+        self.bullet.blend_with(color, weight);
+        self.quote_mark.blend_with(color, weight);
+        self.horizontal_rule.blend_with(color, weight);
+        self.ellipsis.blend_with(color, weight);
+    }
+
     /// Change the foreground of most styles (the ones which commonly
     /// have a default or uniform baground, don't change code styles
     /// for example).

@@ -130,7 +130,7 @@ mod views;
 pub use {
     ask::*,
     area::{compute_scrollbar, terminal_size, Area},
-    color::{ansi, gray, rgb},
+    color::*,
     composite::FmtComposite,
     compound_style::CompoundStyle,
     errors::Error,

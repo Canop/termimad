@@ -51,4 +51,8 @@ impl LineStyle {
     pub fn repeat_space(&self, f: &mut fmt::Formatter<'_>, count: usize) -> fmt::Result {
         self.repeat_string(f, " ", count)
     }
+
+    pub fn blend_with<C: Into<coolor::Color>>(&mut self, color: C, weight: f32) {
+        self.compound_style.blend_with(color, weight);
+    }
 }

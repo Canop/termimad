@@ -1,5 +1,8 @@
 use {
-    crate::{errors::Result, styled_char::StyledChar},
+    crate::{
+        errors::Result,
+        styled_char::StyledChar,
+    },
     crossterm::{
         QueueableCommand,
         style::{
@@ -50,6 +53,23 @@ impl CompoundStyle {
                 background_color,
                 attributes,
             },
+        }
+    }
+
+    /// Blend the foreground and background colors (if any) into the given dest color,
+    /// with a weight in `[0..1]`.
+    ///
+    /// The `dest` color can be for example a [crossterm] color or a [coolor] one.
+    pub fn blend_with<C: Into<coolor::Color>>(&mut self, dest: C, weight: f32) {
+        debug_assert!(weight>=0.0 && weight<=1.0);
+        let dest: coolor::Color = dest.into();
+        if let Some(fg) = self.object_style.foreground_color.as_mut() {
+            let src: coolor::Color = (*fg).into();
+            *fg = coolor::Color::blend(src, 1.0 - weight, dest, weight).into();
+        }
+        if let Some(bg) = self.object_style.foreground_color.as_mut() {
+            let src: coolor::Color = (*bg).into();
+            *bg = coolor::Color::blend(src, 1.0 - weight, dest, weight).into();
         }
     }
 

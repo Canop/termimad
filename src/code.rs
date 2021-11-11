@@ -16,8 +16,8 @@ pub struct CodeBlock {
 impl CodeBlock {
     /// ensure all lines of the block have the same width
     pub fn justify(&self, lines: &mut Vec<FmtLine<'_>>) {
-        for idx in self.start..self.start + self.height {
-            if let FmtLine::Normal(ref mut fc) = lines[idx] {
+        for line in lines.iter_mut().skip(self.start).take(self.height) {
+            if let FmtLine::Normal(ref mut fc) = line {
                 fc.spacing = Some(Spacing {
                     width: self.width,
                     align: Alignment::Left,
