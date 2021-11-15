@@ -118,6 +118,7 @@ mod inline;
 mod line;
 mod line_style;
 mod macros;
+mod rect;
 mod scrollbar_style;
 mod skin;
 mod spacing;
@@ -140,6 +141,7 @@ pub use {
     line::FmtLine,
     line_style::LineStyle,
     minimad::Alignment,
+    rect::*,
     scrollbar_style::ScrollBarStyle,
     skin::MadSkin,
     spacing::Spacing,

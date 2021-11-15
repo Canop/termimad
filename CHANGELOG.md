@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.19.0"></a>
+### v0.19.0 - 2021-11-15
+- addition of the small `Rect` utility, which lets you draw rects
+
 <a name="v0.18.0"></a>
 ### v0.18.0 - 2021-11-11
 - MadSkin blend_with function allows blending a skin with a color, with a given weight, enabling for example fading a skin into its background, which can be useful for displaying behind a dialog
