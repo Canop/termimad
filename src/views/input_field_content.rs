@@ -202,6 +202,8 @@ impl InputFieldContent {
     pub fn push_char(&mut self, c: char) {
         if c == '\n' {
             self.lines.push(Line::default());
+        } else if c == '\r' {
+            // do nothing, it probably comes from a copy-paste on windows
         } else {
             self.last_line().chars.push(c);
         }
