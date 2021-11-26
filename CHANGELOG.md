@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.19.1"></a>
+### v0.19.1 - 2021-11-26
+- update Crossterm to 0.22.1 to fix some bugs
+
 <a name="v0.19.0"></a>
 ### v0.19.0 - 2021-11-15
 - addition of the small `Rect` utility, which lets you draw rects
