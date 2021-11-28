@@ -335,10 +335,13 @@ impl InputField {
     pub fn apply_click_event(&mut self, x: u16, y: u16) -> bool {
         if self.area.contains(x, y) {
             if self.focused {
-                self.content.set_cursor_pos(Pos {
-                    x: (x - self.area.left) as usize + self.scroll.x,
-                    y: (y - self.area.top) as usize + self.scroll.y,
-                });
+                let y = ((y - self.area.top) as usize + self.scroll.y)
+                    .min(self.content.line_count()-1);
+                let line = &self.content.lines()[y];
+                let x = line
+                    .col_to_char_idx((x - self.area.left) as usize + self.scroll.x)
+                    .unwrap_or(line.chars.len());
+                self.content.set_cursor_pos(Pos { x, y });
             } else {
                 self.focused = true;
             }
@@ -357,14 +360,18 @@ impl InputField {
         let MouseEvent { kind, column, row, modifiers } = mouse_event;
         if self.area.contains(column, row) {
             if self.focused {
-                let x = (column - self.area.left) as usize + self.scroll.x;
-                let y = (row - self.area.top) as usize + self.scroll.y;
+                let y = ((row - self.area.top) as usize + self.scroll.y)
+                    .min(self.content.line_count()-1);
+                let line = &self.content.lines()[y];
+                let x = line
+                    .col_to_char_idx((column - self.area.left) as usize + self.scroll.x)
+                    .unwrap_or(line.chars.len());
                 // We handle the selection click on down, so that it's set at the
                 // start of drag.
                 match kind {
                     MouseEventKind::Down(MouseButton::Left) => {
-                        // FIXME Crossterm doesn't seem to send shift modifier with up or down
-                        // mouse events
+                        // FIXME Crossterm doesn't seem to send shift modifier
+                        // with up or down mouse events
                         if modifiers == KeyModifiers::SHIFT {
                             self.content.make_selection();
                         } else {
@@ -477,8 +484,9 @@ impl InputField {
             }
         }
 
-        let line_len = self.content.current_line().chars.len();
-        if line_len < width {
+        let line = self.content.current_line();
+        let line_width = line.width();
+        if line_width < width {
             self.scroll.x = 0;
         } else {
             if self.focused {
@@ -493,19 +501,20 @@ impl InputField {
                         self.scroll.x = pos.x + 1 - width;
                     }
                 } else {
-                    if pos.x < self.scroll.x + 2 {
-                        if pos.x < 2 {
+                    let wpx = line.char_idx_to_col(pos.x);
+                    if wpx < self.scroll.x + 2 {
+                        if wpx < 2 {
                             self.scroll.x = 0;
                         } else {
-                            self.scroll.x = pos.x - 2;
+                            self.scroll.x = wpx - 2;
                         }
-                    } else if pos.x > self.scroll.x + width - 2 {
-                        self.scroll.x = pos.x + 2 - width;
+                    } else if wpx > self.scroll.x + width - 2 {
+                        self.scroll.x = wpx + 2 - width;
                     }
                 }
             }
-            if self.scroll.x + width > line_len + 1 {
-                self.scroll.x = line_len + 1 - width;
+            if self.scroll.x + width > line_width + 1 {
+                self.scroll.x = line_width + 1 - width;
             }
         }
     }
@@ -555,40 +564,54 @@ impl InputField {
         for j in 0..self.area.height {
             queue!(w, cursor::MoveTo(self.area.left, j + self.area.top))?;
             if let Some((y, chars)) = numbered_lines.next() {
-                // we don't show ellipsis if the width is below 4
-                let ellipsis_at_start = self.scroll.x > 0 && width > 4;
                 let cursor_at_end = self.focused && y == pos.y && pos.x == chars.len();
-                let ellipsis_at_end = !cursor_at_end
-                    && chars.len() > self.scroll.x + width
-                    && width > 4;
-                for i in 0..width {
-                    if i == 0 && ellipsis_at_start && chars.len() > 0 {
-                        normal_style.queue(w, fit::ELLIPSIS)?;
+                let mut width_to_skip = self.scroll.x;
+                let mut skipped_width = 0;
+                let mut displayed_width = 0;
+                let mut width = width; // available width for rendering chars
+                // we don't show ellipsis if the width is 4 or less
+                if width_to_skip > 0 && width > 4 {
+                    normal_style.queue(w, fit::ELLIPSIS)?;
+                    width_to_skip += 1;
+                    width -= 1;
+                }
+                for (i, c) in chars.iter().enumerate() {
+                    let c = if self.password_mode { '*' } else { *c };
+                    let char_width = InputFieldContent::char_width(c);
+                    if skipped_width < width_to_skip {
+                        // char hidden by scroll on x
+                        skipped_width += char_width;
                         continue;
                     }
-                    if i == width-1 && ellipsis_at_end {
-                        normal_style.queue(w, fit::ELLIPSIS)?;
-                        continue;
-                    }
-                    let idx = i + self.scroll.x;
-                    if idx >= chars.len() {
-                        if cursor_at_end && idx == chars.len() {
-                            self.cursor_style.queue(w, ' ')?;
-                        } else {
-                            normal_style.queue(w, ' ')?;
+                    if displayed_width + char_width >= width {
+                        let is_last = i == chars.len() - 1;
+                        if !is_last || displayed_width + char_width > width {
+                            if self.focused && selection.contains(i, y) {
+                                self.cursor_style.queue(w, fit::ELLIPSIS)?;
+                            } else {
+                                normal_style.queue(w, fit::ELLIPSIS)?;
+                            }
+                            displayed_width += 1;
+                            break;
                         }
+                    }
+                    if self.focused && selection.contains(i, y) {
+                        self.cursor_style.queue(w, c)?;
                     } else {
-                        let c = if self.password_mode {
-                            '*'
-                        } else {
-                            chars[idx]
-                        };
-                        if self.focused && selection.contains(idx, y) {
-                            self.cursor_style.queue(w, c)?;
-                        } else {
-                            normal_style.queue(w, c)?;
-                        }
+                        normal_style.queue(w, c)?;
                     }
+                    displayed_width += char_width;
+                    if displayed_width >= width {
+                        break;
+                    }
+                }
+                if displayed_width < width && cursor_at_end {
+                    self.cursor_style.queue(w, ' ')?;
+                    displayed_width += 1;
+                }
+                while displayed_width < width {
+                    normal_style.queue(w, ' ')?;
+                    displayed_width += 1;
                 }
             } else {
                 SPACE_FILLING.queue_styled(w, normal_style, width)?;

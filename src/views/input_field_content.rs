@@ -1,8 +1,10 @@
 use {
     super::{Pos, Range},
+    crate::TAB_REPLACEMENT,
     std::{
         fmt,
     },
+    unicode_width::UnicodeWidthChar,
 };
 
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
@@ -101,12 +103,37 @@ impl fmt::Display for InputFieldContent {
     }
 }
 
+impl Line {
+    pub fn col_to_char_idx(&self, col: usize) -> Option<usize> {
+        let mut sum_widths = 0;
+        for (idx, &c) in self.chars.iter().enumerate() {
+            if col <= sum_widths {
+                return Some(idx);
+            }
+            sum_widths += InputFieldContent::char_width(c);
+        }
+        None
+    }
+    pub fn char_idx_to_col(&self, idx: usize) -> usize {
+        self.chars[0..idx].iter()
+            .map(|&c| InputFieldContent::char_width(c))
+            .sum()
+    }
+    pub fn width(&self) -> usize {
+        self.chars.iter().map(|&c| InputFieldContent::char_width(c)).sum()
+    }
+}
+
 impl InputFieldContent {
     pub fn line_count(&self) -> usize {
         self.lines.len()
     }
     pub fn line(&self, y: usize) -> Option<&Line> {
         self.lines.get(y)
+    }
+    pub fn line_saturating(&self, y: usize) -> &Line {
+        self.lines.get(y)
+            .unwrap_or(&self.lines[self.lines.len()-1])
     }
     pub fn current_line(&self) -> &Line {
         &self.lines[self.pos.y]
@@ -204,6 +231,8 @@ impl InputFieldContent {
             self.lines.push(Line::default());
         } else if c == '\r' {
             // do nothing, it probably comes from a copy-paste on windows
+        } else if c == '\x08' { // backspace
+            // do nothing, we don't want those in our inputfield
         } else {
             self.last_line().chars.push(c);
         }
@@ -232,7 +261,7 @@ impl InputFieldContent {
     pub fn insert_char(&mut self, c: char) {
         if c == '\n' {
             self.insert_new_line();
-        } else if c == '\r' {
+        } else if c == '\r' || c == '\x08' {
             // skipping
         } else {
             self.lines[self.pos.y].chars.insert(self.pos.x, c);
@@ -415,11 +444,10 @@ impl InputFieldContent {
     /// Move the cursor up
     pub fn move_lines_up(&mut self, lines: usize) -> bool {
         if self.pos.y > 0 {
+            let cols = self.lines[self.pos.y].char_idx_to_col(self.pos.x);
             self.pos.y -= lines.min(self.pos.y);
-            let line_len = self.lines[self.pos.y].chars.len();
-            if self.pos.x > line_len {
-                self.pos.x = line_len;
-            }
+            let line = &self.lines[self.pos.y];
+            self.pos.x = line.col_to_char_idx(cols).unwrap_or(line.chars.len());
             true
         } else {
             false
@@ -432,11 +460,10 @@ impl InputFieldContent {
     /// Move the cursor down
     pub fn move_lines_down(&mut self, lines: usize) -> bool {
         if self.pos.y + 1 < self.lines.len() {
+            let cols = self.lines[self.pos.y].char_idx_to_col(self.pos.x);
             self.pos.y += lines.min(self.lines.len() - self.pos.y - 1);
-            let line_len = self.lines[self.pos.y].chars.len();
-            if self.pos.x > line_len {
-                self.pos.x = line_len;
-            }
+            let line = &self.lines[self.pos.y];
+            self.pos.x = line.col_to_char_idx(cols).unwrap_or(line.chars.len());
             true
         } else {
             false
@@ -561,6 +588,16 @@ impl InputFieldContent {
             true
         } else {
             false
+        }
+    }
+
+    /// Return the number of columns taken by a char. It's
+    /// assumed the char isn't '\r', `\n', or backspace
+    /// (none of those can be in the inputfield lines)
+    pub fn char_width(c: char) -> usize {
+        match c {
+            '\t' => TAB_REPLACEMENT.len(),
+            _ => UnicodeWidthChar::width(c).unwrap_or(0),
         }
     }
 

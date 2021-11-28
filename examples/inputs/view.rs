@@ -218,10 +218,11 @@ Use **enter** to add a newline
 
 static MD_COMMENTS_VALUE: &str = r#"This is the same kind of input than the previous ones
 but with a higher area and allowed to create newlines.
-
 Try editing it with long sentences
 or scroll it
 or resize the terminal.
+Wide characters are supported: ワイド文字に対応しています。
+You can also select ranges with the mouse of shift arrows, then cut, copy, paste.
 "#;
 
 
