@@ -1,6 +1,7 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-### next
+<a name="v0.19.2"></a>
+### v0.19.2 - 2021-11-28
 - better support of wide characters in InputField
 
 <a name="v0.19.1"></a>
