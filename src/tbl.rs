@@ -178,6 +178,9 @@ fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
 impl Table {
     pub fn fix_columns(&mut self, lines: &mut Vec<FmtLine<'_>>, width: usize) {
         let mut nbcols = self.nbcols;
+        if nbcols == 0 || width == 0 {
+            return;
+        }
         // let's first compute the initial widths of all columns
         // (not counting the widths of the borders)
         // We also add the missing cells

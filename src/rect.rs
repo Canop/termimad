@@ -12,6 +12,7 @@ use {
     std::io::Write,
 };
 
+#[derive(Debug)]
 pub struct RectBorderStyle {
     top_left: char,
     top_right: char,
@@ -72,6 +73,7 @@ pub static BORDER_STYLE_BLAND: &RectBorderStyle = &RectBorderStyle {
 ///
 /// There may be more types of border in the future, if somebody
 /// asks for them
+#[derive(Debug)]
 pub struct Rect<'s> {
     pub area: Area,
     pub colors: CompoundStyle,
@@ -107,8 +109,8 @@ impl<'s> Rect<'s> {
             }
         }
         cs.queue(w, bs.top_right)?;
+        y += 1;
         while y < area.top + area.height - 1 {
-            y += 1;
             w.queue(cursor::MoveTo(area.left, y))?;
             cs.queue(w, bs.left)?;
             if self.fill {
@@ -119,8 +121,9 @@ impl<'s> Rect<'s> {
                 w.queue(cursor::MoveTo(area.left + area.width - 1, y))?;
             }
             cs.queue(w, bs.right)?;
+            y += 1;
         }
-        w.queue(cursor::MoveTo(area.left, area.top + area.height))?;
+        w.queue(cursor::MoveTo(area.left, area.bottom() - 1))?;
         cs.queue(w, bs.bottom_left)?;
         if area.width > 2 {
             for _ in 0..area.width-2 {

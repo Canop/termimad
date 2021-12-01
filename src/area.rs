@@ -117,16 +117,18 @@ impl Area {
 ///
 /// If you represent some data in an Area, you should directly use the
 /// scrollbar method of Area.
-pub fn compute_scrollbar<U1, U2>(
+pub fn compute_scrollbar<U1, U2, U3>(
     scroll: U1,           // 0 for no scroll, positive if scrolled
     content_height: U1,   // number of lines of the content
-    available_height: U2, // for an area it's usually its height
+    available_height: U3, // for an area it's usually its height
     top: U2,              // distance from the top of the screen
 ) -> Option<(U2, U2)>
 where
     U1: Into<usize>, // the type in which you store your content length and content scroll
     U2: Into<usize> + TryFrom<usize>, // the drawing type (u16 for an area)
     <U2 as TryFrom<usize>>::Error: std::fmt::Debug,
+    U3: Into<usize> + TryFrom<usize>, // the type used for available height
+    <U3 as TryFrom<usize>>::Error: std::fmt::Debug,
 {
     let scroll: usize = scroll.into();
     let content_height: usize = content_height.into();
