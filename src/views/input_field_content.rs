@@ -302,9 +302,11 @@ impl InputFieldContent {
     pub fn del_char_left(&mut self) -> bool {
         if self.pos.x > 0 {
             self.pos.x -= 1;
-            self.lines[self.pos.y].chars.remove(self.pos.x);
+            if !self.lines[self.pos.y].chars.is_empty() {
+                self.lines[self.pos.y].chars.remove(self.pos.x);
+            }
             true
-        } else if self.pos.y > 0 {
+        } else if self.pos.y > 0 && self.lines.len() > 1 {
             let mut removed_line = self.lines.remove(self.pos.y);
             self.pos.y -= 1;
             self.pos.x = self.lines[self.pos.y].chars.len();
@@ -368,6 +370,9 @@ impl InputFieldContent {
                 if min.x == 0 {
                     // we remove the whole line
                     self.lines.drain(min.y..min.y+1);
+                    if self.lines.is_empty() {
+                        self.lines.push(Line::default());
+                    }
                 } else {
                     self.lines[min.y].chars.drain(min.x..);
                 }
@@ -389,6 +394,9 @@ impl InputFieldContent {
             };
             if max_y > min_y {
                 self.lines.drain(min_y..(max_y+1).min(self.lines.len()));
+                if self.lines.is_empty() {
+                    self.lines.push(Line::default());
+                }
             }
         }
         self.set_cursor_pos(min);

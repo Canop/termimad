@@ -37,14 +37,12 @@ impl Default for Fitter {
 #[derive(Debug, Clone, Copy)]
 struct CharInfo {
     byte_idx: usize,
-    char: char, // virer
     width: usize, // virer
 }
 fn str_char_infos(s: &str) -> Vec<CharInfo> {
     s.char_indices()
         .map(|(byte_idx, char)| CharInfo {
             byte_idx,
-            char,
             width: char.width().unwrap_or(0),
         })
         .collect()
@@ -54,7 +52,6 @@ fn str_char_infos(s: &str) -> Vec<CharInfo> {
 struct Zone {
     compound_idx: usize,
     byte_start_idx: usize,
-    byte_end_idx: usize,
     char_infos: Vec<CharInfo>,
     removable_width: usize, // cell width of string minus one character each end
 }
@@ -78,7 +75,6 @@ impl Zone {
                                 zones.push(Zone {
                                     compound_idx,
                                     byte_start_idx,
-                                    byte_end_idx: byte_idx,
                                     char_infos,
                                     removable_width,
                                 });
@@ -100,7 +96,6 @@ impl Zone {
                         zones.push(Zone {
                             compound_idx,
                             byte_start_idx,
-                            byte_end_idx,
                             char_infos,
                             removable_width,
                         });
@@ -132,7 +127,6 @@ impl Zone {
                     Some(Zone {
                         compound_idx,
                         byte_start_idx: 0,
-                        byte_end_idx: compound.src.len(),
                         char_infos,
                         removable_width,
                     })

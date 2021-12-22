@@ -274,6 +274,8 @@ dbg!(choice);
 
 * [lfs](https://github.com/Canop/lfs) is a linux utility displaying file systems. Termimad templates are used to show the data in tables
 
+* [SafeCloset](https://github.com/Canop/safecloset) is a secret safe. Its TUI uses Termimad a lot, especially inputs
+
 * [Rhit](https://github.com/Canop/rhit) is a nginx log analyzer. Termimad templates are used to show the data in tables
 
 * [bacon](https://github.com/Canop/bacon) is a background Rust compiler. It uses Termimad for display and event management

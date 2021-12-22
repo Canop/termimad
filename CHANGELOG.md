@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.19.4"></a>
+### v0.19.4 - 2021-12-22
+- fix a case of crash in input field
+
 <a name="v0.19.3"></a>
 ### v0.19.3 - 2021-12-01
 - fix dimension of drawn Rect
