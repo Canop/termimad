@@ -42,8 +42,10 @@ pub const fn composite_style_widths(composite_style: CompositeStyle) -> (usize, 
 pub fn hard_wrap_composite<'s, 'c>(
     src_composite: &'c FmtComposite<'s>,
     width: usize,
-) -> Vec<FmtComposite<'s>> {
-    assert!(width > 2);
+) -> Result<Vec<FmtComposite<'s>>, InsufficientWidthError> {
+    if width < 3 {
+        return Err(InsufficientWidthError{ available_width: width });
+    }
     debug_assert!(src_composite.visible_length > width); // or we shouldn't be called
     let mut composites: Vec<FmtComposite<'s>> = Vec::new();
     let (first_width, _other_widths) = composite_style_widths(src_composite.composite.style);
@@ -79,7 +81,7 @@ pub fn hard_wrap_composite<'s, 'c>(
         composites.push(dst_composite);
         new_dst_composite.add_compound(compounds[compounds.len()-1].clone());
         composites.push(new_dst_composite);
-        return composites;
+        return Ok(composites);
     }
 
     let mut tokens = tokenize(&src_composite.composite, width - first_width);
@@ -98,16 +100,18 @@ pub fn hard_wrap_composite<'s, 'c>(
         }
     }
     composites.push(dst_composite);
-    composites
+    Ok(composites)
 }
 
 /// hard_wrap all normal lines to ensure the text fits the width.
-/// width can't be less than 3.
 /// Doesn't touch table rows.
 /// Consumes the passed array and return a new one (may contain
-/// the original lines, avoiding cloning when possible)
-pub fn hard_wrap_lines<'s>(src_lines: Vec<FmtLine<'s>>, width: usize) -> Vec<FmtLine<'s>> {
-    assert!(width > 2);
+/// the original lines, avoiding cloning when possible).
+/// Return an error if the width is less than 3.
+pub fn hard_wrap_lines<'s>(
+    src_lines: Vec<FmtLine<'s>>,
+    width: usize,
+) -> Result<Vec<FmtLine<'s>>, InsufficientWidthError> {
     let mut src_lines = src_lines;
     let mut lines = Vec::new();
     for src_line in src_lines.drain(..) {
@@ -115,7 +119,7 @@ pub fn hard_wrap_lines<'s>(src_lines: Vec<FmtLine<'s>>, width: usize) -> Vec<Fmt
             if fc.visible_length <= width {
                 lines.push(FmtLine::Normal(fc));
             } else {
-                for fc in hard_wrap_composite(&fc, width) {
+                for fc in hard_wrap_composite(&fc, width)? {
                     lines.push(FmtLine::Normal(fc));
                 }
             }
@@ -123,7 +127,7 @@ pub fn hard_wrap_lines<'s>(src_lines: Vec<FmtLine<'s>>, width: usize) -> Vec<Fmt
             lines.push(src_line);
         }
     }
-    lines
+    Ok(lines)
 }
 
 /// Tests of hard wrapping
@@ -210,7 +214,7 @@ mod wrap_tests {
         let skin = crate::get_default_skin();
         let src = FmtComposite::from(Composite::from_inline("syntax coloring"), &skin);
         println!("input:\n{:?}", &src);
-        let wrapped = hard_wrap_composite(&src, 8);
+        let wrapped = hard_wrap_composite(&src, 8).unwrap();
         println!("wrapped: {:?}", &wrapped);
         assert_eq!(wrapped.len(), 2);
     }

@@ -4,7 +4,9 @@
 mod composite_fit;
 mod crop_writer;
 mod filling;
+mod fit_error;
 mod str_fit;
+mod tbl_fit;
 pub mod wrap;
 
 pub use {
@@ -12,7 +14,9 @@ pub use {
     composite_fit::*,
     crop_writer::*,
     filling::*,
+    fit_error::*,
     str_fit::*,
+    tbl_fit::*,
 };
 use {
     crossterm::{

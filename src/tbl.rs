@@ -5,10 +5,9 @@ use {
         line::FmtLine,
         skin::MadSkin,
         spacing::Spacing,
-        fit::wrap,
+        fit::{TblFit, wrap},
     },
     minimad::{Alignment, TableRow},
-    std::cmp,
 };
 
 
@@ -77,146 +76,44 @@ struct Table {
     nbcols: usize, // number of columns
 }
 
-// an internal struct used during col resizing
-#[derive(Debug)]
-struct Col {
-    idx: usize,       // index of the col
-    width: usize,     // col internal width
-    to_remove: usize, // what should be removed
-}
-
-/// Determine suitable columns width from the current one and the
-/// overall sum goal.
-/// No width can go below 3.
-/// This function should be called only when the goal is attainable
-/// and when there's reduction to be done.
-fn reduce_col_widths(widths: &mut Vec<usize>, goal: usize) {
-    let sum: usize = widths.iter().sum();
-    assert!(sum > goal);
-
-    //- simple case 1 : there's only one col
-    if widths.len()==1 {
-        widths[0] = goal;
-        return;
-    }
-
-    let mut cols: Vec<Col> = widths
-        .iter()
-        .enumerate()
-        .map(|(idx, width)| {
-            Col {
-                idx,
-                width: *width,
-                to_remove: 0,
-            }
-        })
-        .collect();
-    cols.sort_by_key(|c| cmp::Reverse(c.width));
-
-    let mut excess = sum - goal;
-
-    // we do a first reduction, if possible, on columns wider
-    // than 5
-    let excess_of_wide_cols: usize = widths.iter()
-        .filter(|&w| *w > 5)
-        .map(|w| w - 5)
-        .sum();
-    if excess_of_wide_cols + goal > sum {
-        for col in &mut cols {
-            if col.width > 5 {
-                let r = (sum-goal) * col.width / excess_of_wide_cols;
-                let r = r.min(excess).min(col.width-5);
-                excess -= r;
-                col.to_remove += r;
-            } else {
-                break; // due to sort
-            }
-        }
-    }
-
-    if excess > 0 {
-        for col in cols.iter_mut() {
-            let w = col.width - col.to_remove;
-            if w > 3 {
-                let dr = (w * excess / sum).min(w - 3);
-                col.to_remove += dr;
-                excess -= dr;
-            };
-        }
-    }
-
-    cols.sort_by(|a, b| b.to_remove.cmp(&a.to_remove));
-
-    //- general case, which could be improved
-    for col in &mut cols {
-        if col.to_remove < 3 {
-            excess += col.to_remove;
-            col.to_remove = 0;
-        }
-    }
-    while excess > 0 {
-        let mut nb_changed = 0;
-        for col in &mut cols {
-            if col.width - col.to_remove > 3 {
-                col.to_remove += 1;
-                excess -= 1;
-                nb_changed += 1;
-                if excess == 0 {
-                    break;
-                }
-            }
-        }
-        if nb_changed == 0 {
-            break;
-        }
-    }
-    for c in cols {
-        widths[c.idx] -= c.to_remove;
-    }
-}
-
 impl Table {
     pub fn fix_columns(&mut self, lines: &mut Vec<FmtLine<'_>>, width: usize) {
         let mut nbcols = self.nbcols;
         if nbcols == 0 || width == 0 {
             return;
         }
-        // let's first compute the initial widths of all columns
-        // (not counting the widths of the borders)
+        let mut cols_removed = false;
+
+        // we add the missing cells and also prepare the fitter
         // We also add the missing cells
-        let mut widths: Vec<usize> = vec![0; nbcols];
-        for ir in self.start..self.start + self.height {
-            let line = &mut lines[ir];
-            if let FmtLine::TableRow(FmtTableRow { cells }) = line {
-                for ic in 0..nbcols {
-                    if cells.len() <= ic {
-                        cells.push(FmtComposite::new());
+        let widths = match TblFit::new(nbcols, width) {
+            Ok(mut tbl_fit) => {
+                for line in lines.iter_mut().skip(self.start).take(self.height) {
+                    if let FmtLine::TableRow(FmtTableRow { cells }) = line {
+                        for ic in 0..nbcols {
+                            if cells.len() <= ic {
+                                cells.push(FmtComposite::new());
+                            } else {
+                                tbl_fit.see_cell(ic, cells[ic].visible_length);
+                            }
+                        }
+                    } else if let FmtLine::TableRule(rule) = line {
+                        rule.set_nbcols(nbcols);
                     } else {
-                        widths[ic] = widths[ic].max(cells[ic].visible_length);
+                        panic!("not a table row, should not happen");
                     }
                 }
-            } else if let FmtLine::TableRule(rule) = line {
-                rule.set_nbcols(nbcols);
-            } else {
-                println!("not a table row, should not happen"); // should we panic ?
+                tbl_fit.fit().col_widths
             }
-        }
-        // let's find what we must do
-        let widths_sum: usize = widths.iter().sum();
-        let mut cols_removed = false;
-        if widths_sum + nbcols < width {
-            // it fits, all is well
-        } else if nbcols * 4 < width {
-            // we can keep all columns but we'll have to wrap them
-            reduce_col_widths(&mut widths, width - nbcols - 1);
-        } else {
-            // crisis behavior: we remove the columns which don't fit
-            nbcols = (width - 1) / 4;
-            cols_removed = true;
-            for ic in 0..nbcols {
-                widths[ic] = 3;
+            Err(_) => {
+                // there's not enough width, we'll have to remove columns
+                nbcols = (width - 1) / 4;
+                cols_removed = true;
+                vec![3; nbcols]
             }
-        }
+        };
+
+        // At this step, all widths are at least 3 wide
 
         // Now we resize all cells and we insert new rows if necessary.
         // We iterate in reverse order so that we can insert rows
@@ -235,7 +132,8 @@ impl Table {
                     cells_to_add.push(Vec::new());
                     if cells[ic].visible_length > widths[ic] {
                         // we must wrap the cell over several lines
-                        let mut composites = wrap::hard_wrap_composite(&cells[ic], widths[ic]);
+                        let mut composites = wrap::hard_wrap_composite(&cells[ic], widths[ic])
+                            .expect("tbl fitter guaranteed all columns to be wide enough");
                         // the first composite replaces the cell, while the other
                         // ones go to cells_to_add
                         let mut drain = composites.drain(..);
@@ -248,9 +146,9 @@ impl Table {
                 let nb_new_lines = cells_to_add.iter().fold(0, |m, cells| m.max(cells.len()));
                 for inl in (0..nb_new_lines).rev() {
                     let mut new_cells: Vec<FmtComposite<'_>> = Vec::new();
-                    for ic in 0..nbcols {
-                        new_cells.push(if cells_to_add[ic].len() > inl {
-                            cells_to_add[ic].remove(inl)
+                    for cell in cells_to_add.iter_mut().take(nbcols) {
+                        new_cells.push(if cell.len() > inl {
+                            cell.remove(inl)
                         } else {
                             FmtComposite::new()
                         });
@@ -348,43 +246,5 @@ fn find_tables(lines: &[FmtLine<'_>]) -> Vec<Table> {
 pub fn fix_all_tables(lines: &mut Vec<FmtLine<'_>>, width: usize) {
     for tbl in find_tables(lines).iter_mut().rev() {
         tbl.fix_columns(lines, width);
-    }
-}
-
-#[cfg(test)]
-mod col_reduction_tests {
-
-    use super::*;
-
-    #[test]
-    fn test_col_reduction_1_col() {
-        let mut widths = vec![500];
-        reduce_col_widths(&mut widths, 100);
-        assert_eq!(widths, &[100]);
-    }
-    #[test]
-    fn test_col_reduction_bug_01() {
-        // test for a bug giving a width of 0 to the first col
-        let mut widths = vec![3, 1033, 4, 10, 20, 5];
-        reduce_col_widths(&mut widths, 148);
-        for &width in &widths {
-            assert!(width > 2);
-        }
-    }
-    #[test]
-    fn test_col_reduction_bug_unpublished_01() {
-        let widths = vec![ 3, 4, 11, 5, 15, 4, 9, 5, 4, 47 ];
-        let sum: usize = widths.iter().sum();
-        for goal in 30..sum {
-            let mut widths = widths.clone();
-            reduce_col_widths(&mut widths, goal);
-            println!("widths after reduction: {:?}", &widths);
-            for &width in &widths {
-                assert!(width > 2);
-            }
-            let sum: usize = widths.iter().sum();
-            dbg!(sum);
-            assert!(sum<=goal);
-        }
     }
 }

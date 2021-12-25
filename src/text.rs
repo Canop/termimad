@@ -44,7 +44,10 @@ impl<'k, 's> FmtText<'k, 's> {
         tbl::fix_all_tables(&mut lines, width.unwrap_or(std::usize::MAX));
         code::justify_blocks(&mut lines);
         if let Some(width) = width {
-            lines = wrap::hard_wrap_lines(lines, width);
+            if width >= 3 {
+                lines = wrap::hard_wrap_lines(lines, width)
+                    .expect("width should be wide enough");
+            }
         }
         FmtText { skin, lines, width }
     }

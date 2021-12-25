@@ -1,5 +1,10 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.20.0"></a>
+### v0.20.0 - 2021-12-25
+- better algorithm for fitting tables, taking into account the whole column and not just its max width
+- some fitting functions which could panic on an assert in extrem cases now return a Result (there are unlikely to be used directly so this shouldn't lead to breaking changes)
+
 <a name="v0.19.4"></a>
 ### v0.19.4 - 2021-12-22
 - fix a case of crash in input field
