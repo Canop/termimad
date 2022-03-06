@@ -38,7 +38,7 @@ use {
     unicode_width::UnicodeWidthStr,
 };
 
-/// A skin defining how a parsed mardkown appears on the terminal
+/// A skin defining how a parsed markdown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
 #[derive(Clone, Debug)]
 pub struct MadSkin {

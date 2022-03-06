@@ -46,7 +46,7 @@ use {
 ///
 /// If the text and skin are constant, you might prefer to
 /// use a MadView instead of a TextView: the MadView owns
-/// the mardkown string and ensures the formatted text
+/// the markdown string and ensures the formatted text
 /// is computed accordingly to the area.
 pub struct TextView<'a, 't> {
     area: &'a Area,

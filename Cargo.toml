@@ -4,11 +4,12 @@ version = "0.20.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 repository = "https://github.com/Canop/termimad"
 description = "Markdown Renderer for the Terminal"
-edition = "2018"
+edition = "2021"
 keywords = ["markdown", "terminal", "tui", "renderer", "parser"]
 license = "MIT"
 categories = ["command-line-interface", "text-processing", "template-engine"]
 readme = "README.md"
+rust-version = "1.56"
 
 [features]
 special-renders = []

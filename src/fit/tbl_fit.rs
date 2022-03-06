@@ -123,16 +123,16 @@ impl TblFit {
         // Step 1
         // We do a first reduction, if possible, on columns wider
         // than 5, and trying to keep above the average width
-        let potential_total_gain_1 = fits.iter()
+        let potential_uncut_gain_1 = fits.iter()
             .filter(|c| c.width > 4 && c.width > c.avg_width + 1)
             .map(|c| (c.width - c.avg_width).min(4))
-            .sum::<usize>()
+            .sum::<usize>();
+        let potential_cut_gain_1 = potential_uncut_gain_1
             .min(excess);
-        let excess_before_1 = excess;
-        if potential_total_gain_1 > 0 {
+        if potential_cut_gain_1 > 0 {
             for c in fits.iter_mut() {
                 if c.std_width > 4 && c.std_width > c.avg_width {
-                    let gain_1 = div_ceil((c.width - c.avg_width) * excess_before_1, potential_total_gain_1);
+                    let gain_1 = div_ceil((c.width - c.avg_width) * potential_cut_gain_1, potential_uncut_gain_1);
                     let gain_1 = gain_1.min(excess).min(c.width - 4);
                     c.width -= gain_1;
                     excess -= gain_1;

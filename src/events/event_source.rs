@@ -230,3 +230,4 @@ impl Drop for EventSource {
         terminal::disable_raw_mode().unwrap();
     }
 }
+

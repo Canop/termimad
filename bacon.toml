@@ -35,3 +35,17 @@ need_stdout = false
 command = ["cargo", "test", "--color", "always"]
 need_stdout = true
 
+[jobs.exs]
+command = ["cargo", "run", "--example", "simple", "--color", "always"]
+need_stdout = true
+
+[jobs.ex]
+command = ["cargo", "run", "--color", "always", "--example"]
+need_stdout = true
+
+[jobs.doc-open]
+command = ["cargo", "doc", "--open", "--color", "always"]
+on_success = "back"
+
+[keybindings]
+e = "job:ex"
