@@ -28,6 +28,8 @@ command = [
 	"-A", "clippy::if_same_then_else",
 	"-A", "clippy::collapsible-else-if",
 	"-A", "clippy::collapsible-if",
+	"-A", "clippy::match_like_matches_macro",
+	"-A", "clippy::manual_range_contains",
 ]
 need_stdout = false
 

@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.20.1"></a>
+### v0.20.1 - 2022-04-14
+- upgrade coolor to 0.4 (which is pure rust) to fix a cross-compilation problem
+
 <a name="v0.20.0"></a>
 ### v0.20.0 - 2021-12-25
 - better algorithm for fitting tables, taking into account the whole column and not just its max width
