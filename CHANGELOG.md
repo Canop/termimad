@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.20.2"></a>
+### v0.20.2 - 2022-06-07
+- update crossterm to 0.23.1 and coolor to 0.5
+
 <a name="v0.20.1"></a>
 ### v0.20.1 - 2022-04-14
 - upgrade coolor to 0.4 (which is pure rust) to fix a cross-compilation problem
