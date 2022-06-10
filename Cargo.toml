@@ -27,6 +27,7 @@ unicode-width = "0.1.8"
 [dev-dependencies]
 anyhow = "1.0"
 cli-log = "2.0"
+crokey = "0.4"
 terminal-clipboard = "0.3.1"
 
 [patch.crates-io]

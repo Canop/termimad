@@ -12,11 +12,11 @@ mod view;
 
 use {
     anyhow::{self},
+    crokey::key,
     crossterm::{
         cursor,
         event::{
             DisableMouseCapture, EnableMouseCapture,
-            KeyCode, KeyEvent, KeyModifiers,
         },
         terminal::{
             self,
@@ -27,12 +27,6 @@ use {
     std::io::{stdout, Write},
     termimad::*,
 };
-
-// Those 2 lines will be usable when crossterm merges KeyEvent::new being made const
-// pub const CONTROL_C: KeyEvent = KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL);
-// pub const CONTROL_Q: KeyEvent = KeyEvent::new(KeyCode::Char('q'), KeyModifiers::CONTROL);
-
-pub const CONTROL_Q: KeyEvent = KeyEvent { code: KeyCode::Char('q'), modifiers: KeyModifiers::CONTROL };
 
 fn main() -> anyhow::Result<()> {
     init_cli_log!();
@@ -64,7 +58,7 @@ fn run_in_alternate<W: Write>(w: &mut W) -> anyhow::Result<()> {
     for timed_event in event_source.receiver() {
         let mut quit = false;
         debug!("event: {:?}", timed_event);
-        if timed_event.is_key(CONTROL_Q) {
+        if timed_event.is_key(key!(ctrl-q)) {
             quit = true;
         } else if view.apply_timed_event(timed_event) {
             view.queue_on(w)?;

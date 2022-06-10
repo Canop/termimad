@@ -1,8 +1,9 @@
 use {
     crate::clipboard,
     anyhow::{self},
+    crokey::key,
     crossterm::{
-        event::{Event, KeyCode, KeyEvent, KeyModifiers, MouseEvent},
+        event::{Event, KeyEvent, MouseEvent},
         queue,
         terminal::{
             Clear,
@@ -12,12 +13,6 @@ use {
     std::io::Write,
     termimad::*,
 };
-
-pub const ESC: KeyEvent = KeyEvent { code: KeyCode::Esc, modifiers: KeyModifiers::NONE };
-pub const TAB: KeyEvent = KeyEvent { code: KeyCode::Tab, modifiers: KeyModifiers::NONE };
-pub const CONTROL_C: KeyEvent = KeyEvent { code: KeyCode::Char('c'), modifiers: KeyModifiers::CONTROL };
-pub const CONTROL_V: KeyEvent = KeyEvent { code: KeyCode::Char('v'), modifiers: KeyModifiers::CONTROL };
-pub const CONTROL_X: KeyEvent = KeyEvent { code: KeyCode::Char('x'), modifiers: KeyModifiers::CONTROL };
 
 /// The view covering the whole terminal, with its widgets and current state
 pub struct View {
@@ -138,19 +133,19 @@ impl View {
         true
     }
     pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
-        if key == ESC {
+        if key == key!(esc) {
             self.set_focus(Focus::Introduction);
             true
-        } else if key == TAB {
+        } else if key == key!(tab) {
             self.focus_next();
             true
         } else if let Some(input) = self.focused_input() {
             input.apply_key_event(key) || {
-                if key == CONTROL_C {
+                if key == key!(ctrl-c) {
                     clipboard::copy_from_input(input)
-                } else if key == CONTROL_X {
+                } else if key == key!(ctrl-x) {
                     clipboard::cut_from_input(input)
-                } else if key == CONTROL_V {
+                } else if key == key!(ctrl-v) {
                     clipboard::paste_into_input(input)
                 } else {
                     false
