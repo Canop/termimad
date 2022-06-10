@@ -136,7 +136,7 @@ impl InputFieldContent {
             .unwrap_or(&self.lines[self.lines.len()-1])
     }
     pub fn current_line(&self) -> &Line {
-        &self.lines
+        self.lines
             .get(self.pos.y)
             .expect("current line should exist")
     }

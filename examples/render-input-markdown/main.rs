@@ -1,8 +1,8 @@
 //! run this example with
-//!   cargo run --example inputs
+//!   cargo run --example render-input-markdown
 //!
 //! if you want to have a log file generated, run
-//!   TERMIMAD_LOG=debug cargo run --example inputs
+//!   TERMIMAD_LOG=debug cargo run --example render-input-markdown
 
 #[macro_use]
 extern crate cli_log;
