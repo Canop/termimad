@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.20.3"></a>
+### v0.20.3 - 2022-09-20
+- fix some '\' not being rendered because being incorrectly considered as escaping
+
 <a name="v0.20.2"></a>
 ### v0.20.2 - 2022-06-07
 - update crossterm to 0.23.1 and coolor to 0.5

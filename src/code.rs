@@ -15,7 +15,7 @@ pub struct CodeBlock {
 }
 impl CodeBlock {
     /// ensure all lines of the block have the same width
-    pub fn justify(&self, lines: &mut Vec<FmtLine<'_>>) {
+    pub fn justify(&self, lines: &mut [FmtLine<'_>]) {
         for line in lines.iter_mut().skip(self.start).take(self.height) {
             if let FmtLine::Normal(ref mut fc) = line {
                 fc.spacing = Some(Spacing {
@@ -72,7 +72,7 @@ pub fn find_blocks(lines: &[FmtLine<'_>]) -> Vec<CodeBlock> {
 
 /// ensure the widths of all lines in a code block are
 /// the same line.
-pub fn justify_blocks(lines: &mut Vec<FmtLine<'_>>) {
+pub fn justify_blocks(lines: &mut [FmtLine<'_>]) {
     let blocks = find_blocks(lines);
     for b in blocks {
         b.justify(lines);

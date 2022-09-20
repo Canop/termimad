@@ -31,7 +31,7 @@ where
             tab_replacement: DEFAULT_TAB_REPLACEMENT,
         }
     }
-    pub fn is_full(&self) -> bool {
+    pub const fn is_full(&self) -> bool {
         self.allowed == 0
     }
     /// return a tuple containing a string containing either the given &str
