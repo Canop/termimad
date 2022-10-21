@@ -14,7 +14,7 @@
 
 A CLI utilities library leveraging Markdown to format terminal rendering, allowing separation of structure, data and skin.
 
-Based on [crossterm](https://github.com/TimonPost/crossterm) so works on most terminals (even on windows).
+Based on [crossterm](#crossterm-compatibility) so works on most terminals (even on windows).
 
 ![text](doc/text.png)
 
@@ -285,3 +285,9 @@ dbg!(choice);
 * [backdown](https://github.com/Canop/backdown) is a file deduplicator. It uses Termimad to print on screen and ask questions
 
 If you're the author of another application using Termimad, please tell me.
+
+## Crossterm compatibility
+
+[Crossterm](https://github.com/crossterm-rs/crossterm) is a 0.x library which means its API isn't frozen. And it does change sometimes so libraries based on Crossterm can't always use its last version.
+
+Termimad 0.20.x is compatible with Crossterm 0.23.x.
