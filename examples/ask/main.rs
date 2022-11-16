@@ -2,7 +2,7 @@
 //!   cargo run --example ask
 //!
 use {
-    crossterm::{
+    termimad::crossterm::{
         style::Color::*,
     },
     termimad::*,

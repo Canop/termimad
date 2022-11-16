@@ -6,9 +6,9 @@ You execute this example with
      cargo run --example inline-template
 */
 use {
-    crossterm::style::{Attribute::*, Color::*},
     std::io::Write,
     minimad::mad_inline,
+    termimad::crossterm::style::{Attribute::*, Color::*},
     termimad::*,
 };
 

@@ -227,7 +227,7 @@ impl CompoundStyle {
     ///
     /// ```
     /// # use termimad::*;
-    /// # use crossterm::terminal::ClearType;
+    /// # use termimad::crossterm::terminal::ClearType;
     /// # let skin = MadSkin::default();
     /// let mut w = std::io::stderr();
     /// skin.paragraph.compound_style.clear(&mut w, ClearType::UntilNewLine).unwrap();

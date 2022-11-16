@@ -1,4 +1,4 @@
-use crossterm::{execute, style::Color::*, terminal};
+use termimad::crossterm::{execute, style::Color::*, terminal};
 use termimad::*;
 
 static MD: &str = r#"

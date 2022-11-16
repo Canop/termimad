@@ -4,7 +4,7 @@
 //!   cargo run --example stderr
 //!
 
-use crossterm::{
+use termimad::crossterm::{
     event::{
         self,
         Event,

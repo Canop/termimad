@@ -13,7 +13,8 @@ mod view;
 use {
     anyhow::{self},
     crokey::key,
-    crossterm::{
+    std::io::{BufWriter, stdout, Write},
+    termimad::crossterm::{
         cursor,
         event::{
             DisableMouseCapture, EnableMouseCapture,
@@ -24,7 +25,6 @@ use {
         },
         QueueableCommand,
     },
-    std::io::{BufWriter, stdout, Write},
     termimad::*,
 };
 

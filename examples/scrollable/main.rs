@@ -1,7 +1,8 @@
 //! run this example with
 //!   cargo run --example scrollable
 //!
-use crossterm::{
+use std::io::{stdout, Write};
+use termimad::crossterm::{
     cursor::{ Hide, Show},
     event::{
         self,
@@ -19,7 +20,6 @@ use crossterm::{
     },
     style::Color::*,
 };
-use std::io::{stdout, Write};
 use termimad::*;
 
 fn view_area() -> Area {

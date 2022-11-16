@@ -1,7 +1,7 @@
 use {
     super::*,
     crate::*,
-    crossterm::{
+    crate::crossterm::{
         cursor,
         event::{
             Event,
@@ -276,7 +276,7 @@ impl InputField {
             self.insert_new_line();
             return true;
         }
-        use crossterm::event::{
+        use crate::crossterm::event::{
             KeyModifiers as Mod,
         };
         match (key.code, key.modifiers) {

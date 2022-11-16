@@ -2,7 +2,8 @@ use {
     crate::clipboard,
     anyhow::{self},
     crokey::key,
-    crossterm::{
+    std::io::Write,
+    termimad::crossterm::{
         event::{Event, KeyEvent, MouseEvent},
         queue,
         terminal::{
@@ -10,7 +11,6 @@ use {
             ClearType,
         },
     },
-    std::io::Write,
     termimad::*,
 };
 

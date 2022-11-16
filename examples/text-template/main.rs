@@ -6,8 +6,8 @@ You execute this example with
 */
 
 use {
-    crossterm::style::Color::*,
     minimad::{TextTemplate, OwningTemplateExpander},
+    termimad::crossterm::style::Color::*,
     termimad::*,
 };
 

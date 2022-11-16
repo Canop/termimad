@@ -1,6 +1,6 @@
 use {
     crate::*,
-    crossterm::{style::Print, QueueableCommand},
+    crate::crossterm::{style::Print, QueueableCommand},
     std::borrow::Cow,
     unicode_width::UnicodeWidthChar,
 };

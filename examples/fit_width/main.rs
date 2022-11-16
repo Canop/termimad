@@ -2,15 +2,15 @@
 //!   cargo run --example fit_width
 //!
 use {
-    crossterm::{
+    minimad::Composite,
+    std::io::{stderr, Write},
+    termimad::crossterm::{
         cursor::{self, Hide, Show},
         event::{self, Event},
         ExecutableCommand,
         terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
         style::Color::*,
     },
-    minimad::Composite,
-    std::io::{stderr, Write},
     termimad::*,
 };
 

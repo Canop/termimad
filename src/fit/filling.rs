@@ -1,7 +1,7 @@
 
 use {
     crate::*,
-    crossterm::{
+    crate::crossterm::{
         QueueableCommand,
         style::Print,
     },

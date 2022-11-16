@@ -14,7 +14,7 @@ to your tastes or (better) to your application's configuration.
 
 
 ```rust
-use crossterm::style::{Color::*, Attribute::*};
+use termimad::crossterm::style::{Color::*, Attribute::*};
 use termimad::*;
 
 // start with the default skin
@@ -127,6 +127,10 @@ mod tbl;
 mod text;
 mod tokens;
 mod views;
+
+pub mod crossterm {
+    pub use crossterm::*;
+}
 
 pub use {
     ask::*,
