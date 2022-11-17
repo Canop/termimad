@@ -1,5 +1,8 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+### next
+- reexport crossterm
+
 <a name="v0.20.3"></a>
 ### v0.20.3 - 2022-09-20
 - fix some '\' not being rendered because being incorrectly considered as escaping
