@@ -87,16 +87,12 @@ impl fmt::Display for InputFieldContent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use fmt::Write;
         let mut lines = self.lines.iter().peekable();
-        loop {
-            if let Some(line) = lines.next() {
-                for &c in &line.chars {
-                    f.write_char(c)?;
-                }
-                if lines.peek().is_some() {
-                    f.write_char('\n')?;
-                }
-            } else {
-                break;
+        while let Some(line) = lines.next() {
+            for &c in &line.chars {
+                f.write_char(c)?;
+            }
+            if lines.peek().is_some() {
+                f.write_char('\n')?;
             }
         }
         Ok(())

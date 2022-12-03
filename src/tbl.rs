@@ -76,6 +76,7 @@ struct Table {
     nbcols: usize, // number of columns
 }
 
+#[allow(clippy::needless_range_loop)]
 impl Table {
     pub fn fix_columns(&mut self, lines: &mut Vec<FmtLine<'_>>, width: usize) {
         let mut nbcols = self.nbcols;

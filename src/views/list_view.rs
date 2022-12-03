@@ -45,6 +45,7 @@ struct Row<T> {
 /// (i.e. make the cells composites rather than compounds). Shout
 /// out if you need that now.
 /// * this version doesn't allow cell wrapping
+#[allow(clippy::type_complexity)]
 pub struct ListView<'t, T> {
     titles: Vec<Title>,
     columns: Vec<ListViewColumn<'t, T>>,
@@ -126,6 +127,7 @@ impl<'t, T> ListView<'t, T> {
         }
     }
     /// set a comparator for row sorting
+    #[allow(clippy::type_complexity)]
     pub fn sort(&mut self, sort: Box<dyn Fn(&T, &T) -> Ordering>) {
         self.row_order = Some(sort);
     }

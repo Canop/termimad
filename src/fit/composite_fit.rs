@@ -164,7 +164,7 @@ impl Zone {
             }
             let start_byte_idx = self.byte_start_idx + self.char_infos[start_char_idx].byte_idx;
             let end_byte_idx = self.byte_start_idx + self.char_infos[end_char_idx].byte_idx;
-            removed_width = (&compound.src[start_byte_idx..end_byte_idx]).width();
+            removed_width = (compound.src[start_byte_idx..end_byte_idx]).width();
             if removed_width >= to_remove {
                 break;
             }

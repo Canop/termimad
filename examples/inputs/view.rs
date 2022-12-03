@@ -2,7 +2,9 @@ use {
     crate::clipboard,
     anyhow::{self},
     crokey::key,
-    crossterm::{
+    std::io::Write,
+    termimad::*,
+    termimad::crossterm::{
         event::{Event, KeyEvent, MouseEvent},
         queue,
         terminal::{
@@ -10,8 +12,6 @@ use {
             ClearType,
         },
     },
-    std::io::Write,
-    termimad::*,
 };
 
 /// The view covering the whole terminal, with its widgets and current state

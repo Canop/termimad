@@ -67,7 +67,7 @@ impl StrFit {
     pub fn make_string(s: &str, cols_max: usize) -> (String, usize) {
         let fit = StrFit::from(s, cols_max);
         if fit.has_tab {
-            let string = (&s[0..fit.bytes_count]).replace('\t', TAB_REPLACEMENT);
+            let string = (s[0..fit.bytes_count]).replace('\t', TAB_REPLACEMENT);
             (string, fit.cols_count)
         } else {
             (s[0..fit.bytes_count].to_string(), fit.cols_count)
@@ -84,7 +84,7 @@ impl StrFit {
         let fit = StrFit::from(s, cols_max);
         if fit.has_tab {
             // we can't just borrow, as we insert chars
-            let string = (&s[0..fit.bytes_count]).replace('\t', TAB_REPLACEMENT);
+            let string = (s[0..fit.bytes_count]).replace('\t', TAB_REPLACEMENT);
             (Cow::Owned(string), fit.cols_count)
         } else {
             (Cow::Borrowed(&s[0..fit.bytes_count]), fit.cols_count)
