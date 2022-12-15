@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.20.6"></a>
+### v0.20.6 - 2022-12-15
+- fix cases of selection becoming wider than content in input field
+
 <a name="v0.20.5"></a>
 ### v0.20.5 - 2022-12-15
 - fix coolor version to prevent a dependency version problem with crossterm

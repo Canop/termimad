@@ -147,11 +147,15 @@ impl InputFieldContent {
     /// The position set may be different to ensure consistency
     /// (for example if it's after the end, it will be set back).
     pub fn set_cursor_pos(&mut self, new_pos: Pos) {
-        if new_pos.y >= self.lines.len() {
-            self.pos = self.end();
+        self.pos = self.make_valid_pos(new_pos);
+    }
+    /// Return the given pos, maybe modified to be valid for the content
+    pub fn make_valid_pos(&self, mut pos: Pos) -> Pos {
+        if pos.y >= self.lines.len() {
+            self.end()
         } else {
-            self.pos.y = new_pos.y;
-            self.pos.x = new_pos.x.min(self.lines[self.pos.y].chars.len());
+            pos.x = pos.x.min(self.lines[pos.y].chars.len());
+            pos
         }
     }
     /// Set the selection tail to the current pos if there's no selection
@@ -172,6 +176,18 @@ impl InputFieldContent {
                 x: sel_tail.x.min(self.lines[self.pos.y].chars.len()),
             });
         }
+    }
+    fn fix_pos(&mut self) {
+        self.pos = self.make_valid_pos(self.pos);
+    }
+    fn fix_selection_tail(&mut self) {
+        if let Some(sel_tail) = self.selection_tail {
+            self.selection_tail = Some(self.make_valid_pos(sel_tail));
+        }
+    }
+    fn fix_selection(&mut self) {
+        self.fix_pos();
+        self.fix_selection_tail();
     }
     pub fn selection(&self) -> Range {
         if let Some(sel_tail) = self.selection_tail {
@@ -245,6 +261,7 @@ impl InputFieldContent {
         self.lines.clear();
         self.lines.push(Line::default());
         self.pos = Pos::default();
+        self.selection_tail = None;
     }
     pub fn insert_new_line(&mut self) {
         let new_line = Line {
@@ -253,6 +270,7 @@ impl InputFieldContent {
         self.pos.x = 0;
         self.pos.y += 1;
         self.lines.insert(self.pos.y, new_line);
+        self.fix_selection();
     }
     /// Insert a character at the current position, updating
     /// this position
@@ -303,12 +321,14 @@ impl InputFieldContent {
             if !self.lines[self.pos.y].chars.is_empty() {
                 self.lines[self.pos.y].chars.remove(self.pos.x);
             }
+            self.fix_selection();
             true
         } else if self.pos.y > 0 && self.lines.len() > 1 {
             let mut removed_line = self.lines.remove(self.pos.y);
             self.pos.y -= 1;
             self.pos.x = self.lines[self.pos.y].chars.len();
             self.lines[self.pos.y].chars.append(&mut removed_line.chars);
+            self.fix_selection();
             true
         } else {
             false
@@ -342,16 +362,19 @@ impl InputFieldContent {
         if line_len == 0 {
             if self.lines.len() > 1 {
                 self.lines.remove(self.pos.y);
+                self.fix_selection();
                 true
             } else {
                 false
             }
         } else if self.pos.x < line_len {
             self.lines[self.pos.y].chars.remove(self.pos.x);
+            self.fix_selection();
             true
         } else if self.lines.len() > self.pos.y + 1 {
             let mut removed_line = self.lines.remove(self.pos.y + 1);
             self.lines[self.pos.y].chars.append(&mut removed_line.chars);
+            self.fix_selection();
             true
         } else {
             false
@@ -406,6 +429,7 @@ impl InputFieldContent {
     pub fn swap_lines(&mut self, ya: usize, yb: usize) -> bool {
         if ya != yb && ya < self.lines.len() && yb < self.lines.len() {
             self.lines.swap(ya, yb);
+            self.fix_selection();
             true
         } else {
             false
@@ -417,6 +441,7 @@ impl InputFieldContent {
         if self.pos.y > 0 {
             if self.swap_lines(self.pos.y - 1, self.pos.y) {
                 self.pos.y -= 1;
+                self.fix_selection();
                 return true;
             }
         }
@@ -427,6 +452,7 @@ impl InputFieldContent {
     pub fn move_current_line_down(&mut self) -> bool {
         if self.swap_lines(self.pos.y + 1, self.pos.y) {
             self.pos.y += 1;
+            self.fix_selection();
             true
         } else {
             false
@@ -563,6 +589,7 @@ impl InputFieldContent {
                     break;
                 }
             }
+            self.fix_selection();
             true
         } else {
             false
@@ -588,6 +615,7 @@ impl InputFieldContent {
                     break;
                 }
             }
+            self.fix_selection();
             true
         } else if self.pos.x == self.current_line().chars.len() && self.pos.x > 0 {
             self.pos.x -= 1;
@@ -729,6 +757,28 @@ mod input_content_edit_monoline_tests {
             "",
             "^",
         );
+    }
+    /// test wide_select->clear->del_selection
+    #[test]
+    fn test_select_clear_del_selection() {
+        let mut con = make_content(
+            "aaa bbb ccc",
+            "     ^     ",
+        );
+        con.set_selection_tail(con.end());
+        con.clear();
+        con.del_selection();
+    }
+    /// test wide_select->del_char_left->del_selection
+    #[test]
+    fn test_select_del_char_left_del_selection() {
+        let mut con = make_content(
+            "aaa bbb ccc",
+            "     ^     ",
+        );
+        con.set_selection_tail(con.end());
+        con.del_char_left();
+        con.del_selection();
     }
 }
 
