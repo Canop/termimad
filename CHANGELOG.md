@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.20.5"></a>
+### v0.20.5 - 2022-12-15
+- fix coolor version to prevent a dependency version problem with crossterm
+
 <a name="v0.20.4"></a>
 ### v0.20.4 - 2022-12-03
 - reexport crossterm
