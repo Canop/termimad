@@ -2,7 +2,7 @@
 
 <a name="v0.21.0"></a>
 ### v0.21.0 - 2023-02-05
-- parsing markdown with options (clean indentation, continue spans); see parse-options example - Fix #10
+- parsing markdown with options (clean indentation, continue spans); see parse-options example - Fix #38
 
 <a name="v0.20.6"></a>
 ### v0.20.6 - 2022-12-15
