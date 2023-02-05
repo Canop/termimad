@@ -241,14 +241,10 @@ impl InputFieldContent {
     /// characters are normally inserted on insertion point
     /// with insert_char.
     pub fn push_char(&mut self, c: char) {
-        if c == '\n' {
-            self.lines.push(Line::default());
-        } else if c == '\r' {
-            // do nothing, it probably comes from a copy-paste on windows
-        } else if c == '\x08' { // backspace
-            // do nothing, we don't want those in our inputfield
-        } else {
-            self.last_line().chars.push(c);
+        match c {
+            '\n' => self.lines.push(Line::default()),
+            '\r' | '\x08' /*backspacea*/ => {}
+            _ => self.last_line().chars.push(c),
         }
     }
     /// Initialize from a string, with the cursor at end
@@ -438,14 +434,13 @@ impl InputFieldContent {
 
     /// Swap the current line with the line before, if possible
     pub fn move_current_line_up(&mut self) -> bool {
-        if self.pos.y > 0 {
-            if self.swap_lines(self.pos.y - 1, self.pos.y) {
-                self.pos.y -= 1;
-                self.fix_selection();
-                return true;
-            }
+        if self.pos.y > 0 && self.swap_lines(self.pos.y - 1, self.pos.y) {
+            self.pos.y -= 1;
+            self.fix_selection();
+            true
+        } else {
+            false
         }
-        false
     }
 
     /// Swap the current line with the line after, if possible

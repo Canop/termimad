@@ -7,8 +7,8 @@ fn show(skin: &MadSkin, src: &str) {
 }
 
 fn show_some(skin: &MadSkin) {
-    show(&skin, "*Hey* **World!** Here's `some(code)`");
-    show(&skin, "some *nested **style***");
+    show(skin, "*Hey* **World!** Here's `some(code)`");
+    show(skin, "some *nested **style***");
 }
 
 fn main() {

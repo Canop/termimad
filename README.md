@@ -56,7 +56,7 @@ will give different results depending on the width:
 
 ```toml
 [dependencies]
-termimad = "0.14"
+termimad = "0.20"
 ```
 
 ### With the default skin:
@@ -262,10 +262,11 @@ dbg!(choice);
 ## Advices to get started
 
 * Start by reading the examples (in `/examples`): they cover almost the whole API, including templates, how to use an alternate screen or scroll the page, etc.
+* The render-input-markdown example lets you type some markdown in a text area and see it rendered below
 * Be careful that some colors aren't displayable on all terminals. The default color set of your application should not include arbitrary RGB colors.
 * The event / event-source part of Termimad is currently tailored for a short number of applications. If you use it or want to use it, please come and tell me so that your needs are taken into account!
 * If your goal is to format some CLI application output, for example a few tables, have a look at [lfs](https://github.com/Canop/lfs) which is one of the simplest possible uses
-* If a feature is missing, or you don't know how to use some part, come and ping me on my chat during West European hours.
+* If a feature is missing, or you don't know how to use some part, come and ping me on [my chat](https://miaou.dystroy.org/3768) during West European hours.
 
 
 ## Open-source applications using termimad
@@ -290,4 +291,4 @@ If you're the author of another application using Termimad, please tell me.
 
 [Crossterm](https://github.com/crossterm-rs/crossterm) is a 0.x library which means its API isn't frozen. And it does change sometimes so libraries based on Crossterm can't always use its last version.
 
-Crossterm 0.23.x is reexported by Termimad 0.20.5 so you don't have to declare the import yourself. You may use crossterm as `termimad::crossterm`.
+Crossterm 0.23.x is reexported by Termimad 0.21.x so you don't have to declare the import yourself. You may use crossterm as `termimad::crossterm`.

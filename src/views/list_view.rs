@@ -275,7 +275,7 @@ impl<'t, T> ListView<'t, T> {
             }
         }
         // rows, maybe scrolled
-        let mut row_idx = self.scroll as usize;
+        let mut row_idx = self.scroll;
         let scrollbar = self.scrollbar();
         for y in 2..self.area.height {
             queue!(w, MoveTo(self.area.left, self.area.top + y))?;
@@ -369,7 +369,7 @@ impl<'t, T> ListView<'t, T> {
         }
         if self.displayed_rows_count == 1 || self.selection.is_none() {
             for i in 0..self.rows.len() {
-                let i = (i + self.scroll as usize) % self.rows.len();
+                let i = (i + self.scroll) % self.rows.len();
                 if self.rows[i].displayed {
                     self.selection = Some(i);
                     self.make_selection_visible();

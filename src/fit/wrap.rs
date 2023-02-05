@@ -161,12 +161,12 @@ mod wrap_tests {
         let text = skin.text(src, Some(width));
         println!("------- test wrapping with width: {}", width);
         for line in &text.lines {
-            let len = visible_fmt_line_length(skin, &line);
+            let len = visible_fmt_line_length(skin, line);
             println!(
                 "len:{: >4}  | {}",
                 len,
                 DisplayableLine {
-                    skin: &skin,
+                    skin,
                     line,
                     width: None,
                 }
@@ -177,6 +177,7 @@ mod wrap_tests {
     }
 
     /// check line lenghts are what is expected
+    #[allow(clippy::needless_range_loop)]
     fn check_line_lengths(skin: &MadSkin, src: &str, width: usize, lenghts: Vec<usize>) {
         println!("====\ninput text:\n{}", &src);
         let text = skin.text(src, Some(width));
@@ -204,15 +205,15 @@ mod wrap_tests {
                    * short item\n\
                    * a *somewhat longer item* (with a part in **bold**)";
         for width in 3..50 {
-            check_no_overflow(skin, &src, width);
+            check_no_overflow(skin, src, width);
         }
-        check_line_lengths(skin, &src, 25, vec![25, 19, 25, 7, 12, 25, 21]);
+        check_line_lengths(skin, src, 25, vec![25, 19, 25, 7, 12, 25, 21]);
     }
 
     #[test]
     fn check_space_removing() {
         let skin = crate::get_default_skin();
-        let src = FmtComposite::from(Composite::from_inline("syntax coloring"), &skin);
+        let src = FmtComposite::from(Composite::from_inline("syntax coloring"), skin);
         println!("input:\n{:?}", &src);
         let wrapped = hard_wrap_composite(&src, 8).unwrap();
         println!("wrapped: {:?}", &wrapped);

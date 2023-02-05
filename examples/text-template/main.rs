@@ -57,7 +57,7 @@ struct Module {
 }
 
 /// some example data
-const MODULES: &'static [Module] = &[
+const MODULES: &[Module] = &[
     Module { name: "lazy-regex", key: "lrex", count: 0, description: "eases regexes"},
     Module { name: "termimad", key: "tmd", count: 7, description: "do things on *terminal*" },
     Module { name: "bet", key: "bet", count: 11, description: "do formulas, unlike `S=π*r²`" },

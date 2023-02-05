@@ -97,7 +97,7 @@ impl<'a, 't> TextView<'a, 't> {
     /// display the text in the area, taking the scroll into account.
     pub fn write_on<W: Write>(&self, w: &mut W) -> Result<()> {
         let scrollbar = self.scrollbar();
-        let mut lines = self.text.lines.iter().skip(self.scroll as usize);
+        let mut lines = self.text.lines.iter().skip(self.scroll);
         let mut width = self.area.width as usize;
         if scrollbar.is_some() {
             width -= 1;

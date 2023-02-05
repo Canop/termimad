@@ -17,6 +17,7 @@ static MD_TABLE: &str = r#"
 | quotes |  yes |> What a wonderful time to be alive!
 | links | no | (but your terminal already handles raw URLs)
 |-
+*Run this example again in a terminal with a different width*
 "#;
 
 fn main() {

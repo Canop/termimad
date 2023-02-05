@@ -6,7 +6,7 @@ use {
         tbl,
         fit::wrap,
     },
-    minimad::Text,
+    minimad::{parse_text, Options, Text},
     std::fmt,
 };
 
@@ -31,7 +31,7 @@ impl<'k, 's> FmtText<'k, 's> {
     /// This can be called directly or using one of the skin helper
     /// method.
     pub fn from(skin: &'k MadSkin, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
-        let mt = Text::from(src);
+        let mt = parse_text(src, Options::default());
         Self::from_text(skin, mt, width)
     }
     /// build a fmt_text from a minimad text

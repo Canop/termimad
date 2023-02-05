@@ -33,9 +33,7 @@ impl Range {
     pub const fn contains(&self, x: usize, y: usize) -> bool {
         if self.min.y == self.max.y {
             y == self.min.y && self.min.x <= x && x <= self.max.x
-        } else if y < self.min.y {
-            false
-        } else if y > self.max.y {
+        } else if y < self.min.y || y > self.max.y {
             false
         } else if y == self.min.y {
             x >= self.min.x

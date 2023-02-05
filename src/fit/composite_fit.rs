@@ -198,9 +198,9 @@ impl Fitter {
 
     /// ensure the composite fits the max_width, by replacing some parts
     /// with ellisions
-    pub fn fit<'s>(
+    pub fn fit(
         self,
-        fc: &mut FmtComposite<'s>,
+        fc: &mut FmtComposite<'_>,
         max_width: usize,
         skin: &MadSkin
     ) {
@@ -356,9 +356,9 @@ mod fit_tests {
     fn check_fit_align(src: &str, target_width: usize, align: Alignment) {
         dbg!((target_width, align));
         let skin = crate::get_default_skin();
-        let mut fc = FmtComposite::from(Composite::from_inline(src), &skin);
+        let mut fc = FmtComposite::from(Composite::from_inline(src), skin);
         let fitter = Fitter::for_align(align);
-        fitter.fit(&mut fc, target_width, &skin);
+        fitter.fit(&mut fc, target_width, skin);
         dbg!(&fc);
         assert!(fc.visible_length <= target_width); // can be smaller
     }
