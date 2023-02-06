@@ -285,6 +285,8 @@ dbg!(choice);
 
 * [backdown](https://github.com/Canop/backdown) is a file deduplicator. It uses Termimad to print on screen and ask questions
 
+* [Humility](https://github.com/oxidecomputer/humility) is a debugger for embedded systems. It uses Termimad to print Markdown documentation with the `humility doc` subcommand
+
 If you're the author of another application using Termimad, please tell me.
 
 ## Crossterm compatibility
