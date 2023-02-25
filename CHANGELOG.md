@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.21.1"></a>
+### v0.21.1 - 2023-02-25
+- expose the DisplayableLine struct, which can be useful for some widgets
+
 <a name="v0.21.0"></a>
 ### v0.21.0 - 2023-02-05
 - parsing markdown with options (clean indentation, continue spans); see parse-options example - Fix #38

@@ -138,6 +138,7 @@ pub use {
     color::*,
     composite::FmtComposite,
     compound_style::CompoundStyle,
+    displayable_line::DisplayableLine,
     errors::Error,
     events::{TimedEvent, EventSource, EventSourceOptions},
     fit::*,

@@ -10,7 +10,11 @@ use {
     std::fmt,
 };
 
-/// a formatted text, implementing Display
+/// a formatted text, implementing Display.
+///
+/// The text is wrapped for the width given at build, which
+/// means the rendering height is the number of lines.
+///
 /// ```
 /// use termimad::*;
 /// let skin = MadSkin::default();
