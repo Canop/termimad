@@ -87,7 +87,10 @@ Use any other key to quit the application.
 ## What's shown
 
 * an **area** fitting the screen (with some side margin to be prettier)
-* a markdown text **parsed**, **skinned**, **wrapped** to fit the width
+* a markdown text
+ * **parsed**,
+ * **skinned**,
+ * **wrapped** to fit the width
 * a **scrollable** view in *raw terminal mode*
 
 ## Area
@@ -164,5 +167,7 @@ It's a little out of context but it shows how a wide table can be wrapped in a t
 | code bloc | yes |with tabs. Fences not supported
 | crossed text |  ~~not yet~~ | wait... now it works!
 | phpbb like links | no | (because it's preferable to show an URL in a terminal)
+
+(resize your terminal if it's too wide for wrapping to occur)
 
 "#;

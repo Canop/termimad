@@ -273,7 +273,7 @@ impl MadSkin {
             .map(|c| c.src.width())
             .sum();
         (match composite.style {
-            CompositeStyle::ListItem => 2, // space of the bullet
+            CompositeStyle::ListItem(depth) => 2 + depth as usize, // space and bullet
             CompositeStyle::Quote => 2,    // space of the quoting char
             _ => 0,
         }) + compounds_width
@@ -503,7 +503,10 @@ impl MadSkin {
         let (lpo, rpo) = Spacing::optional_completions(ls.align, inner_width, outer_width);
         self.paragraph.repeat_space(f, lpo)?;
         ls.compound_style.repeat_space(f, lpi)?;
-        if fc.composite.is_list_item() {
+        if let CompositeStyle::ListItem(depth) = fc.composite.style {
+            for _ in 0..depth {
+                write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+            }
             write!(f, "{}", self.bullet)?;
             write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }

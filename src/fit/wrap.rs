@@ -7,7 +7,7 @@ use {
 /// build a composite which can be a new line after wrapping.
 const fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
     let style = match fc.composite.style {
-        minimad::CompositeStyle::ListItem => CompositeStyle::Paragraph,
+        minimad::CompositeStyle::ListItem(_) => CompositeStyle::Paragraph,
         _ => fc.composite.style,
     };
     let visible_length = match style {
@@ -30,7 +30,7 @@ pub const fn composite_style_widths(composite_style: CompositeStyle) -> (usize, 
     match composite_style {
         CompositeStyle::Paragraph => (0, 0),
         CompositeStyle::Header(_) => (0, 0),
-        CompositeStyle::ListItem => (2, 0),
+        CompositeStyle::ListItem(depth) => (2+depth as usize, 0),
         CompositeStyle::Code => (0, 0),
         CompositeStyle::Quote => (2, 2),
     }

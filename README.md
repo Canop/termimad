@@ -18,7 +18,8 @@ Based on [crossterm](#crossterm-compatibility) so works on most terminals (even 
 
 ![text](doc/text.png)
 
-The goal isn't to display any markdown text with its various extensions (a terminal isn't really fit for that). The goal is rather to improve the display of texts in a terminal application when we want both the text and the skin to be easily configured.
+The goal isn't to display any markdown text with its various extensions (a terminal isn't really fit for that).
+The goal is rather to improve the display of texts in a terminal application when we want both the text and the skin to be easily configured.
 
 Termimad also includes a few utilities helping efficient managing of events and user input in a multithread application.
 
@@ -293,4 +294,4 @@ If you're the author of another application using Termimad, please tell me.
 
 [Crossterm](https://github.com/crossterm-rs/crossterm) is a 0.x library which means its API isn't frozen. And it does change sometimes so libraries based on Crossterm can't always use its last version.
 
-Crossterm 0.23.x is reexported by Termimad 0.21.x so you don't have to declare the import yourself. You may use crossterm as `termimad::crossterm`.
+Crossterm 0.23.x is reexported by Termimad 0.22.x so you don't have to declare the import yourself. You may use crossterm as `termimad::crossterm`.
