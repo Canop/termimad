@@ -1,6 +1,7 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-### next
+<a name="v0.22.0"></a>
+### v0.22.0 - 2023-03-02
 - with 1, 2, or 3 spaces before a bullet, you make a deeper list item - Fix #41
 
 <a name="v0.21.1"></a>
