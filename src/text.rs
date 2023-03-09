@@ -38,6 +38,12 @@ impl<'k, 's> FmtText<'k, 's> {
         let mt = parse_text(src, Options::default());
         Self::from_text(skin, mt, width)
     }
+    /// build a text as raw (with no markdown interpretation)
+    pub fn raw_str(skin: &'k MadSkin, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
+        let mt = Text::raw_str(src);
+        Self::from_text(skin, mt, width)
+    }
+
     /// build a fmt_text from a minimad text
     pub fn from_text(skin: &'k MadSkin, mut text: Text<'s>, width: Option<usize>) -> FmtText<'k, 's> {
         let mut lines = text
