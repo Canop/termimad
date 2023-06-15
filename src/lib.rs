@@ -157,6 +157,7 @@ pub use {
         MadView, ProgressBar, TextView,
     },
 };
+pub use coolor;
 pub use minimad;
 
 use tokens::*;

@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.23.1"></a>
+### v0.23.1 - 2023-06-15
+- reexport coolor to ease dependency managment
+
 <a name="v0.23.0"></a>
 ### v0.23.0 - 2023-03-09
 - FmtText::raw_str function to build a text with no markdown interpretation
