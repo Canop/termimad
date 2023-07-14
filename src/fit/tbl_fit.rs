@@ -32,7 +32,11 @@ impl Default for ColData {
 
 impl ColData {
     const fn avg_width(self) -> usize {
-        div_ceil(self.sum_widths, self.count)
+        if self.count == 0 {
+            0
+        } else {
+            div_ceil(self.sum_widths, self.count)
+        }
     }
     pub fn see_cell(&mut self, cell_width: usize) {
         self.sum_widths += cell_width;
