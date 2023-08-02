@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.23.2"></a>
+### v0.23.2 - 2023-08-02
+- utility functions (`FmtText::content_width` and `FmtText::set_rendering_width`) and example (content-align) helping base alignments on the content's width rather than the terminal's width
+
 <a name="v0.23.1"></a>
 ### v0.23.1 - 2023-06-15
 - reexport coolor to ease dependency managment
