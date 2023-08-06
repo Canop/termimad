@@ -3,7 +3,6 @@ use crate::{
 };
 
 /// Termimad error type
-///
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
 
