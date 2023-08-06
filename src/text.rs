@@ -61,6 +61,25 @@ impl<'k, 's> FmtText<'k, 's> {
         }
         FmtText { skin, lines, width }
     }
+    /// set the width to render the text to.
+    ///
+    /// It's preferable to set it no smaller than content_width and
+    /// no wider than the terminal's width.
+    ///
+    /// If you want the text to be wrapped, pass a width on construction
+    /// (ie in FmtText::from or FmtText::from_text) instead.
+    /// The main purpose of this function is to optimize the rendering
+    /// of a text (or several ones) to a content width, for example to
+    /// have centered titles centered not based on the terminal's width
+    /// but on the content width
+    pub fn set_rendering_width(&mut self, width: usize) {
+        self.width = Some(width);
+    }
+    pub fn content_width(&self) -> usize {
+        self.lines
+            .iter()
+            .fold(0, |cw, line| cw.max(line.visible_length()))
+    }
 }
 
 impl fmt::Display for FmtText<'_, '_> {

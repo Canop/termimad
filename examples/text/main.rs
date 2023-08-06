@@ -75,5 +75,6 @@ fn main() {
         print_direct(&skin);
     } else {
         print_in_text_view(skin);
+        println!();
     }
 }
