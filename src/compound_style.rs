@@ -20,6 +20,19 @@ use {
     std::fmt::{self, Display},
 };
 
+/// The attributes which are often supported
+pub static ATTRIBUTES: &[Attribute] = &[
+    Attribute::Bold,
+    Attribute::Dim,
+    Attribute::Italic,
+    Attribute::Underlined,
+    Attribute::Reverse,
+    Attribute::CrossedOut,
+    Attribute::Encircled,
+    Attribute::OverLined,
+];
+
+
 /// A style which may be applied to a compound
 #[derive(Default, Clone, Debug)]
 pub struct CompoundStyle {
@@ -134,6 +147,11 @@ impl CompoundStyle {
         self.object_style.attributes.set(attr);
     }
 
+    /// Check whether the style contains the attribute
+    pub fn has_attr(&self, attr: Attribute) -> bool {
+        self.object_style.attributes.has(attr)
+    }
+
     /// Remove an `Attribute`. Like italic, underlined or bold.
     pub fn remove_attr(&mut self, attr: Attribute) {
         self.object_style.attributes.unset(attr);
@@ -243,5 +261,9 @@ impl CompoundStyle {
 
     pub fn style_char(&self, nude_char: char) -> StyledChar {
         StyledChar::new(self.clone(), nude_char)
+    }
+
+    pub fn attrs(&self) -> Attributes {
+        self.object_style.attributes
     }
 }

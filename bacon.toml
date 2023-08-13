@@ -3,7 +3,7 @@
 # Bacon repository: https://github.com/Canop/bacon
 # Complete help on configuration: https://dystroy.org/bacon/config/
 
-default_job = "check"
+default_job = "check-all"
 
 [jobs.check]
 command = ["cargo", "check", "--color", "always"]
@@ -28,6 +28,11 @@ watch = ["tests", "benches", "examples"]
 command = ["cargo", "test", "--color", "always"]
 need_stdout = true
 watch = ["tests"]
+
+[jobs.ex]
+command = ["cargo", "run", "--color", "always", "--example"]
+allow_warnings = true
+need_stdout = true
 
 [jobs.doc]
 command = ["cargo", "doc", "--color", "always", "--no-deps"]

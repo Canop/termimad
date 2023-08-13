@@ -33,6 +33,9 @@ impl StyledChar {
     pub fn nude(nude_char: char) -> StyledChar {
         Self::new(CompoundStyle::default(), nude_char)
     }
+    pub fn nude_char(&self) -> char {
+        self.nude_char
+    }
     pub fn from_fg_char(fg: Color, nude_char: char) -> StyledChar {
         Self::new(CompoundStyle::with_fg(fg), nude_char)
     }

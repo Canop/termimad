@@ -2,6 +2,8 @@
 
 ### next
 - gray panicking on out of range level has been changed to a silent clamping
+- skin now deserializable with serde
+- several utilities to parse colors and style elements
 
 <a name="v0.23.1"></a>
 ### v0.23.1 - 2023-06-15
