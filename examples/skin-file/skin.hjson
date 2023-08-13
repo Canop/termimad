@@ -1,0 +1,18 @@
+# This Hjson file is an example skin.
+# You can modify it then run `cargo run --example skin-file`
+
+bold: "#fb0 bold"
+italic: dim italic
+strikeout: crossedout red
+bullet: ○ yellow bold
+paragraph: gray(20)
+code_block: gray(2) gray(15) center
+headers: [
+    yellow bold center
+    yellow underlined
+    yellow
+]
+quote: > red
+horizontal-rule: "~ #00cafe"
+table: "#540 center"
+scrollbar: "red yellow"

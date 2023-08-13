@@ -36,3 +36,19 @@ impl Default for ScrollBarStyle {
         Self::new()
     }
 }
+
+impl From<StyledChar> for ScrollBarStyle {
+    fn from(sc: StyledChar) -> Self {
+        let char = sc.nude_char();
+        Self {
+            track: StyledChar::from_fg_char(
+                sc.get_bg().unwrap_or(gray(5)),
+                char,
+            ),
+            thumb: StyledChar::from_fg_char(
+                sc.get_fg().unwrap_or(gray(21)),
+                char,
+            ),
+        }
+    }
+}

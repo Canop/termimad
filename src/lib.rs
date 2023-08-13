@@ -104,8 +104,8 @@ The repository contains several other examples, which hopefully cover the whole 
 
 */
 
-mod ask;
 mod area;
+mod ask;
 mod code;
 mod color;
 mod composite;
@@ -118,8 +118,10 @@ mod inline;
 mod line;
 mod line_style;
 mod macros;
+mod parse;
 mod rect;
 mod scrollbar_style;
+mod serde;
 mod skin;
 mod spacing;
 mod styled_char;
@@ -133,11 +135,11 @@ pub mod crossterm {
 }
 
 pub use {
-    ask::*,
     area::{compute_scrollbar, terminal_size, Area},
+    ask::*,
     color::*,
     composite::FmtComposite,
-    compound_style::CompoundStyle,
+    compound_style::*,
     displayable_line::DisplayableLine,
     errors::Error,
     events::{TimedEvent, EventSource, EventSourceOptions},
@@ -146,6 +148,7 @@ pub use {
     line::FmtLine,
     line_style::LineStyle,
     minimad::Alignment,
+    parse::*,
     rect::*,
     scrollbar_style::ScrollBarStyle,
     skin::MadSkin,
