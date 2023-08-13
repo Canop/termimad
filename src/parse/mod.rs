@@ -67,7 +67,7 @@ pub fn parse_style_token(s: &str) -> Result<StyleToken, ParseStyleTokenError> {
 
 pub fn parse_style_tokens(s: &str) -> Result<Vec<StyleToken>, ParseStyleTokenError> {
     let mut tokens = Vec::new();
-    for m in regex!(r#"\S+(\([\w,\s]+\))?"#).find_iter(s) {
+    for m in regex!(r#"[^\s()]+(\([\w,\s]+\))?"#).find_iter(s) {
         tokens.push(parse_style_token(m.as_str())?);
     }
     Ok(tokens)
@@ -88,12 +88,20 @@ fn test_parse_style_tokens() {
     );
     assert!(parse_style_tokens("red pissenlit").is_err());
     assert_eq!(
-        parse_style_tokens("Center, grey(15)/RGB(51, 47, 58), bold").unwrap(),
+        parse_style_tokens("Center grey(15) RGB(51, 47, 58) bold").unwrap(),
         vec![T::Align(Center), T::Color(gray(15)), T::Color(rgb(51, 47, 58)), T::Attribute(Bold)],
     );
     assert_eq!(
-        parse_style_tokens(" Yellow+Italic ").unwrap(),
+        parse_style_tokens(" Yellow Italic ").unwrap(),
         vec![T::Color(Color::Yellow), T::Attribute(Italic)],
+    );
+    assert_eq!(
+        parse_style_tokens("| Yellow red").unwrap(),
+        vec![T::Char('|'), T::Color(Color::Yellow), T::Color(Color::Red)],
+    );
+    assert_eq!(
+        parse_style_tokens("rgb(255,0,100) #fb0").unwrap(),
+        vec![T::Color(rgb(255,0,100)), T::Color(rgb(255,187,0))],
     );
     if let Err(E::Unrecognized(invalid)) = parse_style_tokens(" red gray(40) ") {
         assert_eq!(&invalid, "gray(40)");
