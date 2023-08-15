@@ -29,6 +29,10 @@ pub fn parse_attribute(s: &str) -> Result<Attribute, ParseAttributeError> {
         Ok(Attribute::Reverse)
     } else if regex_is_match!("encircled"i, s) {
         Ok(Attribute::Encircled)
+    } else if regex_is_match!("slow[_-]?blink"i, s) {
+        Ok(Attribute::SlowBlink)
+    } else if regex_is_match!("rapid[_-]?blink"i, s) {
+        Ok(Attribute::RapidBlink)
     } else {
         Err(ParseAttributeError::Unrecognized)
     }

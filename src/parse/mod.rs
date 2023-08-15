@@ -29,6 +29,8 @@ use {
 pub enum ParseStyleTokenError {
     #[error("{0} not recognized as a style token")]
     Unrecognized(String),
+    #[error("Invalid color: {0}")]
+    InvalidColor(#[from] ParseColorError),
 }
 
 /// something which may be part of a style
@@ -46,8 +48,10 @@ pub fn parse_style_token(s: &str) -> Result<StyleToken, ParseStyleTokenError> {
     if regex_is_match!("none"i, s) {
         return Ok(StyleToken::None);
     }
-    if let Ok(color) = parse_color(s) {
-        return Ok(StyleToken::Color(color));
+    match parse_color(s) {
+        Ok(color) => { return Ok(StyleToken::Color(color)); }
+        Err(ParseColorError::Unrecognized) => {}
+        Err(e) => { return Err(e.into()); }
     }
     if let Ok(attribute) = parse_attribute(s) {
         return Ok(StyleToken::Attribute(attribute));
@@ -103,8 +107,9 @@ fn test_parse_style_tokens() {
         parse_style_tokens("rgb(255,0,100) #fb0").unwrap(),
         vec![T::Color(rgb(255,0,100)), T::Color(rgb(255,187,0))],
     );
-    if let Err(E::Unrecognized(invalid)) = parse_style_tokens(" red gray(40) ") {
-        assert_eq!(&invalid, "gray(40)");
+    let parsed = parse_style_tokens(" red gray(40) ");
+    if let Err(E::InvalidColor(ParseColorError::InvalidGreyLevel{level})) = parsed {
+        assert_eq!(level, 40);
     } else {
         panic!("failed to fail");
     };
