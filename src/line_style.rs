@@ -46,10 +46,16 @@ impl LineStyle {
         self.compound_style.repeat_string(f, s, count)
     }
 
+    /// Write a string several times with the line compound style
+    #[inline(always)]
+    pub fn repeat_char(&self, f: &mut fmt::Formatter<'_>, c: char, count: usize) -> fmt::Result {
+        self.compound_style.repeat_char(f, c, count)
+    }
+
     /// Write 0 or more spaces with the line's compound style
     #[inline(always)]
     pub fn repeat_space(&self, f: &mut fmt::Formatter<'_>, count: usize) -> fmt::Result {
-        self.repeat_string(f, " ", count)
+        self.repeat_char(f, ' ', count)
     }
 
     pub fn blend_with<C: Into<coolor::Color>>(&mut self, color: C, weight: f32) {

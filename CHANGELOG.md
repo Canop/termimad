@@ -1,5 +1,8 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+### next
+- `skin.limit_to_ascii()` makes the characters used for table borders, bullets, etc. be in the non extended ASCII range - see "high-compatibility" example
+
 <a name="v0.24.1"></a>
 ### v0.24.1 - 2023-08-15
 - attribute parsing support RapidBlink and SlowBlink

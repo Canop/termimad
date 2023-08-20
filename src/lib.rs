@@ -125,6 +125,7 @@ mod serde;
 mod skin;
 mod spacing;
 mod styled_char;
+mod table_border_chars;
 mod tbl;
 mod text;
 mod tokens;
@@ -154,6 +155,7 @@ pub use {
     skin::MadSkin,
     spacing::Spacing,
     styled_char::StyledChar,
+    table_border_chars::*,
     text::FmtText,
     views::{
         InputField, ListView, ListViewCell, ListViewColumn,

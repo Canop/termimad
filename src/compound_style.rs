@@ -183,6 +183,21 @@ impl CompoundStyle {
         self.object_style.background_color
     }
 
+    /// Write a char several times with the line compound style
+    #[inline(always)]
+    pub fn repeat_char(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+        c: char,
+        count: usize,
+    ) -> fmt::Result {
+        if count > 0 {
+            let s = std::iter::repeat(c).take(count).collect::<String>();
+            write!(f, "{}", self.apply_to(s))?;
+        }
+        Ok(())
+    }
+
     /// Write a string several times with the line compound style
     ///
     /// Implementation Note: performances here are critical

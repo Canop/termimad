@@ -14,6 +14,7 @@ use {
         tbl::*,
         text::FmtText,
         views::TextView,
+        table_border_chars::*,
     },
     crossterm::{
         queue,
@@ -55,6 +56,7 @@ pub struct MadSkin {
     pub quote_mark: StyledChar,
     pub horizontal_rule: StyledChar,
     pub ellipsis: CompoundStyle,
+    pub table_border_chars: &'static TableBorderChars,
 
     /// compounds which should be replaced with special
     /// renders.
@@ -63,6 +65,7 @@ pub struct MadSkin {
     /// Do not use compounds with a length different than 1.
     #[cfg(feature="special-renders")]
     pub special_chars: HashMap<Compound<'static>, StyledChar>,
+
 }
 
 impl Default for MadSkin {
@@ -95,6 +98,7 @@ impl Default for MadSkin {
             ),
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
             ellipsis: CompoundStyle::default(),
+            table_border_chars: STANDARD_TABLE_BORDER_CHARS,
             #[cfg(feature="special-renders")]
             special_chars: HashMap::new(),
         };
@@ -133,6 +137,7 @@ impl MadSkin {
             ellipsis: CompoundStyle::default(),
             #[cfg(feature="special-renders")]
             special_chars: HashMap::new(),
+            table_border_chars: STANDARD_TABLE_BORDER_CHARS,
         }
     }
 
@@ -164,6 +169,15 @@ impl MadSkin {
         skin.headers[1].set_fg(gray(2));
         skin.headers[2].set_fg(gray(4));
         skin
+    }
+
+    /// Change the characters used for table borders, bullets, etc.
+    /// to be in the non extended ASCII range
+    pub fn limit_to_ascii(&mut self) {
+        self.table_border_chars = ASCII_TABLE_BORDER_CHARS;
+        self.bullet.set_char('*');
+        self.quote_mark.set_char('>');
+        self.horizontal_rule.set_char('-');
     }
 
     /// Blend the foreground and background colors (if any) into the given dest color,
@@ -319,9 +333,9 @@ impl MadSkin {
         os
     }
 
-    // return a formatted line or part of line.
-    //
-    // Don't use this function if `src` is expected to be several lines.
+    /// return a formatted line or part of line.
+    ///
+    /// Don't use this function if `src` is expected to be several lines.
     pub fn inline<'k, 's>(&'k self, src: &'s str) -> FmtInline<'k, 's> {
         let composite = FmtComposite::from(Composite::from_inline(src), self);
         FmtInline {
@@ -549,6 +563,7 @@ impl MadSkin {
         width: Option<usize>,
         with_right_completion: bool,
     ) -> fmt::Result {
+        let tbc = &self.table_border_chars;
         match line {
             FmtLine::Normal(fc) => {
                 self.write_fmt_composite(f, fc, width, with_right_completion)?;
@@ -564,10 +579,10 @@ impl MadSkin {
                 let (lpo, rpo) = Spacing::optional_completions(self.table.align, tbl_width, width);
                 self.paragraph.repeat_space(f, lpo)?;
                 for cell in cells {
-                    write!(f, "{}", self.table.compound_style.apply_to("│"))?;
+                    write!(f, "{}", self.table.compound_style.apply_to(tbc.vertical))?;
                     self.write_fmt_composite(f, cell, None, false)?;
                 }
-                write!(f, "{}", self.table.compound_style.apply_to("│"))?;
+                write!(f, "{}", self.table.compound_style.apply_to(tbc.vertical))?;
                 if with_right_completion {
                     self.paragraph.repeat_space(f, rpo)?;
                 }
@@ -580,9 +595,9 @@ impl MadSkin {
                     f,
                     "{}",
                     self.table.compound_style.apply_to(match rule.position {
-                        RelativePosition::Top => '┌',
-                        RelativePosition::Other => '├',
-                        RelativePosition::Bottom => '└',
+                        RelativePosition::Top => tbc.top_left_corner,
+                        RelativePosition::Other => tbc.left_junction,
+                        RelativePosition::Bottom => tbc.bottom_left_corner,
                     })
                 )?;
                 for (idx, &width) in rule.widths.iter().enumerate() {
@@ -591,21 +606,21 @@ impl MadSkin {
                             f,
                             "{}",
                             self.table.compound_style.apply_to(match rule.position {
-                                RelativePosition::Top => '┬',
-                                RelativePosition::Other => '┼',
-                                RelativePosition::Bottom => '┴',
+                                RelativePosition::Top => tbc.top_junction,
+                                RelativePosition::Other => tbc.cross,
+                                RelativePosition::Bottom => tbc.bottom_junction,
                             })
                         )?;
                     }
-                    self.table.repeat_string(f, "─", width)?;
+                    self.table.repeat_char(f, tbc.horizontal, width)?;
                 }
                 write!(
                     f,
                     "{}",
                     self.table.compound_style.apply_to(match rule.position {
-                        RelativePosition::Top => '┐',
-                        RelativePosition::Other => '┤',
-                        RelativePosition::Bottom => '┘',
+                        RelativePosition::Top => tbc.top_right_corner,
+                        RelativePosition::Other => tbc.right_junction,
+                        RelativePosition::Bottom => tbc.bottom_right_corner,
                     })
                 )?;
                 if with_right_completion {
