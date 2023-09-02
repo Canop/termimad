@@ -100,5 +100,6 @@ fn make_skin() -> MadSkin {
     skin.bold.set_fg(Yellow);
     skin.italic.set_fg(Magenta);
     skin.scrollbar.thumb.set_fg(AnsiValue(178));
+    skin.table_border_chars = ROUNDED_TABLE_BORDER_CHARS;
     skin
 }

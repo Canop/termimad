@@ -42,7 +42,7 @@ fn main() -> Result<(), Error> {
 
     // looping: the template is compiled only once (the macro stores the compiled
     // template in a lazy static var)
-    let user_supplied_strings = vec![
+    let user_supplied_strings = [
         "Victor Hugo",
         "L'escargot et l'alouette",
         "Pizza weight: π * z * z * a", // the stars don't mess with the markdown
