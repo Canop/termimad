@@ -310,16 +310,24 @@ impl InputField {
             } else {
                 self.content.del_char_below()
             }
+        } else if let KeyCode::Char(c) = code {
+            if self.content.has_wide_selection() {
+                self.content.del_selection();
+                self.put_char(c);
+                self.fix_scroll();
+                true
+            } else {
+                self.put_char(c)
+            }
         } else {
             if shift {
                 self.content.make_selection();
             } else {
-                self.content.unselect();
+              self.content.unselect();
             }
             match code {
                 KeyCode::Home => self.move_to_line_start(),
                 KeyCode::End => self.move_to_line_end(),
-                KeyCode::Char(c) => self.put_char(c),
                 KeyCode::Up => self.move_up(),
                 KeyCode::Down => self.move_down(),
                 KeyCode::Left => self.move_left(),

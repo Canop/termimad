@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.25.2"></a>
+### v0.25.2 - 2023-09-03
+- fix shift-key extending the selection
+
 <a name="v0.25.1"></a>
 ### v0.25.1 - 2023-09-01
 - option for rounded corner tables in skin - see test-template example
