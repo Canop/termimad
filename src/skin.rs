@@ -389,6 +389,10 @@ impl MadSkin {
     }
 
     /// do a `print!` of the given src interpreted as a markdown span
+    ///
+    /// Don't use this function if the string is expected to be several
+    /// lines or have typed lines (titles, bullets, code fences, etc.):
+    /// use `print_text` instead.
     pub fn print_inline(&self, src: &str) {
         print!("{}", self.inline(src));
     }

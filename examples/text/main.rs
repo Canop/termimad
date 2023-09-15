@@ -8,7 +8,7 @@ static MD: &str = r#"
 
 Here's the code to print this markdown block in the terminal:
 
-```
+```rust
 let mut skin = MadSkin::default();
 skin.set_headers_fg(rgb(255, 187, 0));
 skin.bold.set_fg(Yellow);
