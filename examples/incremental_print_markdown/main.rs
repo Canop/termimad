@@ -24,20 +24,15 @@ fn main() {
     let mut string_buffer = String::new();
     let mut generator = MARKDOWN_TEXT.chars();
     stdout().execute(cursor::SavePosition).unwrap();  // save initial cursor position
-    loop {
-        let next_one = generator.next();
-        if let Some(chunk) = next_one {
-            stdout()
-                .execute(cursor::RestorePosition).unwrap() // restore cursor position to initial
-                .execute(Clear(FromCursorDown)).unwrap(); // clear previous output
-            string_buffer.push(chunk);
-            let formatted_text = FmtText::from(&skin, &string_buffer, None); // can have Some(width) to enable hard wrapping
-            print!("{}", formatted_text);
-            stdout().flush().unwrap();
-            sleep(std::time::Duration::from_millis(100));
-        } else {
-            break;
-        }
+    while let Some(chunk) = generator.next() {
+        stdout()
+            .execute(cursor::RestorePosition).unwrap() // restore cursor position to initial
+            .execute(Clear(FromCursorDown)).unwrap(); // clear previous output
+        string_buffer.push(chunk);
+        let formatted_text = FmtText::from(&skin, &string_buffer, None); // can have Some(width) to enable hard wrapping
+        print!("{}", formatted_text);
+        stdout().flush().unwrap();
+        sleep(std::time::Duration::from_millis(100));
     }
     stdout().execute(cursor::Show).unwrap();
     sleep(std::time::Duration::from_millis(500));
