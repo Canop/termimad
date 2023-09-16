@@ -32,6 +32,7 @@ cli-log = "2.0"
 crokey = "0.4"
 deser-hjson = "2.0"
 terminal-clipboard = "0.3.1"
+ctrlc = "3.4"
 
 [patch.crates-io]
 # coolor = { path = "../coolor" }
