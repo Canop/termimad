@@ -69,6 +69,7 @@ impl IncrementalMarkdownPrinter {
         print!("{}", formatted_text);
         stdout().flush().unwrap();
         // update cursor anchor
+        // the cursor position is relative to the terminal not the screen/history, so the anchor "floats" when a scrollbar appears.
         let mut new_cursor_anchor = cursor::position().unwrap();
         if new_cursor_anchor.0 > columns {
             new_cursor_anchor.0 -= columns;
