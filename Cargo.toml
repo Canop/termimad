@@ -17,7 +17,7 @@ default = ["special-renders"]
 
 [dependencies]
 minimad = "0.13.0"
-coolor = { version="=0.5.0", features=["crossterm"] }
+coolor = { version="=0.5.1", features=["crossterm"] }
 crossterm = "0.23.2"
 crossbeam = "0.8"
 lazy-regex = "3.0.0"
