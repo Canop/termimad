@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.25.4"></a>
+### v0.25.4 - 2023-10-14
+- dependency version updated
+
 <a name="v0.25.3"></a>
 ### v0.25.3 - 2023-10-12
 - coolor updated to 0.5.1
