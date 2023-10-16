@@ -1,7 +1,7 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-<a name="v0.25.4"></a>
-### v0.25.4 - 2023-10-14
+<a name="v0.25.5"></a>
+### v0.25.5 - 2023-10-16
 - dependency version updated
 
 <a name="v0.25.3"></a>
