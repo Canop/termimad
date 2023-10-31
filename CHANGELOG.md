@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.25.6"></a>
+### v0.25.6 - 2023-10-31
+- upgrade terminal-clipboard due to RUSTSEC-2021-0019 in its X11 dependency
+
 <a name="v0.25.5"></a>
 ### v0.25.5 - 2023-10-16
 - dependency version updated
