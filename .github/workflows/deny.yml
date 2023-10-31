@@ -1,0 +1,35 @@
+on: [push, pull_request]
+
+name: cargo-deny
+
+jobs:
+  deny:
+    name: deny
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        checks:
+          - advisories
+          - bans licenses sources
+
+    # Prevent sudden announcement of a new advisory from failing ci:
+    continue-on-error: ${{ matrix.checks == 'advisories' }}
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4.1.1
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.73.0
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: cargo-deny
+        uses: EmbarkStudios/cargo-deny-action@v1
+        with:
+          command: check ${{ matrix.checks }}
+
