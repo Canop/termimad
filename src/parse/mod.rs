@@ -23,6 +23,10 @@ use {
     },
     minimad::Alignment,
     lazy_regex::*,
+    std::{
+        fmt::{self, Write},
+        io,
+    },
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -42,6 +46,63 @@ pub enum StyleToken {
     Align(Alignment),
     /// A specified absence, meaning for example "no foreground"
     None,
+}
+
+impl fmt::Display for StyleToken {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Char(c) => write!(f, "{}", c),
+            Self::Color(c) => write_color(f, *c),
+            Self::Attribute(a) => write_attribute(f, *a),
+            Self::Align(a) => write_align(f, *a),
+            Self::None => write!(f, "none"),
+        }
+    }
+}
+
+pub trait PushStyleTokens {
+    fn push_style_tokens(&self, tokens: &mut Vec<StyleToken>);
+
+    fn to_style_tokens_string(&self) -> String {
+        let mut tokens = Vec::new();
+        self.push_style_tokens(&mut tokens);
+        let mut s = String::new();
+        for token in tokens {
+            // safety: write! on a string can't fail
+            if !s.is_empty() {
+                write!(&mut s, " {token}").unwrap();
+            } else {
+                write!(&mut s, "{token}").unwrap();
+            }
+        }
+        s
+    }
+}
+
+pub fn write_style_tokens<W: io::Write>(w: &mut W, tokens: &[StyleToken]) -> io::Result<()> {
+    let mut first = true;
+    for token in tokens {
+        if first {
+            write!(w, " {token}")?;
+            first = false;
+        } else {
+            write!(w, "{token}")?;
+        }
+    }
+    Ok(())
+}
+
+pub fn style_tokens_to_string(tokens: &[StyleToken]) -> String {
+    let mut s = String::new();
+    for token in tokens {
+        // safety: write! on a string can't fail
+        if !s.is_empty() {
+            write!(&mut s, " {token}").unwrap();
+        } else {
+            write!(&mut s, "{token}").unwrap();
+        }
+    }
+    s
 }
 
 pub fn parse_style_token(s: &str) -> Result<StyleToken, ParseStyleTokenError> {

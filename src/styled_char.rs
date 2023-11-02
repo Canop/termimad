@@ -15,7 +15,7 @@ use {
 
 /// A modifiable character which can be easily written or repeated. Can
 /// be used for bullets, horizontal rules or quote marks.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct StyledChar {
     compound_style: CompoundStyle,
     nude_char: char,
@@ -67,6 +67,9 @@ impl StyledChar {
     pub fn set_compound_style(&mut self, compound_style: CompoundStyle) {
         self.compound_style = compound_style;
         self.styled_char = self.compound_style.apply_to(self.nude_char);
+    }
+    pub fn compound_style(&self) -> &CompoundStyle {
+        &self.compound_style
     }
     /// Return a struct implementing `Display`, made of a (optimized) repetition
     ///  of the character with its style.

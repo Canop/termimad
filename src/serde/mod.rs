@@ -1,6 +1,12 @@
-mod deser_skin;
-mod deser_compound_style;
-mod deser_line_style;
-mod deser_styled_char;
+mod serde_skin;
+mod serde_compound_style;
+mod serde_line_style;
+mod serde_scrollbar_style;
+mod serde_styled_char;
+
+pub use {
+    serde_scrollbar_style::*,
+};
+
 
 

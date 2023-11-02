@@ -1,0 +1,25 @@
+{
+  "bold": "Yellow Bold",
+  "italic": "Magenta rgb(30, 30, 40) Italic Underlined OverLined",
+  "strikeout": "CrossedOut",
+  "inline_code": "ansi(249) ansi(235) Reverse",
+  "ellipsis": "",
+  "bullet": "⟡ Yellow",
+  "quote": "▐ Yellow Bold",
+  "horizontal_rule": "― ansi(238)",
+  "scrollbar": "▐ ansi(178) ansi(237)",
+  "paragraph": "Magenta center",
+  "code_block": "ansi(249) ansi(235) ",
+  "table": "ansi(239) center",
+  "headers": [
+    "ansi(178) ansi(129) Bold Underlined center",
+    "ansi(178) Bold Underlined ",
+    "ansi(254) Underlined ",
+    "ansi(178) Underlined ",
+    "ansi(178) Underlined ",
+    "ansi(178) Underlined ",
+    "ansi(178) Underlined ",
+    "ansi(178) Underlined "
+  ],
+  "table_border_chars": "rounded"
+}

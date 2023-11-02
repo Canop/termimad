@@ -17,11 +17,11 @@ special-renders = []
 default = ["special-renders"]
 
 [dependencies]
-minimad = "0.13.0"
 coolor = { version="0.7.0", features=["crossterm"] }
-crossterm = "=0.23.2"
 crossbeam = "0.8"
+crossterm = "=0.23.2"
 lazy-regex = "3"
+minimad = "0.13.0"
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 unicode-width = "0.1.10"
@@ -32,6 +32,8 @@ anyhow = "1.0"
 cli-log = "2"
 crokey = "0.4"
 deser-hjson = "2"
+pretty_assertions = "1.4"
+serde_json = "1"
 terminal-clipboard = ">=0.3.1"
 
 [patch.crates-io]

@@ -2,8 +2,9 @@ use {
     crate::{
         CompoundStyle,
         parse_compound_style,
+        parse::PushStyleTokens,
     },
-    serde::de,
+    serde::{de, Serialize, Serializer},
 };
 
 impl<'de> de::Deserialize<'de> for CompoundStyle {
@@ -16,3 +17,11 @@ impl<'de> de::Deserialize<'de> for CompoundStyle {
     }
 }
 
+impl Serialize for CompoundStyle {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_style_tokens_string())
+    }
+}

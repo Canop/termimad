@@ -14,8 +14,6 @@ skin.set_headers_fg(rgb(255, 187, 0));
 skin.bold.set_fg(Yellow);
 skin.italic.set_fgbg(Magenta, rgb(30, 30, 40));
 skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
-skin.quote_mark = StyledChar::from_fg_char(Yellow, '▐');
-skin.bullet = StyledChar::from_fg_char(Yellow, '⟡');
 skin.quote_mark.set_fg(Yellow);
 println!("{}", skin.term_text(my_markdown));
 ```

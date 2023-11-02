@@ -11,7 +11,7 @@ use {
 ///
 /// For the default styling only the fg color is defined
 ///  and the char is ▐ but everything can be changed.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ScrollBarStyle {
     pub track: StyledChar,
     pub thumb: StyledChar,
