@@ -34,7 +34,7 @@ pub static ATTRIBUTES: &[Attribute] = &[
 
 
 /// A style which may be applied to a compound
-#[derive(Default, Clone, Debug)]
+#[derive(Default, Clone, Debug, PartialEq)]
 pub struct CompoundStyle {
     pub object_style: ContentStyle, // a crossterm content style
 }

@@ -6,6 +6,7 @@ use {
     },
     crossterm::style::Color,
     lazy_regex::*,
+    std::fmt,
 };
 
 #[derive(thiserror::Error, Debug)]
@@ -14,6 +15,30 @@ pub enum ParseColorError {
     Unrecognized,
     #[error("grey level must be between 0 and 23 (got {level})")]
     InvalidGreyLevel { level: u8 },
+}
+
+pub fn write_color(f: &mut fmt::Formatter<'_>, c: Color) -> fmt::Result {
+    match c {
+        Color::Reset => Ok(()),
+        Color::Black => write!(f, "Black"),
+        Color::DarkGrey => write!(f, "DarkGrey"),
+        Color::Red => write!(f, "Red"),
+        Color::DarkRed => write!(f, "DarkRed"),
+        Color::Green => write!(f, "Green"),
+        Color::DarkGreen => write!(f, "DarkGreen"),
+        Color::Yellow => write!(f, "Yellow"),
+        Color::DarkYellow => write!(f, "DarkYellow"),
+        Color::Blue => write!(f, "Blue"),
+        Color::DarkBlue => write!(f, "DarkBlue"),
+        Color::Magenta => write!(f, "Magenta"),
+        Color::DarkMagenta => write!(f, "DarkMagenta"),
+        Color::Cyan => write!(f, "Cyan"),
+        Color::DarkCyan => write!(f, "DarkCyan"),
+        Color::White => write!(f, "White"),
+        Color::Grey => write!(f, "Grey"),
+        Color::Rgb { r, g, b } => write!(f, "rgb({r}, {g}, {b})"),
+        Color::AnsiValue(code) => write!(f, "ansi({code})"),
+    }
 }
 
 /// Read a Crossterm color from a string.

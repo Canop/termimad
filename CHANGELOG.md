@@ -1,5 +1,8 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+### next
+- MadSkin and other structs now implement serde::Serialize - Fix #19
+
 <a name="v0.25.7"></a>
 ### v0.25.7 - 2023-10-31
 - upgrade coolor, removing the ansi_colours dependency, fixing a license incompatibility - Fix #51

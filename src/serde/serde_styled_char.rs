@@ -2,8 +2,9 @@ use {
     crate::{
         StyledChar,
         parse_styled_char,
+        parse::PushStyleTokens,
     },
-    serde::de,
+    serde::{de, Serialize, Serializer},
 };
 
 impl<'de> de::Deserialize<'de> for StyledChar {
@@ -16,4 +17,11 @@ impl<'de> de::Deserialize<'de> for StyledChar {
     }
 }
 
-
+impl Serialize for StyledChar {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_style_tokens_string())
+    }
+}

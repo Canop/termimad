@@ -1,6 +1,6 @@
 
 /// The set of characters to use to render table borders
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TableBorderChars {
     pub horizontal: char,
     pub vertical: char,
@@ -13,6 +13,31 @@ pub struct TableBorderChars {
     pub bottom_junction: char,
     pub left_junction: char,
     pub cross: char,
+}
+
+impl TableBorderChars {
+    /// return a key which could be used in by_key.
+    ///
+    /// (note that we're comparing the values, not the pointers)
+    pub fn key(&self) -> Option<&'static str> {
+        if self == STANDARD_TABLE_BORDER_CHARS {
+            Some("standard")
+        } else if self == ASCII_TABLE_BORDER_CHARS {
+            Some("ascii")
+        } else if self == ROUNDED_TABLE_BORDER_CHARS {
+            Some("rounded")
+        } else {
+            None
+        }
+    }
+    pub fn by_key(key: &str) -> Option<&'static Self> {
+        match key {
+            "standard" => Some(STANDARD_TABLE_BORDER_CHARS),
+            "ascii" => Some(ASCII_TABLE_BORDER_CHARS),
+            "rounded" => Some(ROUNDED_TABLE_BORDER_CHARS),
+            _ => None,
+        }
+    }
 }
 
 /// Default square tables

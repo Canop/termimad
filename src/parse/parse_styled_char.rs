@@ -19,3 +19,10 @@ pub fn parse_styled_char(s: &str, default_nude_char: char) -> Result<StyledChar,
     Ok(StyledChar::new(style, nude_char))
 }
 
+impl PushStyleTokens for StyledChar {
+    fn push_style_tokens(&self, tokens: &mut Vec<StyleToken>) {
+        tokens.push(StyleToken::Char(self.nude_char()));
+        self.compound_style().push_style_tokens(tokens);
+    }
+}
+

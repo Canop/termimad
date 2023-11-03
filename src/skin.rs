@@ -41,7 +41,7 @@ use {
 
 /// A skin defining how a parsed markdown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MadSkin {
     pub paragraph: LineStyle,
     pub bold: CompoundStyle,

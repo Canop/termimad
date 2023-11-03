@@ -24,3 +24,10 @@ impl From<&[StyleToken]> for LineStyle {
         LineStyle { compound_style, align }
     }
 }
+
+impl PushStyleTokens for LineStyle {
+    fn push_style_tokens(&self, tokens: &mut Vec<StyleToken>) {
+        self.compound_style.push_style_tokens(tokens);
+        tokens.push(StyleToken::Align(self.align));
+    }
+}

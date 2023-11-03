@@ -3,12 +3,43 @@ use {
         Attribute,
     },
     lazy_regex::*,
+    std::fmt,
 };
 
 #[derive(thiserror::Error, Debug)]
 pub enum ParseAttributeError {
     #[error("not a recognized attribute")]
     Unrecognized,
+}
+
+pub fn write_attribute(f: &mut fmt::Formatter<'_>, a: Attribute) -> fmt::Result {
+    match a {
+        Attribute::Reset => Ok(()),
+        Attribute::Bold => write!(f, "Bold"),
+        Attribute::Dim => write!(f, "Dim"),
+        Attribute::Italic => write!(f, "Italic"),
+        Attribute::Underlined => write!(f, "Underlined"),
+        Attribute::SlowBlink => write!(f, "SlowBlink"),
+        Attribute::RapidBlink => write!(f, "RapidBlink"),
+        Attribute::Reverse => write!(f, "Reverse"),
+        Attribute::Hidden => write!(f, "Hidden"),
+        Attribute::CrossedOut => write!(f, "CrossedOut"),
+        Attribute::Fraktur => write!(f, "Fraktur"),
+        Attribute::NoBold => write!(f, "NoBold"),
+        Attribute::NormalIntensity => write!(f, "NormalIntensity"),
+        Attribute::NoItalic => write!(f, "NoItalic"),
+        Attribute::NoUnderline => write!(f, "NoUnderline"),
+        Attribute::NoBlink => write!(f, "NoBlink"),
+        Attribute::NoReverse => write!(f, "NoReverse"),
+        Attribute::NoHidden => write!(f, "NoHidden"),
+        Attribute::NotCrossedOut => write!(f, "NotCrossedOut"),
+        Attribute::Framed => write!(f, "Framed"),
+        Attribute::Encircled => write!(f, "Encircled"),
+        Attribute::OverLined => write!(f, "OverLined"),
+        Attribute::NotFramedOrEncircled => write!(f, "NotFramedOrEncircled"),
+        Attribute::NotOverLined => write!(f, "NotOverLined"),
+        _ => Ok(()),
+    }
 }
 
 /// Read a Minimad Attributement from a string.
