@@ -1,6 +1,7 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-### next
+<a name="v0.26.0"></a>
+### v0.26.0 - 2023-11-03
 - MadSkin and other structs now implement serde::Serialize - Fix #19
 
 <a name="v0.25.7"></a>
