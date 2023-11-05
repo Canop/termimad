@@ -453,6 +453,12 @@ impl InputFieldContent {
             false
         }
     }
+    /// Tell whether it's possible to move the cursor to the
+    /// right (or to the next line)
+    pub fn can_move_right(&self) -> bool {
+        self.pos.x < self.lines[self.pos.y].chars.len()
+            || self.pos.y < self.lines.len() - 1
+    }
 
     /// Move the cursor to the right (or to the line below
     /// if it's a the end of a non-last line)
@@ -498,6 +504,9 @@ impl InputFieldContent {
     }
     pub fn move_down(&mut self) -> bool {
         self.move_lines_down(1)
+    }
+    pub fn can_move_left(&self) -> bool {
+        self.pos.x > 0 || self.pos.y > 0
     }
     pub fn move_left(&mut self) -> bool {
         if self.pos.x > 0 {

@@ -165,6 +165,12 @@ impl InputField {
     pub fn get_content(&self) -> String {
         self.content.to_string()
     }
+    pub fn can_move_left(&self) -> bool {
+        self.content.can_move_left()
+    }
+    pub fn can_move_right(&self) -> bool {
+        self.content.can_move_right()
+    }
     pub fn is_empty(&self) -> bool {
         self.content.is_empty()
     }
