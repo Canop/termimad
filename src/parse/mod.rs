@@ -44,6 +44,7 @@ pub enum StyleToken {
     Color(Color),
     Attribute(Attribute),
     Align(Alignment),
+    Dimension(u16),
     /// A specified absence, meaning for example "no foreground"
     None,
 }
@@ -55,6 +56,7 @@ impl fmt::Display for StyleToken {
             Self::Color(c) => write_color(f, *c),
             Self::Attribute(a) => write_attribute(f, *a),
             Self::Align(a) => write_align(f, *a),
+            Self::Dimension(number) =>  write!(f, "{}", number),
             Self::None => write!(f, "none"),
         }
     }
@@ -108,6 +110,9 @@ pub fn style_tokens_to_string(tokens: &[StyleToken]) -> String {
 pub fn parse_style_token(s: &str) -> Result<StyleToken, ParseStyleTokenError> {
     if regex_is_match!("none"i, s) {
         return Ok(StyleToken::None);
+    }
+    if let Ok(number) = s.parse() {
+        return Ok(StyleToken::Dimension(number));
     }
     match parse_color(s) {
         Ok(color) => { return Ok(StyleToken::Color(color)); }

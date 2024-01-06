@@ -52,6 +52,9 @@ impl From<&[StyleToken]> for CompoundStyle {
                 StyleToken::Align(_) => {
                     // not of use for compound styles
                 }
+                StyleToken::Dimension(_) => {
+                    // not of use for compound styles
+                }
             }
         }
         style

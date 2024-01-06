@@ -48,7 +48,7 @@ pub fn hard_wrap_composite<'s, 'c>(
     }
     debug_assert!(src_composite.visible_length > width); // or we shouldn't be called
     let mut composites: Vec<FmtComposite<'s>> = Vec::new();
-    let (first_width, _other_widths) = composite_style_widths(src_composite.composite.style);
+    let (first_width, other_widths) = composite_style_widths(src_composite.composite.style);
     let mut dst_composite = FmtComposite {
         composite: Composite {
             style: src_composite.composite.style,
@@ -66,13 +66,13 @@ pub fn hard_wrap_composite<'s, 'c>(
         ( // clean cut of 2
             compounds.len() == 2
             && compounds[0].src.width() + first_width <= width
-            && compounds[1].src.width() + _other_widths <= width
+            && compounds[1].src.width() + other_widths <= width
         )
         ||
         ( // clean cut of 3
             compounds.len() == 3
             && compounds[0].src.width() + first_width <= width
-            && compounds[2].src.width() + _other_widths <= width
+            && compounds[2].src.width() + other_widths <= width
             && compounds[1].src.chars().all(char::is_whitespace)
         )
     {
@@ -88,6 +88,7 @@ pub fn hard_wrap_composite<'s, 'c>(
     // Strategy 2:
     // we try to cut along tokens, using spaces to break
     for token in tokens.drain(..) {
+        // TODO: does that really take first_width into account ?
         if dst_composite.visible_length + token.width > width {
             if !token.blank { // we skip blank composite at line change
                 let mut repl_composite = follow_up_composite(&dst_composite);
@@ -108,18 +109,22 @@ pub fn hard_wrap_composite<'s, 'c>(
 /// Consumes the passed array and return a new one (may contain
 /// the original lines, avoiding cloning when possible).
 /// Return an error if the width is less than 3.
-pub fn hard_wrap_lines(
-    src_lines: Vec<FmtLine<'_>>,
+pub fn hard_wrap_lines<'s, 'k>(
+    src_lines: Vec<FmtLine<'s>>,
     width: usize,
-) -> Result<Vec<FmtLine<'_>>, InsufficientWidthError> {
+    skin: &'k MadSkin,
+) -> Result<Vec<FmtLine<'s>>, InsufficientWidthError> {
     let mut src_lines = src_lines;
     let mut lines = Vec::new();
     for src_line in src_lines.drain(..) {
         if let FmtLine::Normal(fc) = src_line {
-            if fc.visible_length <= width {
+            let (left_margin, right_margin) = skin
+                .line_style(&fc.composite.style)
+                .margins_in(Some(width));
+            if fc.visible_length + left_margin + right_margin <= width {
                 lines.push(FmtLine::Normal(fc));
             } else {
-                for fc in hard_wrap_composite(&fc, width)? {
+                for fc in hard_wrap_composite(&fc, width - left_margin - right_margin)? {
                     lines.push(FmtLine::Normal(fc));
                 }
             }

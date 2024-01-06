@@ -14,9 +14,35 @@ use {
 pub struct LineStyle {
     pub compound_style: CompoundStyle,
     pub align: Alignment,
+    pub left_margin: usize,
+    pub right_margin: usize,
 }
 
 impl LineStyle {
+
+    /// Return a (left_margin, right_margin) tupple, with both values
+    /// being zeroed when they wouldn't let a width of at least 3 otherwise.
+    pub fn margins_in(&self, available_width: Option<usize>) -> (usize, usize) {
+        if let Some(width) = available_width {
+            if width < self.left_margin + self.right_margin + 3 {
+                return (0, 0);
+            }
+        }
+        (self.left_margin, self.right_margin)
+    }
+
+    pub fn new(
+        compound_style: CompoundStyle,
+        align: Alignment,
+    ) -> Self {
+        Self {
+            compound_style,
+            align,
+            left_margin: 0,
+            right_margin: 0,
+        }
+    }
+
     /// Set the foreground color to the passed color.
     #[inline(always)]
     pub fn set_fg(&mut self, color: Color) {
@@ -60,5 +86,16 @@ impl LineStyle {
 
     pub fn blend_with<C: Into<coolor::Color>>(&mut self, color: C, weight: f32) {
         self.compound_style.blend_with(color, weight);
+    }
+}
+
+impl From<CompoundStyle> for LineStyle {
+    fn from(compound_style: CompoundStyle) -> Self {
+        Self {
+            compound_style,
+            align: Alignment::Unspecified,
+            left_margin: 0,
+            right_margin: 0,
+        }
     }
 }

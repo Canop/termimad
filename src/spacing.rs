@@ -1,5 +1,10 @@
-use crate::{compound_style::CompoundStyle, errors::Result};
-use minimad::Alignment;
+use {
+    crate::{
+        compound_style::CompoundStyle,
+        errors::Result,
+    },
+    minimad::Alignment,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Spacing {
@@ -18,7 +23,11 @@ impl Spacing {
     /// compute the number of chars to add left and write of inner_width
     /// to fill outer_width
     #[inline(always)]
-    pub const fn completions(align: Alignment, inner_width: usize, outer_width: usize) -> (usize, usize) {
+    pub const fn completions(
+        align: Alignment,
+        inner_width: usize,
+        outer_width: usize,
+    ) -> (usize, usize) {
         if inner_width >= outer_width {
             return (0, 0);
         }
@@ -76,6 +85,8 @@ impl Spacing {
         }
         Ok(())
     }
+    // FIXME use the number of chars instead of their real width,
+    // the crop writer should be used when wide characters are expected
     pub fn write_str<W>(&self, w: &mut W, s: &str, style: &CompoundStyle) -> Result<()>
     where
         W: std::io::Write,
