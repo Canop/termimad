@@ -654,6 +654,10 @@ fn test_char_iterator() {
     }
 }
 
+fn is_word_char(c: char) -> bool {
+    c.is_alphanumeric() || c == '_'
+}
+
 #[cfg(test)]
 mod input_content_edit_monoline_tests {
 
@@ -787,6 +791,3 @@ mod input_content_edit_monoline_tests {
 }
 
 
-fn is_word_char(c: char) -> bool {
-    c.is_alphanumeric() || c == '_'
-}
