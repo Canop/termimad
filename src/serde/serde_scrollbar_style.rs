@@ -36,6 +36,7 @@ impl From<&ScrollBarStyle> for ScrollBarStyleDef {
                 CompoundStyle::new(
                     sc.thumb.get_fg(),
                     sc.track.get_fg(),
+                    None,
                     Default::default(),
                 ),
                 sc.track.nude_char(),

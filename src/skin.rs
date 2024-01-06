@@ -93,7 +93,7 @@ impl Default for MadSkin {
             },
             bullet: StyledChar::from_fg_char(gray(8), '•'),
             quote_mark: StyledChar::new(
-                CompoundStyle::new(Some(gray(12)), None, Attribute::Bold.into()),
+                CompoundStyle::new(Some(gray(12)), None, None, Attribute::Bold.into()),
                 '▐',
             ),
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),

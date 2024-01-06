@@ -26,7 +26,7 @@ pub struct EscapeSequence {
 impl fmt::Display for EscapeSequence {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for key in &self.keys {
-            if let KeyEvent { code: KeyCode::Char(c), modifiers: KeyModifiers::NONE } = key {
+            if let KeyEvent { code: KeyCode::Char(c), modifiers: KeyModifiers::NONE, .. } = key {
                 write!(f, "{}", c)?;
             }
         }

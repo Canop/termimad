@@ -7,6 +7,8 @@ use {
             Event,
             KeyCode,
             KeyEvent,
+            KeyEventKind,
+            KeyEventState,
             KeyModifiers,
             MouseButton,
             MouseEvent,
@@ -69,10 +71,14 @@ impl InputField {
     pub const ENTER: KeyEvent = KeyEvent {
         code: KeyCode::Enter,
         modifiers: KeyModifiers::NONE,
+        kind: KeyEventKind::Press,
+        state: KeyEventState::NONE,
     };
     pub const ALT_ENTER: KeyEvent = KeyEvent {
         code: KeyCode::Enter,
         modifiers: KeyModifiers::ALT,
+        kind: KeyEventKind::Press,
+        state: KeyEventState::NONE,
     };
 
     pub fn new(area: Area) -> Self {
@@ -284,10 +290,11 @@ impl InputField {
         }
         use crate::crossterm::event::{
             KeyModifiers as Mod,
+            KeyEventKind as Kind,
         };
-        match (key.code, key.modifiers) {
-            (code, Mod::NONE) => self.apply_keycode_event(code, false),
-            (code, Mod::SHIFT) => self.apply_keycode_event(code, true),
+        match (key.code, key.modifiers, key.kind) {
+            (code, Mod::NONE, Kind::Press) => self.apply_keycode_event(code, false),
+            (code, Mod::SHIFT, Kind::Press) => self.apply_keycode_event(code, true),
             _ => false,
         }
     }
@@ -426,7 +433,7 @@ impl InputField {
             Event::Mouse(mouse_event) => {
                 self.apply_mouse_event(mouse_event, is_double_click)
             }
-            Event::Key(KeyEvent{code, modifiers}) if self.focused => {
+            Event::Key(KeyEvent{code, modifiers, ..}) if self.focused => {
                 if modifiers.is_empty() {
                     self.apply_keycode_event(code, false)
                 } else if modifiers == KeyModifiers::SHIFT {

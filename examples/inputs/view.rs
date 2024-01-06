@@ -172,6 +172,9 @@ impl View {
             Event::Key(key) => self.apply_key_event(key),
             Event::Mouse(me) => self.apply_mouse_event(me, timed_event.double_click),
             Event::Resize(w, h) => self.resize(Area::new(0, 0, w, h)),
+            Event::FocusGained => false,
+            Event::FocusLost => false,
+            Event::Paste(_) => false,
         }
     }
     /// draw the view (not flushing)

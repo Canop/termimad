@@ -22,7 +22,7 @@ let mut skin = MadSkin::default();
 // let's decide bold is in light gray
 skin.bold.set_fg(gray(20));
 // let's make strikeout not striked out but red, with no specific background, and bold
-skin.strikeout = CompoundStyle::new(Some(Red), None, Bold.into());
+skin.strikeout = CompoundStyle::new(Some(Red), None, None, Bold.into());
 ```
 
 **Beware:**

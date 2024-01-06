@@ -9,6 +9,7 @@ use termimad::crossterm::{
         self,
         Event,
         KeyEvent,
+        KeyEventKind,
         KeyCode::*,
     },
     cursor,
@@ -57,7 +58,7 @@ where
     loop {
         view.write_on(w)?;
         w.flush()?;
-        if let Ok(Event::Key(KeyEvent{code, modifiers})) = event::read() {
+        if let Ok(Event::Key(KeyEvent{code, modifiers, kind: KeyEventKind::Press, ..})) = event::read() {
             if !modifiers.is_empty() {
                 continue;
             }

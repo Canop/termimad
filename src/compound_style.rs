@@ -58,12 +58,14 @@ impl CompoundStyle {
     pub const fn new(
         foreground_color: Option<Color>,
         background_color: Option<Color>,
+        underline_color: Option<Color>,
         attributes: Attributes,
     ) -> CompoundStyle {
         CompoundStyle {
             object_style: ContentStyle {
                 foreground_color,
                 background_color,
+                underline_color,
                 attributes,
             },
         }
@@ -92,6 +94,7 @@ impl CompoundStyle {
             object_style: ContentStyle {
                 foreground_color: Some(fg),
                 background_color: Some(bg),
+                underline_color: None,
                 attributes: Attributes::default(),
             }
         }
@@ -103,6 +106,7 @@ impl CompoundStyle {
             object_style: ContentStyle {
                 foreground_color: Some(fg),
                 background_color: None,
+                underline_color: None,
                 attributes: Attributes::default(),
             }
         }
@@ -114,6 +118,7 @@ impl CompoundStyle {
             object_style: ContentStyle {
                 foreground_color: None,
                 background_color: Some(bg),
+                underline_color: None,
                 attributes: Attributes::default(),
             }
         }

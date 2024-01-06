@@ -13,7 +13,7 @@ use {
 };
 
 /// a user event with happening time
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TimedEvent {
 
     pub time: Instant,
@@ -52,7 +52,7 @@ impl TimedEvent {
 
     /// If it's a simple mouse up and not determined to be the second click of
     /// a double click, return the coordinates
-    pub const fn as_click(self) -> Option<(u16, u16)> {
+    pub const fn as_click(&self) -> Option<(u16, u16)> {
         if self.double_click {
             return None;
         }
@@ -64,7 +64,7 @@ impl TimedEvent {
         }
     }
 
-    pub fn is_key(self, key: KeyEvent) -> bool {
+    pub fn is_key(&self, key: KeyEvent) -> bool {
         match self.event {
             Event::Key(k) if k == key => true,
             _ => false,

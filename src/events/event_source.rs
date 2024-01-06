@@ -13,6 +13,8 @@ use {
             Event,
             KeyCode,
             KeyEvent,
+            KeyEventKind,
+            KeyEventState,
             KeyModifiers,
             MouseButton,
             MouseEvent,
@@ -93,10 +95,14 @@ impl EventSource {
         let seq_start = KeyEvent {
             code: KeyCode::Char('_'),
             modifiers: KeyModifiers::ALT,
+            kind: KeyEventKind::Press,
+            state: KeyEventState::NONE,
         };
         let seq_end = KeyEvent {
             code: KeyCode::Char('\\'),
             modifiers: KeyModifiers::ALT,
+            kind: KeyEventKind::Press,
+            state: KeyEventState::NONE,
         };
         thread::spawn(move || {
             let mut last_up: Option<TimedClick> = None;
