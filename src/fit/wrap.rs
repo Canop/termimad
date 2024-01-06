@@ -109,10 +109,10 @@ pub fn hard_wrap_composite<'s, 'c>(
 /// Consumes the passed array and return a new one (may contain
 /// the original lines, avoiding cloning when possible).
 /// Return an error if the width is less than 3.
-pub fn hard_wrap_lines<'s, 'k>(
+pub fn hard_wrap_lines<'s>(
     src_lines: Vec<FmtLine<'s>>,
     width: usize,
-    skin: &'k MadSkin,
+    skin: &MadSkin,
 ) -> Result<Vec<FmtLine<'s>>, InsufficientWidthError> {
     let mut src_lines = src_lines;
     let mut lines = Vec::new();
