@@ -70,7 +70,7 @@ The first encountered color is the foreground color. If you want no foreground c
 
 Line styles are "paragraph", "code-block", and "table".
 
-They're defined like inline styles but accept an optional alignment (`left`, `right`, or `center`).
+They're defined like inline styles but accept an optional alignment (`left`, `right`, or `center`) and optional left and right margins.
 
 ### Styled chars
 

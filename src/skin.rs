@@ -87,10 +87,7 @@ impl Default for MadSkin {
             code_block: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
-            table: LineStyle {
-                compound_style: CompoundStyle::with_fg(gray(7)),
-                align: Alignment::Unspecified,
-            },
+            table: CompoundStyle::with_fg(gray(7)).into(),
             bullet: StyledChar::from_fg_char(gray(8), '•'),
             quote_mark: StyledChar::new(
                 CompoundStyle::new(Some(gray(12)), None, Attribute::Bold.into()),
@@ -301,7 +298,7 @@ impl MadSkin {
     }
 
     /// return the style to apply to a given line
-    const fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
+    pub const fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
         match style {
             CompositeStyle::Code => &self.code_block,
             CompositeStyle::Header(level) if *level <= MAX_HEADER_DEPTH as u8 => {
@@ -507,19 +504,29 @@ impl MadSkin {
     /// Write a composite.
     ///
     /// This function is internally used and normally not needed outside
-    ///  of Termimad's implementation.
+    ///  of Termimad's implementation. Its arguments may change.
     pub fn write_fmt_composite(
         &self,
         f: &mut fmt::Formatter<'_>,
         fc: &FmtComposite<'_>,
         outer_width: Option<usize>,
         with_right_completion: bool,
+        with_margins: bool,
     ) -> fmt::Result {
         let ls = self.line_style(&fc.composite.style);
+        let (left_margin, right_margin) = if with_margins {
+            ls.margins_in(outer_width)
+        } else {
+            (0, 0)
+        };
         let (lpi, rpi) = fc.completions(); // inner completion
         let inner_width = fc.spacing.map_or(fc.visible_length, |sp| sp.width);
-        let (lpo, rpo) = Spacing::optional_completions(ls.align, inner_width, outer_width);
-        self.paragraph.repeat_space(f, lpo)?;
+        let (lpo, rpo) = Spacing::optional_completions(
+            ls.align,
+            inner_width + left_margin + right_margin,
+            outer_width,
+        );
+        self.paragraph.repeat_space(f, lpo + left_margin)?;
         ls.compound_style.repeat_space(f, lpi)?;
         if let CompositeStyle::ListItem(depth) = fc.composite.style {
             for _ in 0..depth {
@@ -548,7 +555,7 @@ impl MadSkin {
         }
         ls.compound_style.repeat_space(f, rpi)?;
         if with_right_completion {
-            self.paragraph.repeat_space(f, rpo)?;
+            self.paragraph.repeat_space(f, rpo + right_margin)?;
         }
         Ok(())
     }
@@ -570,7 +577,7 @@ impl MadSkin {
         let tbc = &self.table_border_chars;
         match line {
             FmtLine::Normal(fc) => {
-                self.write_fmt_composite(f, fc, width, with_right_completion)?;
+                self.write_fmt_composite(f, fc, width, with_right_completion, true)?;
             }
             FmtLine::TableRow(FmtTableRow { cells }) => {
                 let tbl_width = 1 + cells.iter().fold(0, |sum, cell| {
@@ -584,7 +591,7 @@ impl MadSkin {
                 self.paragraph.repeat_space(f, lpo)?;
                 for cell in cells {
                     write!(f, "{}", self.table.compound_style.apply_to(tbc.vertical))?;
-                    self.write_fmt_composite(f, cell, None, false)?;
+                    self.write_fmt_composite(f, cell, None, false, false)?;
                 }
                 write!(f, "{}", self.table.compound_style.apply_to(tbc.vertical))?;
                 if with_right_completion {
