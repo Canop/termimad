@@ -38,6 +38,7 @@ fn main() {
         skin.table_border_chars = ROUNDED_TABLE_BORDER_CHARS;
         skin.paragraph.align = Alignment::Center;
         skin.table.align = Alignment::Center;
+        skin.table.right_margin = 4;
         skin.inline_code.add_attr(Attribute::Reverse);
         skin.paragraph.set_fg(Magenta);
         skin.italic.add_attr(Attribute::Underlined);

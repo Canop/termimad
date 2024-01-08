@@ -42,5 +42,9 @@ impl PushStyleTokens for LineStyle {
     fn push_style_tokens(&self, tokens: &mut Vec<StyleToken>) {
         self.compound_style.push_style_tokens(tokens);
         tokens.push(StyleToken::Align(self.align));
+        if self.left_margin > 0 || self.right_margin > 0 {
+            tokens.push(StyleToken::Dimension(self.left_margin.min(65536) as u16));
+            tokens.push(StyleToken::Dimension(self.right_margin.min(65536) as u16));
+        }
     }
 }
