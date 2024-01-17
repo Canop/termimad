@@ -1,11 +1,11 @@
 use {
     crate::clipboard,
     anyhow::{self},
-    crokey::key,
+    crokey::{key, KeyCombination},
     std::io::Write,
     termimad::*,
     termimad::crossterm::{
-        event::{Event, KeyEvent, MouseEvent},
+        event::{Event, MouseEvent},
         queue,
         terminal::{
             Clear,
@@ -132,7 +132,7 @@ impl View {
         self.area = area;
         true
     }
-    pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
+    pub fn apply_key_combination(&mut self, key: KeyCombination) -> bool {
         if key == key!(esc) {
             self.set_focus(Focus::Introduction);
             true
@@ -140,7 +140,7 @@ impl View {
             self.focus_next();
             true
         } else if let Some(input) = self.focused_input() {
-            input.apply_key_event(key) || {
+            input.apply_key_combination(key) || {
                 if key == key!(ctrl-c) {
                     clipboard::copy_from_input(input)
                 } else if key == key!(ctrl-x) {
@@ -152,7 +152,7 @@ impl View {
                 }
             }
         } else {
-            self.introduction.apply_key_event(key)
+            self.introduction.apply_key_combination(key)
         }
     }
     pub fn apply_mouse_event(&mut self, mouse_event: MouseEvent, double_click: bool) -> bool {
@@ -169,9 +169,10 @@ impl View {
     }
     pub fn apply_timed_event(&mut self, timed_event: TimedEvent) -> bool {
         match timed_event.event {
-            Event::Key(key) => self.apply_key_event(key),
+            Event::Key(key) => self.apply_key_combination(key.into()),
             Event::Mouse(me) => self.apply_mouse_event(me, timed_event.double_click),
             Event::Resize(w, h) => self.resize(Area::new(0, 0, w, h)),
+            _ => false,
         }
     }
     /// draw the view (not flushing)

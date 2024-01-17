@@ -9,10 +9,10 @@ use {
         rgb,
         StyledChar,
         minimad::Alignment,
-    },
-    crossterm::style::{
-        Attribute,
-        Color::*,
+        crossterm::style::{
+            Attribute,
+            Color::*,
+        },
     },
 };
 

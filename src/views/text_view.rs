@@ -1,22 +1,23 @@
 use {
     crate::{
         area::Area,
+        crossterm::{
+            cursor::MoveTo,
+            event::{
+                KeyCode,
+                KeyEvent,
+                KeyModifiers,
+            },
+            queue,
+            QueueableCommand,
+            style::Print,
+        },
         displayable_line::DisplayableLine,
         errors::Result,
         text::FmtText,
         SPACE_FILLING,
     },
-    crossterm::{
-        cursor::MoveTo,
-        event::{
-            KeyCode,
-            KeyEvent,
-            KeyModifiers,
-        },
-        queue,
-        QueueableCommand,
-        style::Print,
-    },
+    crokey::{OneToThree, KeyCombination},
     std::io::{stdout, Write},
 };
 
@@ -212,14 +213,23 @@ impl<'a, 't> TextView<'a, 't> {
     /// Return true when the event led to a change, false when it
     /// was discarded.
     pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
+        self.apply_key_combination(key)
+    }
+
+    /// Apply an event being a key: page_up, page_down, up and down.
+    ///
+    /// Return true when the event led to a change, false when it
+    /// was discarded.
+    pub fn apply_key_combination<K: Into<KeyCombination>>(&mut self, key: K) -> bool {
+        let key = key.into();
         if key.modifiers != KeyModifiers::NONE {
             return false;
         }
-        match key.code {
-            KeyCode::Up => self.line_up(),
-            KeyCode::Down => self.line_down(),
-            KeyCode::PageUp => self.page_up(),
-            KeyCode::PageDown => self.page_down(),
+        match key.codes {
+            OneToThree::One(KeyCode::Up) => self.line_up(),
+            OneToThree::One(KeyCode::Down) => self.line_down(),
+            OneToThree::One(KeyCode::PageUp) => self.page_up(),
+            OneToThree::One(KeyCode::PageDown) => self.page_down(),
             _ => false,
         }
     }

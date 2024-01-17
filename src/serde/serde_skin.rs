@@ -2,20 +2,20 @@ use {
     super::ScrollBarStyleDef,
     crate::{
         minimad::Alignment,
-        ATTRIBUTES,
+        parse_compound_style,
+        parse_line_style,
+        parse_styled_char,
         LineStyle,
         MadSkin,
-        parse_compound_style,
-        parse_styled_char,
-        parse_line_style,
         TableBorderChars,
+        ATTRIBUTES,
     },
     serde::{
         de,
+        ser::SerializeMap,
         Deserialize,
         Serialize,
         Serializer,
-        ser::SerializeMap,
     },
     std::fmt,
 };
@@ -41,56 +41,47 @@ impl<'de> de::Deserialize<'de> for MadSkin {
                 let mut skin = MadSkin::default();
                 while let Some(key) = map.next_key::<String>()? {
                     match key.as_str() {
-
                         // inline styles
                         "bold" => {
                             let value = map.next_value::<String>()?;
-                            let cs = parse_compound_style(&value)
-                                .map_err(de::Error::custom)?;
+                            let cs = parse_compound_style(&value).map_err(de::Error::custom)?;
                             skin.bold = cs;
                         }
                         "italic" => {
                             let value = map.next_value::<String>()?;
-                            let cs = parse_compound_style(&value)
-                                .map_err(de::Error::custom)?;
+                            let cs = parse_compound_style(&value).map_err(de::Error::custom)?;
                             skin.italic = cs;
                         }
                         "strikeout" => {
                             let value = map.next_value::<String>()?;
-                            let cs = parse_compound_style(&value)
-                                .map_err(de::Error::custom)?;
+                            let cs = parse_compound_style(&value).map_err(de::Error::custom)?;
                             skin.strikeout = cs;
                         }
                         "inline_code" | "inline-code" => {
                             let value = map.next_value::<String>()?;
-                            let cs = parse_compound_style(&value)
-                                .map_err(de::Error::custom)?;
+                            let cs = parse_compound_style(&value).map_err(de::Error::custom)?;
                             skin.inline_code = cs;
                         }
                         "ellipsis" => {
                             let value = map.next_value::<String>()?;
-                            let cs = parse_compound_style(&value)
-                                .map_err(de::Error::custom)?;
+                            let cs = parse_compound_style(&value).map_err(de::Error::custom)?;
                             skin.ellipsis = cs;
                         }
 
                         // marker chars
                         "bullet" => {
                             let value = map.next_value::<String>()?;
-                            let sc = parse_styled_char(&value, '*')
-                                .map_err(de::Error::custom)?;
+                            let sc = parse_styled_char(&value, '*').map_err(de::Error::custom)?;
                             skin.bullet = sc;
                         }
                         "quote_mark" | "quote" | "quote-mark" => {
                             let value = map.next_value::<String>()?;
-                            let sc = parse_styled_char(&value, '*')
-                                .map_err(de::Error::custom)?;
+                            let sc = parse_styled_char(&value, '*').map_err(de::Error::custom)?;
                             skin.quote_mark = sc;
                         }
                         "horizontal_rule" | "horizontal-rule" | "rule" => {
                             let value = map.next_value::<String>()?;
-                            let sc = parse_styled_char(&value, '*')
-                                .map_err(de::Error::custom)?;
+                            let sc = parse_styled_char(&value, '*').map_err(de::Error::custom)?;
                             skin.horizontal_rule = sc;
                         }
 
@@ -103,53 +94,48 @@ impl<'de> de::Deserialize<'de> for MadSkin {
                         // line styles
                         "paragraph" => {
                             let value = map.next_value::<String>()?;
-                            let ls = parse_line_style(&value)
-                                .map_err(de::Error::custom)?;
+                            let ls = parse_line_style(&value).map_err(de::Error::custom)?;
                             skin.paragraph = ls;
                         }
                         "code_block" | "code-block" => {
                             let value = map.next_value::<String>()?;
-                            let ls = parse_line_style(&value)
-                                .map_err(de::Error::custom)?;
+                            let ls = parse_line_style(&value).map_err(de::Error::custom)?;
                             skin.code_block = ls;
                         }
                         "table" => {
                             let value = map.next_value::<String>()?;
-                            let ls = parse_line_style(&value)
-                                .map_err(de::Error::custom)?;
+                            let ls = parse_line_style(&value).map_err(de::Error::custom)?;
                             skin.table = ls;
                         }
 
                         // headers
-                        "headers" => {
-                            match map.next_value::<HeadersStyleInfo>()? {
-                                HeadersStyleInfo::Add(ls) => {
-                                    for h in &mut skin.headers {
-                                        if let Some(fg) = ls.compound_style.get_fg() {
-                                            h.compound_style.set_fg(fg);
-                                        }
-                                        if let Some(bg) = ls.compound_style.get_bg() {
-                                            h.compound_style.set_bg(bg);
-                                        }
-                                        for &attr in ATTRIBUTES {
-                                            if ls.compound_style.has_attr(attr) {
-                                                h.compound_style.add_attr(attr);
-                                            }
-                                        }
-                                        if ls.align != Alignment::Unspecified {
-                                            h.align = ls.align;
+                        "headers" => match map.next_value::<HeadersStyleInfo>()? {
+                            HeadersStyleInfo::Add(ls) => {
+                                for h in &mut skin.headers {
+                                    if let Some(fg) = ls.compound_style.get_fg() {
+                                        h.compound_style.set_fg(fg);
+                                    }
+                                    if let Some(bg) = ls.compound_style.get_bg() {
+                                        h.compound_style.set_bg(bg);
+                                    }
+                                    for &attr in ATTRIBUTES {
+                                        if ls.compound_style.has_attr(attr) {
+                                            h.compound_style.add_attr(attr);
                                         }
                                     }
-                                }
-                                HeadersStyleInfo::Levels(mut vls) => {
-                                    for (lvl, h) in vls.drain(..).enumerate() {
-                                        if lvl < skin.headers.len() {
-                                            skin.headers[lvl] = h;
-                                        }
+                                    if ls.align != Alignment::Unspecified {
+                                        h.align = ls.align;
                                     }
                                 }
                             }
-                        }
+                            HeadersStyleInfo::Levels(mut vls) => {
+                                for (lvl, h) in vls.drain(..).enumerate() {
+                                    if lvl < skin.headers.len() {
+                                        skin.headers[lvl] = h;
+                                    }
+                                }
+                            }
+                        },
 
                         // table border chars
                         // There's currently no way to allow custom table border
@@ -231,14 +217,14 @@ enum HeadersStyleInfo {
 fn skin_json_roundtrip() {
     use {
         crate::{
+            crossterm::style::{
+                Attribute,
+                Color::*,
+            },
             gray,
-            ROUNDED_TABLE_BORDER_CHARS,
             rgb,
             StyledChar,
-        },
-        crossterm::style::{
-            Attribute,
-            Color::*,
+            ROUNDED_TABLE_BORDER_CHARS,
         },
         pretty_assertions::assert_eq,
     };

@@ -1,24 +1,27 @@
 use {
     super::*,
-    crate::*,
-    crate::crossterm::{
-        cursor,
-        event::{
-            Event,
-            KeyCode,
-            KeyEvent,
-            KeyModifiers,
-            MouseButton,
-            MouseEvent,
-            MouseEventKind,
+    crate::{
+        crossterm::{
+            cursor,
+            event::{
+                Event,
+                KeyCode,
+                KeyEvent,
+                KeyModifiers,
+                MouseButton,
+                MouseEvent,
+                MouseEventKind,
+            },
+            queue,
+            style::{
+                Attribute,
+                Color,
+                SetBackgroundColor,
+            },
         },
-        queue,
-        style::{
-            Attribute,
-            Color,
-            SetBackgroundColor,
-        },
+        *,
     },
+    crokey::{OneToThree, KeyCombination, key},
     std::io::Write,
 };
 
@@ -42,7 +45,7 @@ pub struct InputField {
     /// if not focused, the content will be displayed as text
     focused: bool,
     scroll: Pos,
-    new_line_keys: Vec<KeyEvent>,
+    new_line_keys: Vec<KeyCombination>,
 }
 
 impl Default for InputField {
@@ -65,15 +68,8 @@ macro_rules! wrap_content_fun {
 }
 
 impl InputField {
-
-    pub const ENTER: KeyEvent = KeyEvent {
-        code: KeyCode::Enter,
-        modifiers: KeyModifiers::NONE,
-    };
-    pub const ALT_ENTER: KeyEvent = KeyEvent {
-        code: KeyCode::Enter,
-        modifiers: KeyModifiers::ALT,
-    };
+    pub const ENTER: KeyCombination = key!(enter);
+    pub const ALT_ENTER: KeyCombination = key!(alt-enter);
 
     pub fn new(area: Area) -> Self {
         let focused_style = CompoundStyle::default();
@@ -110,8 +106,8 @@ impl InputField {
     /// let mut textarea = InputField::new(Area::new(5, 5, 20, 10));
     /// textarea.new_line_on(InputField::ALT_ENTER);
     /// ```
-    pub fn new_line_on(&mut self, key: KeyEvent) {
-        self.new_line_keys.push(key);
+    pub fn new_line_on<K: Into<KeyCombination>>(&mut self, key: K) {
+        self.new_line_keys.push(key.into());
     }
     /// Change the area x, y and width, but not the height.
     ///
@@ -275,19 +271,33 @@ impl InputField {
     /// may call function like `put_char` and `del_char_left`
     /// directly.
     pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
+        self.apply_key_combination(key)
+    }
+
+    /// apply a key combination
+    ///
+    ///
+    /// This function handles a few events like deleting a
+    /// char, or going to the start (home key) or end (end key)
+    /// of the input. If you want to totally handle events, you
+    /// may call function like `put_char` and `del_char_left`
+    /// directly.
+    pub fn apply_key_combination<K: Into<KeyCombination>>(
+        &mut self,
+        key: K,
+    ) -> bool {
         if !self.focused {
             return false;
         }
+        let key = key.into();
         if self.new_line_keys.contains(&key) {
             self.insert_new_line();
             return true;
         }
-        use crate::crossterm::event::{
-            KeyModifiers as Mod,
-        };
-        match (key.code, key.modifiers) {
-            (code, Mod::NONE) => self.apply_keycode_event(code, false),
-            (code, Mod::SHIFT) => self.apply_keycode_event(code, true),
+        use crate::crossterm::event::KeyModifiers as Mod;
+        match (key.codes, key.modifiers) {
+            (OneToThree::One(code), Mod::NONE) => self.apply_keycode_event(code, false),
+            (OneToThree::One(code), Mod::SHIFT) => self.apply_keycode_event(code, true),
             _ => false,
         }
     }
@@ -297,11 +307,7 @@ impl InputField {
     /// You don't usually call this function but the more
     /// general `apply_event`. This one is useful when you
     /// manage events mostly yourselves.
-    pub fn apply_keycode_event(
-        &mut self,
-        code: KeyCode,
-        shift: bool,
-    ) -> bool {
+    pub fn apply_keycode_event(&mut self, code: KeyCode, shift: bool) -> bool {
         if code == KeyCode::Backspace {
             if self.content.has_wide_selection() {
                 self.content.del_selection();
@@ -329,7 +335,7 @@ impl InputField {
             if shift {
                 self.content.make_selection();
             } else {
-              self.content.unselect();
+                self.content.unselect();
             }
             match code {
                 KeyCode::Home => self.move_to_line_start(),
@@ -350,7 +356,7 @@ impl InputField {
         if self.area.contains(x, y) {
             if self.focused {
                 let y = ((y - self.area.top) as usize + self.scroll.y)
-                    .min(self.content.line_count()-1);
+                    .min(self.content.line_count() - 1);
                 let line = &self.content.lines()[y];
                 let x = line
                     .col_to_char_idx((x - self.area.left) as usize + self.scroll.x)
@@ -366,16 +372,17 @@ impl InputField {
     }
 
     /// Apply a mouse event
-    pub fn apply_mouse_event(
-        &mut self,
-        mouse_event: MouseEvent,
-        is_double_click: bool,
-    ) -> bool {
-        let MouseEvent { kind, column, row, modifiers } = mouse_event;
+    pub fn apply_mouse_event(&mut self, mouse_event: MouseEvent, is_double_click: bool) -> bool {
+        let MouseEvent {
+            kind,
+            column,
+            row,
+            modifiers,
+        } = mouse_event;
         if self.area.contains(column, row) {
             if self.focused {
                 let y = ((row - self.area.top) as usize + self.scroll.y)
-                    .min(self.content.line_count()-1);
+                    .min(self.content.line_count() - 1);
                 let line = &self.content.lines()[y];
                 let x = line
                     .col_to_char_idx((column - self.area.left) as usize + self.scroll.x)
@@ -421,16 +428,14 @@ impl InputField {
     /// apply the event to change the state (content, cursor)
     ///
     /// Return true when the event was used.
-    pub fn apply_event(&mut self, event: Event, is_double_click: bool) -> bool {
+    pub fn apply_event(&mut self, event: &Event, is_double_click: bool) -> bool {
         match event {
-            Event::Mouse(mouse_event) => {
-                self.apply_mouse_event(mouse_event, is_double_click)
-            }
-            Event::Key(KeyEvent{code, modifiers}) if self.focused => {
+            Event::Mouse(mouse_event) => self.apply_mouse_event(*mouse_event, is_double_click),
+            Event::Key(KeyEvent { code, modifiers, .. }) if self.focused => {
                 if modifiers.is_empty() {
-                    self.apply_keycode_event(code, false)
-                } else if modifiers == KeyModifiers::SHIFT {
-                    self.apply_keycode_event(code, true)
+                    self.apply_keycode_event(*code, false)
+                } else if *modifiers == KeyModifiers::SHIFT {
+                    self.apply_keycode_event(*code, true)
                 } else {
                     false
                 }
@@ -442,8 +447,8 @@ impl InputField {
     /// apply the event to change the state (content, cursor, focus)
     ///
     /// Return true when the event was used.
-    pub fn apply_timed_event(&mut self, event: TimedEvent) -> bool {
-        self.apply_event(event.event, event.double_click)
+    pub fn apply_timed_event(&mut self, event: &TimedEvent) -> bool {
+        self.apply_event(&event.event, event.double_click)
     }
 
     pub fn scroll_up(&mut self) -> bool {
@@ -549,10 +554,9 @@ impl InputField {
 
         let mut width = self.area.width as usize;
         let pos = self.content.cursor_pos();
-        let scrollbar = self.area.scrollbar(
-            self.scroll.y as u16,
-            self.content.line_count() as u16,
-        );
+        let scrollbar = self
+            .area
+            .scrollbar(self.scroll.y as u16, self.content.line_count() as u16);
         if scrollbar.is_some() {
             width -= 1;
         }
@@ -568,7 +572,10 @@ impl InputField {
             }
         }
 
-        let mut numbered_lines = self.content.lines().iter()
+        let mut numbered_lines = self
+            .content
+            .lines()
+            .iter()
             .map(|line| &line.chars)
             .enumerate()
             .skip(self.scroll.y);
@@ -583,7 +590,7 @@ impl InputField {
                 let mut skipped_width = 0;
                 let mut displayed_width = 0;
                 let mut width = width; // available width for rendering chars
-                // we don't show ellipsis if the width is 4 or less
+                                       // we don't show ellipsis if the width is 4 or less
                 if width_to_skip > 0 && width > 4 {
                     normal_style.queue(w, fit::ELLIPSIS)?;
                     width_to_skip += 1;
@@ -650,4 +657,3 @@ impl InputField {
         Ok(())
     }
 }
-

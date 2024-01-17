@@ -56,7 +56,7 @@ fn run_in_alternate<W: Write>(w: &mut W) -> anyhow::Result<()> {
         debug!("event: {:?}", timed_event);
         if timed_event.is_key(key!(ctrl-q)) {
             quit = true;
-        } else if view.apply_timed_event(timed_event) {
+        } else if view.apply_timed_event(&timed_event) {
             view.queue_on(w)?;
             w.flush()?;
         }

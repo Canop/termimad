@@ -1,9 +1,20 @@
 use {
     crate::{
-        area::{terminal_size, Area},
+        area::{
+            terminal_size,
+            Area,
+        },
         color::*,
         composite::FmtComposite,
         compound_style::CompoundStyle,
+        crossterm::{
+            queue,
+            style::{
+                Attribute,
+                Color,
+                Print,
+            },
+        },
         errors::Result,
         inline::FmtInline,
         line::FmtLine,
@@ -11,14 +22,10 @@ use {
         scrollbar_style::ScrollBarStyle,
         spacing::Spacing,
         styled_char::StyledChar,
+        table_border_chars::*,
         tbl::*,
         text::FmtText,
         views::TextView,
-        table_border_chars::*,
-    },
-    crossterm::{
-        queue,
-        style::{Attribute, Color, Print},
     },
     minimad::{
         Alignment,
@@ -26,15 +33,15 @@ use {
         CompositeStyle,
         Compound,
         Line,
-        MAX_HEADER_DEPTH,
         OwningTemplateExpander,
         TextTemplate,
         TextTemplateExpander,
+        MAX_HEADER_DEPTH,
     },
     std::{
+        collections::HashMap,
         fmt,
         io::Write,
-        collections::HashMap,
     },
     unicode_width::UnicodeWidthStr,
 };
@@ -63,9 +70,8 @@ pub struct MadSkin {
     /// Experimental. This API will probably change
     /// (comments welcome)
     /// Do not use compounds with a length different than 1.
-    #[cfg(feature="special-renders")]
+    #[cfg(feature = "special-renders")]
     pub special_chars: HashMap<Compound<'static>, StyledChar>,
-
 }
 
 impl Default for MadSkin {
@@ -96,7 +102,7 @@ impl Default for MadSkin {
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
             ellipsis: CompoundStyle::default(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
-            #[cfg(feature="special-renders")]
+            #[cfg(feature = "special-renders")]
             special_chars: HashMap::new(),
         };
         skin.code_block.set_fgbg(gray(17), gray(3));
@@ -110,7 +116,6 @@ impl Default for MadSkin {
 }
 
 impl MadSkin {
-
     /// Build a customizable skin with no style, most useful
     /// when your application must run in no-color mode, for
     /// example when piped to a file.
@@ -132,7 +137,7 @@ impl MadSkin {
             quote_mark: StyledChar::nude('▐'),
             horizontal_rule: StyledChar::nude('―'),
             ellipsis: CompoundStyle::default(),
-            #[cfg(feature="special-renders")]
+            #[cfg(feature = "special-renders")]
             special_chars: HashMap::new(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
         }
@@ -215,7 +220,7 @@ impl MadSkin {
         self.quote_mark.set_fg(fg);
         self.horizontal_rule.set_fg(fg);
         self.ellipsis.set_fg(fg);
-        #[cfg(feature="special-renders")]
+        #[cfg(feature = "special-renders")]
         {
             for (_, sc) in self.special_chars.iter_mut() {
                 sc.set_fg(fg);
@@ -241,7 +246,7 @@ impl MadSkin {
         self.horizontal_rule.set_bg(bg);
         self.ellipsis.set_bg(bg);
         self.scrollbar.set_bg(bg);
-        #[cfg(feature="special-renders")]
+        #[cfg(feature = "special-renders")]
         {
             for (_, sc) in self.special_chars.iter_mut() {
                 sc.set_bg(bg);
@@ -279,13 +284,10 @@ impl MadSkin {
 
     /// Return the number of visible chars in a composite
     pub fn visible_composite_length(&self, composite: &Composite<'_>) -> usize {
-        let compounds_width: usize = composite.compounds
-            .iter()
-            .map(|c| c.src.width())
-            .sum();
+        let compounds_width: usize = composite.compounds.iter().map(|c| c.src.width()).sum();
         (match composite.style {
             CompositeStyle::ListItem(depth) => 2 + depth as usize, // space and bullet
-            CompositeStyle::Quote => 2,    // space of the quoting char
+            CompositeStyle::Quote => 2,                            // space of the quoting char
             _ => 0,
         }) + compounds_width
     }
@@ -373,12 +375,7 @@ impl MadSkin {
     }
 
     /// queue the rendered markdown in the specified area, without flush
-    pub fn write_in_area_on<W: Write>(
-        &self,
-        w: &mut W,
-        markdown: &str,
-        area: &Area,
-    ) -> Result<()> {
+    pub fn write_in_area_on<W: Write>(&self, w: &mut W, markdown: &str, area: &Area) -> Result<()> {
         let text = self.area_text(markdown, area);
         let mut view = TextView::from(area, &text);
         view.show_scrollbar = false;
@@ -434,20 +431,26 @@ impl MadSkin {
     }
 
     pub fn print_composite(&self, composite: Composite<'_>) {
-        print!("{}", FmtInline{
-            skin: self,
-            composite: FmtComposite::from(composite, self),
-        });
+        print!(
+            "{}",
+            FmtInline {
+                skin: self,
+                composite: FmtComposite::from(composite, self),
+            }
+        );
     }
 
     pub fn write_composite<W>(&self, w: &mut W, composite: Composite<'_>) -> Result<()>
     where
         W: std::io::Write,
     {
-        Ok(queue!(w, Print(FmtInline{
-            skin: self,
-            composite: FmtComposite::from(composite, self),
-        }))?)
+        Ok(queue!(
+            w,
+            Print(FmtInline {
+                skin: self,
+                composite: FmtComposite::from(composite, self),
+            })
+        )?)
     }
 
     /// write a composite filling the given width
@@ -467,10 +470,13 @@ impl MadSkin {
     {
         let mut fc = FmtComposite::from(composite, self);
         fc.fill_width(width, align, self);
-        Ok(queue!(w, Print(FmtInline{
-            skin: self,
-            composite: fc,
-        }))?)
+        Ok(queue!(
+            w,
+            Print(FmtInline {
+                skin: self,
+                composite: fc,
+            })
+        )?)
     }
 
     /// parse the given src as a markdown snippet and write it on
@@ -539,7 +545,7 @@ impl MadSkin {
             write!(f, "{}", self.quote_mark)?;
             write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
-        #[cfg(feature="special-renders")]
+        #[cfg(feature = "special-renders")]
         for c in &fc.composite.compounds {
             if let Some(replacement) = self.special_chars.get(c) {
                 write!(f, "{}", replacement)?;
@@ -548,7 +554,7 @@ impl MadSkin {
                 write!(f, "{}", os.apply_to(c.as_str()))?;
             }
         }
-        #[cfg(not(feature="special-renders"))]
+        #[cfg(not(feature = "special-renders"))]
         for c in &fc.composite.compounds {
             let os = self.compound_style(ls, c);
             write!(f, "{}", os.apply_to(c.as_str()))?;

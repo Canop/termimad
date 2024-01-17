@@ -1,11 +1,12 @@
 use {
     crate::{
         area::Area,
+        crossterm::event::KeyEvent,
         errors::Result,
         skin::MadSkin,
         views::TextView,
     },
-    crossterm::event::KeyEvent,
+    crokey::KeyCombination,
     std::io::Write,
 };
 
@@ -77,15 +78,26 @@ impl MadView {
     ///
     /// It's possible to handle the key yourself and call the try_scroll
     /// methods.
-    pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
+    pub fn apply_key_combination<K: Into<KeyCombination>>(&mut self, key: K) -> bool {
+        let key = key.into();
         let text = self.skin.area_text(&self.markdown, &self.area);
         let mut text_view = TextView::from(&self.area, &text);
         text_view.scroll = self.scroll;
-        if text_view.apply_key_event(key) {
+        if text_view.apply_key_combination(key) {
             self.scroll = text_view.scroll;
             true
         } else {
             false
         }
+    }
+    /// Apply an event being a key: page_up, page_down, up and down.
+    ///
+    /// Return true when the event led to a change, false when it
+    /// was discarded.
+    ///
+    /// It's possible to handle the key yourself and call the try_scroll
+    /// methods.
+    pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
+        self.apply_key_combination(key)
     }
 }

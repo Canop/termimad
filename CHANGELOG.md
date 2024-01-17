@@ -1,5 +1,8 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+### next
+Major change: termimad and its coolor and crokey dependencies now use the version 0.27 of Crossterm, which brings many breaking changes but allows new capabilities in key events handling. Termimad's EventSource now outputs key combinations along crossterm events.
+
 <a name="v0.27.0"></a>
 ### v0.27.0 - 2024-01-08
 - paragraphs, code blocks, headers, and tables can be given a left_margin and a right_margin - Fix #11

@@ -131,10 +131,6 @@ mod text;
 mod tokens;
 mod views;
 
-pub mod crossterm {
-    pub use crossterm::*;
-}
-
 pub use {
     area::{compute_scrollbar, terminal_size, Area},
     ask::*,
@@ -163,6 +159,7 @@ pub use {
     },
 };
 pub use coolor;
+pub use crokey::crossterm;
 pub use minimad;
 
 use tokens::*;

@@ -1,7 +1,5 @@
 use {
-    crossterm::style::{
-        Attribute,
-    },
+    crate::crossterm::style::Attribute,
     lazy_regex::*,
     std::fmt,
 };
@@ -68,4 +66,3 @@ pub fn parse_attribute(s: &str) -> Result<Attribute, ParseAttributeError> {
         Err(ParseAttributeError::Unrecognized)
     }
 }
-
