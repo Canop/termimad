@@ -1,6 +1,8 @@
 use {
-    crate::compound_style::CompoundStyle,
-    crossterm::style::{Attribute, Color},
+    crate::{
+        compound_style::CompoundStyle,
+        crossterm::style::{Attribute, Color},
+    },
     minimad::Alignment,
     std::fmt,
 };

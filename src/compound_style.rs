@@ -1,21 +1,21 @@
 use {
     crate::{
         errors::Result,
-        styled_char::StyledChar,
-    },
-    crossterm::{
-        QueueableCommand,
-        style::{
-            Attribute,
-            Attributes,
-            Color,
-            ContentStyle,
-            PrintStyledContent,
-            SetBackgroundColor,
-            SetForegroundColor,
-            StyledContent,
+        crossterm::{
+            QueueableCommand,
+            style::{
+                Attribute,
+                Attributes,
+                Color,
+                ContentStyle,
+                PrintStyledContent,
+                SetBackgroundColor,
+                SetForegroundColor,
+                StyledContent,
+            },
+            terminal::{Clear, ClearType},
         },
-        terminal::{Clear, ClearType},
+        styled_char::StyledChar,
     },
     std::fmt::{self, Display},
 };
@@ -40,8 +40,8 @@ pub struct CompoundStyle {
 }
 
 impl From<ContentStyle> for CompoundStyle {
-    fn from(object_style: ContentStyle) -> CompoundStyle {
-        CompoundStyle { object_style }
+    fn from(object_style: ContentStyle) -> Self {
+        Self { object_style }
     }
 }
 
@@ -59,11 +59,12 @@ impl CompoundStyle {
         foreground_color: Option<Color>,
         background_color: Option<Color>,
         attributes: Attributes,
-    ) -> CompoundStyle {
-        CompoundStyle {
+    ) -> Self {
+        Self {
             object_style: ContentStyle {
                 foreground_color,
                 background_color,
+                underline_color: None,
                 attributes,
             },
         }
@@ -87,41 +88,35 @@ impl CompoundStyle {
     }
 
     /// Get an new instance of `CompoundStyle`
-    pub fn with_fgbg(fg: Color, bg: Color) -> CompoundStyle {
-        CompoundStyle {
-            object_style: ContentStyle {
-                foreground_color: Some(fg),
-                background_color: Some(bg),
-                attributes: Attributes::default(),
-            }
-        }
+    pub fn with_fgbg(fg: Color, bg: Color) -> Self {
+        Self::new(
+            Some(fg),
+            Some(bg),
+            Attributes::default(),
+        )
     }
 
     /// Get an new instance of `CompoundStyle`
-    pub fn with_fg(fg: Color) -> CompoundStyle {
-        CompoundStyle {
-            object_style: ContentStyle {
-                foreground_color: Some(fg),
-                background_color: None,
-                attributes: Attributes::default(),
-            }
-        }
+    pub fn with_fg(fg: Color) -> Self {
+        Self::new(
+            Some(fg),
+            None,
+            Attributes::default(),
+        )
     }
 
     /// Get an new instance of `CompoundStyle`
-    pub fn with_bg(bg: Color) -> CompoundStyle {
-        CompoundStyle {
-            object_style: ContentStyle {
-                foreground_color: None,
-                background_color: Some(bg),
-                attributes: Attributes::default(),
-            }
-        }
+    pub fn with_bg(bg: Color) -> Self {
+        Self::new(
+            None,
+            Some(bg),
+            Attributes::default(),
+        )
     }
 
     /// Get an new instance of `CompoundStyle`
-    pub fn with_attr(attr: Attribute) -> CompoundStyle {
-        let mut cp = CompoundStyle::default();
+    pub fn with_attr(attr: Attribute) -> Self {
+        let mut cp = Self::default();
         cp.add_attr(attr);
         cp
     }
@@ -159,7 +154,7 @@ impl CompoundStyle {
 
     /// Add the defined characteristics of `other` to self, overwriting
     ///  its own one when defined
-    pub fn overwrite_with(&mut self, other: &CompoundStyle) {
+    pub fn overwrite_with(&mut self, other: &Self) {
         self.object_style.foreground_color = other
             .object_style
             .foreground_color

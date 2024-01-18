@@ -1,8 +1,6 @@
 use {
     super::*,
-    crate::{
-        LineStyle,
-    },
+    crate::LineStyle,
 };
 
 /// Read a line_style from a string.
@@ -34,7 +32,12 @@ impl From<&[StyleToken]> for LineStyle {
         }
         let left_margin = left_margin.unwrap_or_default() as usize;
         let right_margin = right_margin.unwrap_or_default() as usize;
-        LineStyle { compound_style, align, left_margin, right_margin }
+        LineStyle {
+            compound_style,
+            align,
+            left_margin,
+            right_margin,
+        }
     }
 }
 

@@ -1,12 +1,13 @@
 use {
     super::*,
-    crate::{
-        StyledChar,
-    },
+    crate::StyledChar,
 };
 
 /// Read a styled char from a string.
-pub fn parse_styled_char(s: &str, default_nude_char: char) -> Result<StyledChar, ParseStyleTokenError> {
+pub fn parse_styled_char(
+    s: &str,
+    default_nude_char: char,
+) -> Result<StyledChar, ParseStyleTokenError> {
     let tokens = parse_style_tokens(s)?;
     let style = tokens.as_slice().into();
     let nude_char = tokens
@@ -25,4 +26,3 @@ impl PushStyleTokens for StyledChar {
         self.compound_style().push_style_tokens(tokens);
     }
 }
-

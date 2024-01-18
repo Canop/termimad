@@ -1,9 +1,9 @@
 use {
     crate::{
         color::*,
+        crossterm::style::Color,
         styled_char::StyledChar,
     },
-    crossterm::style::Color,
 };
 
 /// A scrollbar style defined by two styled chars, one

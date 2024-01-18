@@ -1,17 +1,33 @@
-use std::{
-    cmp::Ordering,
-    io::{stdout, Write},
-};
-
-use crossterm::{
-    cursor::MoveTo,
-    queue,
-    style::{Color, SetBackgroundColor},
-    terminal::{Clear, ClearType},
-};
-
-use crate::{
-    compute_scrollbar, errors::Result, gray, Alignment, Area, CompoundStyle, MadSkin, Spacing,
+use {
+    crate::{
+        crossterm::{
+            cursor::MoveTo,
+            queue,
+            style::{
+                Color,
+                SetBackgroundColor,
+            },
+            terminal::{
+                Clear,
+                ClearType,
+            },
+        },
+        compute_scrollbar,
+        errors::Result,
+        gray,
+        Alignment,
+        Area,
+        CompoundStyle,
+        MadSkin,
+        Spacing,
+    },
+    std::{
+        cmp::Ordering,
+        io::{
+            stdout,
+            Write,
+        },
+    },
 };
 
 pub struct ListViewCell<'t> {
@@ -186,8 +202,7 @@ impl<'t, T> ListView<'t, T> {
     /// recompute the widths of all columns.
     /// This should be called when the area size is modified
     pub fn update_dimensions(&mut self) {
-        let available_width: i32 =
-            i32::from(self.area.width)
+        let available_width: i32 = i32::from(self.area.width)
             - (self.columns.len() as i32 - 1) // we remove the separator
             - 1; // we remove 1 to let space for the scrollbar
         let sum_min_widths: i32 = self.columns.iter().map(|c| c.min_width as i32).sum();
@@ -346,7 +361,7 @@ impl<'t, T> ListView<'t, T> {
     pub fn try_scroll_lines(&mut self, lines_count: i32) {
         if lines_count < 0 {
             let lines_count = -lines_count as usize;
-                self.scroll = if lines_count >= self.scroll {
+            self.scroll = if lines_count >= self.scroll {
                 0
             } else {
                 self.scroll - lines_count

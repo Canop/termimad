@@ -17,14 +17,17 @@ pub use {
 };
 
 use {
-    crossterm::style::{
+    crate::crossterm::style::{
         Attribute,
         Color,
     },
-    minimad::Alignment,
     lazy_regex::*,
+    minimad::Alignment,
     std::{
-        fmt::{self, Write},
+        fmt::{
+            self,
+            Write,
+        },
         io,
     },
 };
@@ -56,7 +59,7 @@ impl fmt::Display for StyleToken {
             Self::Color(c) => write_color(f, *c),
             Self::Attribute(a) => write_attribute(f, *a),
             Self::Align(a) => write_align(f, *a),
-            Self::Dimension(number) =>  write!(f, "{}", number),
+            Self::Dimension(number) => write!(f, "{}", number),
             Self::None => write!(f, "none"),
         }
     }
@@ -115,9 +118,13 @@ pub fn parse_style_token(s: &str) -> Result<StyleToken, ParseStyleTokenError> {
         return Ok(StyleToken::Dimension(number));
     }
     match parse_color(s) {
-        Ok(color) => { return Ok(StyleToken::Color(color)); }
+        Ok(color) => {
+            return Ok(StyleToken::Color(color));
+        }
         Err(ParseColorError::Unrecognized) => {}
-        Err(e) => { return Err(e.into()); }
+        Err(e) => {
+            return Err(e.into());
+        }
     }
     if let Ok(attribute) = parse_attribute(s) {
         return Ok(StyleToken::Attribute(attribute));
@@ -146,11 +153,14 @@ pub fn parse_style_tokens(s: &str) -> Result<Vec<StyleToken>, ParseStyleTokenErr
 #[test]
 fn test_parse_style_tokens() {
     use {
-        crate::{gray, rgb},
-        StyleToken as T,
-        ParseStyleTokenError as E,
-        crossterm::style::Attribute::*,
+        crate::{
+            crossterm::style::Attribute::*,
+            gray,
+            rgb,
+        },
         minimad::Alignment::*,
+        ParseStyleTokenError as E,
+        StyleToken as T,
     };
     assert_eq!(
         parse_style_tokens("red bold left").unwrap(),
@@ -159,7 +169,12 @@ fn test_parse_style_tokens() {
     assert!(parse_style_tokens("red pissenlit").is_err());
     assert_eq!(
         parse_style_tokens("Center grey(15) RGB(51, 47, 58) bold").unwrap(),
-        vec![T::Align(Center), T::Color(gray(15)), T::Color(rgb(51, 47, 58)), T::Attribute(Bold)],
+        vec![
+            T::Align(Center),
+            T::Color(gray(15)),
+            T::Color(rgb(51, 47, 58)),
+            T::Attribute(Bold)
+        ],
     );
     assert_eq!(
         parse_style_tokens(" Yellow Italic ").unwrap(),
@@ -171,10 +186,10 @@ fn test_parse_style_tokens() {
     );
     assert_eq!(
         parse_style_tokens("rgb(255,0,100) #fb0").unwrap(),
-        vec![T::Color(rgb(255,0,100)), T::Color(rgb(255,187,0))],
+        vec![T::Color(rgb(255, 0, 100)), T::Color(rgb(255, 187, 0))],
     );
     let parsed = parse_style_tokens(" red gray(40) ");
-    if let Err(E::InvalidColor(ParseColorError::InvalidGreyLevel{level})) = parsed {
+    if let Err(E::InvalidColor(ParseColorError::InvalidGreyLevel { level })) = parsed {
         assert_eq!(level, 40);
     } else {
         panic!("failed to fail");

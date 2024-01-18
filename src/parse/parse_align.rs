@@ -1,6 +1,6 @@
 use {
-    minimad::Alignment,
     lazy_regex::*,
+    minimad::Alignment,
     std::fmt,
 };
 

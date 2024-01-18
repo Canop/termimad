@@ -1,8 +1,8 @@
 use {
     super::*,
     crate::{
-        ATTRIBUTES,
         CompoundStyle,
+        ATTRIBUTES,
     },
 };
 

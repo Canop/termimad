@@ -1,13 +1,13 @@
 use {
     crate::{
+        crossterm::{
+            cursor,
+            QueueableCommand,
+        },
         Area,
         CompoundStyle,
         errors::Result,
         SPACE_FILLING,
-    },
-    crossterm::{
-        cursor,
-        QueueableCommand,
     },
     std::io::Write,
 };

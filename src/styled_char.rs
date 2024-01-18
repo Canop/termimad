@@ -1,14 +1,21 @@
 use {
     crate::{
         compound_style::CompoundStyle,
+        crossterm::{
+            style::{
+                Color,
+                PrintStyledContent,
+                StyledContent,
+            },
+            QueueableCommand,
+        },
         errors::Result,
     },
-    crossterm::{
-        QueueableCommand,
-        style::{Color, PrintStyledContent, StyledContent},
-    },
     std::{
-        fmt::{self, Display},
+        fmt::{
+            self,
+            Display,
+        },
         io::Write,
     },
 };

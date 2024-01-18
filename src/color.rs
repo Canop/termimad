@@ -1,5 +1,5 @@
 use {
-    crossterm::style::Color,
+    crate::crossterm::style::Color,
 };
 
 /// Build a RGB color

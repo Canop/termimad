@@ -1,10 +1,10 @@
 use {
     crate::{
         ansi,
+        crossterm::style::Color,
         gray,
         rgb,
     },
-    crossterm::style::Color,
     lazy_regex::*,
     std::fmt,
 };
@@ -77,7 +77,9 @@ pub fn parse_color(s: &str) -> Result<Color, ParseColorError> {
         }
     }
 
-    if let Some((_, r, g, b)) = regex_captures!(r"^rgb\((?P<r>\d+),\s*(?P<g>\d+),\s*(?P<b>\d+)\)$"i, s) {
+    if let Some((_, r, g, b)) =
+        regex_captures!(r"^rgb\((?P<r>\d+),\s*(?P<g>\d+),\s*(?P<b>\d+)\)$"i, s)
+    {
         if let (Ok(r), Ok(g), Ok(b)) = (r.parse(), g.parse(), b.parse()) {
             return Ok(rgb(r, g, b));
         } else {
@@ -85,7 +87,9 @@ pub fn parse_color(s: &str) -> Result<Color, ParseColorError> {
         }
     }
 
-    if let Some((_, r, g, b)) = regex_captures!(r"^#([\da-f]{1,2})([\da-f]{1,2})([\da-f]{1,2})$"i, s) {
+    if let Some((_, r, g, b)) =
+        regex_captures!(r"^#([\da-f]{1,2})([\da-f]{1,2})([\da-f]{1,2})$"i, s)
+    {
         if let (Ok(r), Ok(g), Ok(b)) = (hex(r), hex(g), hex(b)) {
             return Ok(rgb(r, g, b));
         } else {
@@ -116,10 +120,7 @@ pub fn parse_color(s: &str) -> Result<Color, ParseColorError> {
 
 #[test]
 fn test_parse_color() {
-    assert_eq!(
-        parse_color("rgb(255, 35, 45)").unwrap(),
-        rgb(255, 35, 45),
-    );
+    assert_eq!(parse_color("rgb(255, 35, 45)").unwrap(), rgb(255, 35, 45),);
     assert!(matches!(
         parse_color("rgb(255, 260, 45)"),
         Err(ParseColorError::Unrecognized),
@@ -133,4 +134,3 @@ fn test_parse_color() {
         parse_color("GREY(11)").unwrap(),
     );
 }
-
