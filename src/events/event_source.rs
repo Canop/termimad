@@ -45,6 +45,15 @@ pub struct EventSourceOptions {
     /// This changes the behavior of the terminal, if it's compatible, then restores
     /// the standard behavior on drop.
     pub combine_keys: bool,
+    /// When combining is enabled, you may either want "simple" keys
+    /// (i.e. without modifier or space) to be handled on key press,
+    /// or to wait for a key release so that maybe they may
+    /// be part of a combination like 'a-b'.
+    /// If combinations without modifier or space are unlikely in your
+    /// application, you may make it feel snappier by setting this to true.
+    ///
+    /// This setting has no effect when combining isn't enabled.
+    pub mandate_modifier_for_multiple_keys: bool,
     /// Whether to filter out raw key events (default true)
     /// (if you want to manage repeat, press, release, specifically, you're probably
     /// not interested in combining keys)
@@ -80,6 +89,7 @@ impl Default for EventSourceOptions {
     fn default() -> Self {
         Self {
             combine_keys: true,
+            mandate_modifier_for_multiple_keys: true,
             discard_raw_key_events: true,
             discard_mouse_move: true,
             discard_mouse_drag: false,
@@ -107,8 +117,10 @@ impl EventSource {
     /// If true, you may receive events with multiple non-modifier keys,
     /// eg `ctrl-a-b`. If not, the same sequence of keys will be received
     /// as two successive combinations: `ctrl-a` and `ctrl-b`.
+    ///
     /// Combining is not delay-based: you receive the combination as soon
-    /// as the keys are released.
+    /// as the keys are released (or as soon as the key is pressed in
+    /// most cases when `mandate_modifier_for_multiple_keys` is true).
     pub fn supports_multi_key_combinations(&self) -> bool {
         self.is_combining_keys
     }
@@ -123,6 +135,7 @@ impl EventSource {
         } else {
             false
         };
+        combiner.set_mandate_modifier_for_multiple_keys(options.mandate_modifier_for_multiple_keys);
         let (tx_events, rx_events) = unbounded();
         let (tx_seqs, rx_seqs) = bounded(ESCAPE_SEQUENCE_CHANNEL_SIZE);
         let (tx_quit, rx_quit) = unbounded();
