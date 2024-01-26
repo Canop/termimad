@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.28.2"></a>
+### v0.28.2 - 2024-01-26
+- Better support of repeated keys in EventSource
+
 <a name="v0.28.1"></a>
 ### v0.28.1 - 2024-01-20
 - EventSource by default mandates modifier (or space) for combinations with multiple simple keys. This can be changed with an option
