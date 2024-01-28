@@ -1,9 +1,6 @@
 use {
-    crate::{
-        line::*,
-        spacing::Spacing,
-    },
-    minimad::{Alignment, CompositeStyle},
+    crate::*,
+    minimad::Alignment,
 };
 
 /// a sequence of lines whose line-style is Code
@@ -29,8 +26,8 @@ impl CodeBlock {
 
 const fn code_line_length(line: &FmtLine<'_>) -> Option<usize> {
     match line {
-        FmtLine::Normal(fc) => match fc.composite.style {
-            CompositeStyle::Code => Some(fc.visible_length),
+        FmtLine::Normal(fc) => match fc.kind {
+            CompositeKind::Code => Some(fc.visible_length),
             _ => None,
         },
         _ => None,

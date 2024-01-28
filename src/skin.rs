@@ -1,12 +1,6 @@
 use {
     crate::{
-        area::{
-            terminal_size,
-            Area,
-        },
-        color::*,
-        composite::FmtComposite,
-        compound_style::CompoundStyle,
+        *,
         crossterm::{
             queue,
             style::{
@@ -16,21 +10,12 @@ use {
             },
         },
         errors::Result,
-        inline::FmtInline,
-        line::FmtLine,
-        line_style::LineStyle,
-        scrollbar_style::ScrollBarStyle,
-        spacing::Spacing,
-        styled_char::StyledChar,
         table_border_chars::*,
         tbl::*,
-        text::FmtText,
-        views::TextView,
     },
     minimad::{
         Alignment,
         Composite,
-        CompositeStyle,
         Compound,
         Line,
         OwningTemplateExpander,
@@ -282,29 +267,35 @@ impl MadSkin {
         self.horizontal_rule.set_bg(c);
     }
 
-    /// Return the number of visible chars in a composite
-    pub fn visible_composite_length(&self, composite: &Composite<'_>) -> usize {
-        let compounds_width: usize = composite.compounds.iter().map(|c| c.src.width()).sum();
-        (match composite.style {
-            CompositeStyle::ListItem(depth) => 2 + depth as usize, // space and bullet
-            CompositeStyle::Quote => 2,                            // space of the quoting char
+    /// Return the number of visible cells
+    pub fn visible_composite_length(
+        &self,
+        kind: CompositeKind,
+        compounds: &[Compound<'_>],
+    ) -> usize {
+        let compounds_width: usize = compounds.iter().map(|c| c.src.width()).sum();
+        (match kind {
+            CompositeKind::ListItem(depth) => 2 + depth as usize, // space and bullet
+            CompositeKind::ListItemFollowUp(depth) => 2 + depth as usize, // spaces
+            CompositeKind::Quote => 2,                            // space of the quoting char
             _ => 0,
         }) + compounds_width
     }
 
+    // FIXME deprecate ?
     pub fn visible_line_length(&self, line: &Line<'_>) -> usize {
         match line {
-            Line::Normal(composite) => self.visible_composite_length(composite),
+            Line::Normal(composite) => self.visible_composite_length(composite.style.into(), &composite.compounds),
             _ => 0, // FIXME implement
         }
     }
 
     /// return the style to apply to a given line
-    pub const fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
-        match style {
-            CompositeStyle::Code => &self.code_block,
-            CompositeStyle::Header(level) if *level <= MAX_HEADER_DEPTH as u8 => {
-                &self.headers[*level as usize - 1]
+    pub const fn line_style(&self, kind: CompositeKind) -> &LineStyle {
+        match kind {
+            CompositeKind::Code => &self.code_block,
+            CompositeKind::Header(level) if level <= MAX_HEADER_DEPTH as u8 => {
+                &self.headers[level as usize - 1]
             }
             _ => &self.paragraph,
         }
@@ -519,7 +510,7 @@ impl MadSkin {
         with_right_completion: bool,
         with_margins: bool,
     ) -> fmt::Result {
-        let ls = self.line_style(&fc.composite.style);
+        let ls = self.line_style(fc.kind);
         let (left_margin, right_margin) = if with_margins {
             ls.margins_in(outer_width)
         } else {
@@ -534,19 +525,25 @@ impl MadSkin {
         );
         self.paragraph.repeat_space(f, lpo + left_margin)?;
         ls.compound_style.repeat_space(f, lpi)?;
-        if let CompositeStyle::ListItem(depth) = fc.composite.style {
+        if let CompositeKind::ListItem(depth) = fc.kind {
             for _ in 0..depth {
                 write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
             }
             write!(f, "{}", self.bullet)?;
             write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
-        if fc.composite.is_quote() {
+        if let CompositeKind::ListItemFollowUp(depth) = fc.kind {
+            for _ in 0..depth+1 {
+                write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+            }
+            write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+        }
+        if fc.kind == CompositeKind::Quote {
             write!(f, "{}", self.quote_mark)?;
             write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
         #[cfg(feature = "special-renders")]
-        for c in &fc.composite.compounds {
+        for c in &fc.compounds {
             if let Some(replacement) = self.special_chars.get(c) {
                 write!(f, "{}", replacement)?;
             } else {

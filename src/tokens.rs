@@ -24,11 +24,11 @@ impl<'s> Token<'s> {
 /// Cut a composite into token, each one being either only spaces or without space, and
 /// each one from one compound
 pub(crate) fn tokenize<'s, 'c>(
-    composite: &'c Composite<'s>,
+    compounds: &'c [Compound<'s>],
     max_token_width: usize,
 ) -> Vec<Token<'s>> {
     let mut tokens: Vec<Token<'s>> = Vec::new();
-    for compound in &composite.compounds {
+    for compound in compounds {
         let mut token: Option<Token> = None;
         for (idx, char) in compound.src.char_indices() {
             let blank = char.is_whitespace() && !compound.code;

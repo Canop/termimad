@@ -56,9 +56,9 @@ struct Zone {
     removable_width: usize, // cell width of string minus one character each end
 }
 impl Zone {
-    fn token(composite: &Composite, min_removable_width: usize) -> Vec<Zone> {
+    fn token(compounds: &[Compound], min_removable_width: usize) -> Vec<Zone> {
         let mut zones = Vec::new();
-        for (compound_idx, compound) in composite.compounds.iter().enumerate() {
+        for (compound_idx, compound) in compounds.iter().enumerate() {
             let s = compound.src;
             if s.len() < min_removable_width + 2 {
                 continue;
@@ -105,14 +105,14 @@ impl Zone {
         }
         zones
     }
-    fn biggest_token(composite: &Composite, min_removable_width: usize) -> Option<Zone> {
-        Zone::token(composite, min_removable_width)
+    fn biggest_token(compounds: &[Compound], min_removable_width: usize) -> Option<Zone> {
+        Zone::token(compounds, min_removable_width)
             .drain(..)
             .max_by_key(|z| z.removable_width)
     }
     /// make a zone from each compound large enough
-    fn compounds(composite: &Composite, min_removable_width: usize) -> Vec<Zone> {
-        composite.compounds.iter()
+    fn compounds(compounds: &[Compound], min_removable_width: usize) -> Vec<Zone> {
+        compounds.iter()
             .enumerate()
             .filter_map(|(compound_idx, compound)| {
                 let char_infos = str_char_infos(compound.src);
@@ -134,17 +134,17 @@ impl Zone {
             })
             .collect()
     }
-    fn biggest_compound(composite: &Composite, min_removable_width: usize) -> Option<Zone> {
-        Zone::compounds(composite, min_removable_width)
+    fn biggest_compound(compounds: &[Compound], min_removable_width: usize) -> Option<Zone> {
+        Zone::compounds(compounds, min_removable_width)
             .drain(..)
             .max_by_key(|z| z.removable_width)
     }
     /// return the gain (that is the removed minus 1 for the ellipsis length)
-    fn cut(&self, composite: &mut Composite, to_remove: usize) -> usize {
+    fn cut(&self, compounds: &mut Vec<Compound>, to_remove: usize) -> usize {
         if self.removable_width < 2 {
             return 0;
         }
-        let compound = &composite.compounds[self.compound_idx];
+        let compound = &compounds[self.compound_idx];
         let len = self.char_infos.len();
         let mut start_char_idx = len / 2;
         let mut end_char_idx = start_char_idx;
@@ -173,9 +173,9 @@ impl Zone {
         let end_byte_idx = self.byte_start_idx + self.char_infos[end_char_idx].byte_idx;
         let head = compound.sub(0, start_byte_idx);
         let tail = compound.tail(end_byte_idx);
-        composite.compounds[self.compound_idx] = head;
-        composite.compounds.insert(self.compound_idx+1, Compound::raw_str(ELLIPSIS));
-        composite.compounds.insert(self.compound_idx+2, tail);
+        compounds[self.compound_idx] = head;
+        compounds.insert(self.compound_idx+1, Compound::raw_str(ELLIPSIS));
+        compounds.insert(self.compound_idx+2, tail);
 
         removed_width - 1
     }
@@ -208,12 +208,12 @@ impl Fitter {
         if fc.visible_length <= max_width {
             return;
         } else if max_width == 0 {
-            fc.composite.compounds.clear();
+            fc.compounds.clear();
             fc.visible_length = 0;
             return;
         } else if max_width == 1 {
-            fc.composite.compounds.clear();
-            fc.composite.compounds.push(Compound::raw_str(ELLIPSIS));
+            fc.compounds.clear();
+            fc.compounds.push(Compound::raw_str(ELLIPSIS));
             fc.visible_length = 1;
             return;
         }
@@ -227,8 +227,8 @@ impl Fitter {
             // cutting in the middle of big no space parts
             while excess > 0 {
                 let mut gain = 0;
-                if let Some(zone) = Zone::biggest_token(&fc.composite, 3) {
-                    gain = zone.cut(&mut fc.composite, excess + 1);
+                if let Some(zone) = Zone::biggest_token(&fc.compounds, 3) {
+                    gain = zone.cut(&mut fc.compounds, excess + 1);
                 }
                 if gain == 0 {
                     break;
@@ -243,8 +243,8 @@ impl Fitter {
                 let mut gain = 0;
                 // we'll look for zones of removable width at least 2
                 // (because we put the ellipsis in place)
-                if let Some(zone) = Zone::biggest_compound(&fc.composite, 2) {
-                    gain = zone.cut(&mut fc.composite, excess + 1);
+                if let Some(zone) = Zone::biggest_compound(&fc.compounds, 2) {
+                    gain = zone.cut(&mut fc.compounds, excess + 1);
                 }
                 if gain == 0 {
                     break;
@@ -258,7 +258,7 @@ impl Fitter {
             return;
         }
 
-        let compounds = &mut fc.composite.compounds;
+        let compounds = &mut fc.compounds;
         // we'll have to compensate with 1 or 2 ellipsis, so the "excess" is
         // increased accordingly we increase
         let (mut excess_left, mut excess_right) = match self.align {

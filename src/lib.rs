@@ -109,6 +109,7 @@ mod ask;
 mod code;
 mod color;
 mod composite;
+mod composite_kind;
 mod compound_style;
 mod displayable_line;
 mod errors;
@@ -137,6 +138,7 @@ pub use {
     color::*,
     composite::FmtComposite,
     compound_style::*,
+    composite_kind::*,
     displayable_line::DisplayableLine,
     errors::Error,
     events::{TimedEvent, EventSource, EventSourceOptions},
