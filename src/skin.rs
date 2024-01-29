@@ -49,6 +49,7 @@ pub struct MadSkin {
     pub horizontal_rule: StyledChar,
     pub ellipsis: CompoundStyle,
     pub table_border_chars: &'static TableBorderChars,
+    pub list_items_indentation_mode: ListItemsIndentationMode,
 
     /// compounds which should be replaced with special
     /// renders.
@@ -57,6 +58,7 @@ pub struct MadSkin {
     /// Do not use compounds with a length different than 1.
     #[cfg(feature = "special-renders")]
     pub special_chars: HashMap<Compound<'static>, StyledChar>,
+
 }
 
 impl Default for MadSkin {
@@ -87,6 +89,8 @@ impl Default for MadSkin {
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
             ellipsis: CompoundStyle::default(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
+            list_items_indentation_mode: Default::default(),
+
             #[cfg(feature = "special-renders")]
             special_chars: HashMap::new(),
         };
@@ -122,6 +126,7 @@ impl MadSkin {
             quote_mark: StyledChar::nude('▐'),
             horizontal_rule: StyledChar::nude('―'),
             ellipsis: CompoundStyle::default(),
+            list_items_indentation_mode: Default::default(),
             #[cfg(feature = "special-renders")]
             special_chars: HashMap::new(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
@@ -276,8 +281,11 @@ impl MadSkin {
         let compounds_width: usize = compounds.iter().map(|c| c.src.width()).sum();
         (match kind {
             CompositeKind::ListItem(depth) => 2 + depth as usize, // space and bullet
-            CompositeKind::ListItemFollowUp(depth) => 2 + depth as usize, // spaces
-            CompositeKind::Quote => 2,                            // space of the quoting char
+            CompositeKind::ListItemFollowUp(depth) => match self.list_items_indentation_mode {
+                ListItemsIndentationMode::FirstLineOnly => 0,
+                ListItemsIndentationMode::Block => 2 + depth as usize, // spaces
+            },
+            CompositeKind::Quote => 2, // space of the quoting char
             _ => 0,
         }) + compounds_width
     }
@@ -532,11 +540,13 @@ impl MadSkin {
             write!(f, "{}", self.bullet)?;
             write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
-        if let CompositeKind::ListItemFollowUp(depth) = fc.kind {
-            for _ in 0..depth+1 {
+        if self.list_items_indentation_mode == ListItemsIndentationMode::Block {
+            if let CompositeKind::ListItemFollowUp(depth) = fc.kind {
+                for _ in 0..depth+1 {
+                    write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+                }
                 write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
             }
-            write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
         if fc.kind == CompositeKind::Quote {
             write!(f, "{}", self.quote_mark)?;

@@ -118,6 +118,7 @@ mod fit;
 mod inline;
 mod line;
 mod line_style;
+mod list_indentation;
 mod macros;
 mod parse;
 mod rect;
@@ -146,6 +147,7 @@ pub use {
     inline::FmtInline,
     line::FmtLine,
     line_style::LineStyle,
+    list_indentation::*,
     minimad::Alignment,
     parse::*,
     rect::*,

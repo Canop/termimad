@@ -8,13 +8,16 @@ use {
 };
 
 /// build a composite which can be a new line after wrapping.
-const fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
+fn follow_up_composite<'s>(
+    fc: &FmtComposite<'s>,
+    skin: &MadSkin,
+) -> FmtComposite<'s> {
     let kind = match fc.kind {
         CompositeKind::ListItem(l) => CompositeKind::ListItemFollowUp(l),
         k => k,
     };
     let visible_length = match kind {
-        CompositeKind::ListItemFollowUp(l) => 2+l as usize,
+        CompositeKind::ListItemFollowUp(l) if skin.list_items_indentation_mode == ListItemsIndentationMode::Block => 2+l as usize,
         CompositeKind::Quote => 2,
         _ => 0,
     };
@@ -28,12 +31,28 @@ const fn follow_up_composite<'s>(fc: &FmtComposite<'s>) -> FmtComposite<'s> {
 
 /// return the inherent widths related to the kind, the one of the first line (for
 /// example with a bullet) and the ones for the next lines (for example with quotes)
-pub const fn composite_kind_widths(composite_kind: CompositeKind) -> (usize, usize) {
+pub fn composite_kind_widths(
+    composite_kind: CompositeKind,
+    skin: &MadSkin,
+) -> (usize, usize) {
     match composite_kind {
         CompositeKind::Paragraph => (0, 0),
         CompositeKind::Header(_) => (0, 0),
-        CompositeKind::ListItem(depth) => (2+depth as usize, 2),
-        CompositeKind::ListItemFollowUp(depth) => (2+depth as usize, 2),
+        CompositeKind::ListItem(depth) => {
+            let indent = 2 + depth as usize;
+            match skin.list_items_indentation_mode {
+                ListItemsIndentationMode::FirstLineOnly => (indent, 0),
+                ListItemsIndentationMode::Block => (indent, indent),
+            }
+
+        }
+        CompositeKind::ListItemFollowUp(depth) => {
+            let indent = 2 + depth as usize;
+            match skin.list_items_indentation_mode {
+                ListItemsIndentationMode::FirstLineOnly => (0, 0),
+                ListItemsIndentationMode::Block => (indent, indent),
+            }
+        }
         CompositeKind::Code => (0, 0),
         CompositeKind::Quote => (2, 2),
     }
@@ -45,13 +64,14 @@ pub const fn composite_kind_widths(composite_kind: CompositeKind) -> (usize, usi
 pub fn hard_wrap_composite<'s, 'c>(
     src_composite: &'c FmtComposite<'s>,
     width: usize,
+    skin: &MadSkin,
 ) -> Result<Vec<FmtComposite<'s>>, InsufficientWidthError> {
     if width < 3 {
         return Err(InsufficientWidthError{ available_width: width });
     }
     debug_assert!(src_composite.visible_length > width); // or we shouldn't be called
     let mut composites: Vec<FmtComposite<'s>> = Vec::new();
-    let (first_width, other_widths) = composite_kind_widths(src_composite.kind);
+    let (first_width, other_widths) = composite_kind_widths(src_composite.kind, skin);
     let mut dst_composite = FmtComposite {
         kind: src_composite.kind,
         compounds: Vec::new(),
@@ -78,7 +98,7 @@ pub fn hard_wrap_composite<'s, 'c>(
         )
     {
         dst_composite.add_compound(compounds[0].clone());
-        let mut new_dst_composite = follow_up_composite(&dst_composite);
+        let mut new_dst_composite = follow_up_composite(&dst_composite, skin);
         composites.push(dst_composite);
         new_dst_composite.add_compound(compounds[compounds.len()-1].clone());
         composites.push(new_dst_composite);
@@ -92,7 +112,7 @@ pub fn hard_wrap_composite<'s, 'c>(
         // TODO: does that really take first_width into account ?
         if dst_composite.visible_length + token.width > width {
             if !token.blank { // we skip blank composite at line change
-                let mut repl_composite = follow_up_composite(&dst_composite);
+                let mut repl_composite = follow_up_composite(&dst_composite, skin);
                 std::mem::swap(&mut dst_composite, &mut repl_composite);
                 composites.push(repl_composite);
                 dst_composite.add_compound(token.to_compound());
@@ -125,7 +145,7 @@ pub fn hard_wrap_lines<'s>(
             if fc.visible_length + left_margin + right_margin <= width {
                 lines.push(FmtLine::Normal(fc));
             } else {
-                for fc in hard_wrap_composite(&fc, width - left_margin - right_margin)? {
+                for fc in hard_wrap_composite(&fc, width - left_margin - right_margin, skin)? {
                     lines.push(FmtLine::Normal(fc));
                 }
             }
@@ -221,7 +241,7 @@ mod wrap_tests {
         let skin = crate::get_default_skin();
         let src = FmtComposite::from(Composite::from_inline("syntax coloring"), skin);
         println!("input:\n{:?}", &src);
-        let wrapped = hard_wrap_composite(&src, 8).unwrap();
+        let wrapped = hard_wrap_composite(&src, 8, &skin).unwrap();
         println!("wrapped: {:?}", &wrapped);
         assert_eq!(wrapped.len(), 2);
     }
