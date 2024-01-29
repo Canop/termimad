@@ -86,11 +86,11 @@ Use any other key to quit the application.
 
 ## What's shown
 
-* an **area** fitting the screen (with some side margin to be prettier)
+* an **area** fitting the screen (with a max width of 120, to be prettier)
 * a markdown text
  * **parsed**,
  * **skinned**,
- * **wrapped** to fit the width
+ * and **wrapped** to fit the width
 * a **scrollable** view in *raw terminal mode*
 
 ## Area

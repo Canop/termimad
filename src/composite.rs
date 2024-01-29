@@ -1,35 +1,40 @@
 use {
-    crate::{
-        Alignment,
-        MadSkin,
-        Spacing,
-        Fitter,
-    },
+    crate::*,
     minimad::{Composite, Compound},
     unicode_width::UnicodeWidthStr,
 };
 
-/// Wrap a Minimad Composite, which is a list of Compounds
-/// (which are strings with an homogeneous style)
+/// Wrap Minimad compounds with their style and
+/// termimad specific information
 #[derive(Debug, Clone)]
 pub struct FmtComposite<'s> {
-    pub composite: Composite<'s>,
-    pub visible_length: usize, // to avoid recomputing it again and again
+
+    pub kind: CompositeKind,
+
+    pub compounds: Vec<Compound<'s>>,
+
+    // cached visible length in cells, not counting margins, bullets, etc.
+    pub visible_length: usize,
+
     pub spacing: Option<Spacing>,
+
 }
 
 impl<'s> FmtComposite<'s> {
     pub fn new() -> Self {
         FmtComposite {
-            composite: Composite::new(),
+            kind: CompositeKind::Paragraph,
+            compounds: Vec::new(),
             visible_length: 0,
             spacing: None,
         }
     }
     pub fn from(composite: Composite<'s>, skin: &MadSkin) -> Self {
+        let kind: CompositeKind = composite.style.into();
         FmtComposite {
-            visible_length: skin.visible_composite_length(&composite),
-            composite,
+            visible_length: skin.visible_composite_length(kind, &composite.compounds),
+            kind,
+            compounds: composite.compounds,
             spacing: None,
         }
     }
@@ -51,7 +56,7 @@ impl<'s> FmtComposite<'s> {
     #[inline(always)]
     pub fn add_compound(&mut self, compound: Compound<'s>) {
         self.visible_length += compound.src.width();
-        self.composite.compounds.push(compound);
+        self.compounds.push(compound);
     }
     /// Ensure the cached visible_length is correct.
     ///
@@ -59,7 +64,7 @@ impl<'s> FmtComposite<'s> {
     /// this must be called if compounds are added,
     /// removed or modified without using the FmtComposite API
     pub fn recompute_width(&mut self, skin: &MadSkin) {
-        self.visible_length = skin.visible_composite_length(&self.composite);
+        self.visible_length = skin.visible_composite_length(self.kind, &self.compounds);
     }
     /// try to ensure the composite's width doesn't exceed the given
     /// width.

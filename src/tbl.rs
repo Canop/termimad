@@ -82,7 +82,7 @@ impl Table {
         &mut self,
         lines: &mut Vec<FmtLine<'_>>,
         width: usize,
-        _skin: &MadSkin,
+        skin: &MadSkin,
     ) {
         let mut nbcols = self.nbcols;
         if nbcols == 0 || width == 0 {
@@ -138,7 +138,7 @@ impl Table {
                     cells_to_add.push(Vec::new());
                     if cells[ic].visible_length > widths[ic] {
                         // we must wrap the cell over several lines
-                        let mut composites = wrap::hard_wrap_composite(&cells[ic], widths[ic])
+                        let mut composites = wrap::hard_wrap_composite(&cells[ic], widths[ic], skin)
                             .expect("tbl fitter guaranteed all columns to be wide enough");
                         // the first composite replaces the cell, while the other
                         // ones go to cells_to_add
