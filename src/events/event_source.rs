@@ -41,7 +41,7 @@ struct TimedClick {
 }
 
 pub struct EventSourceOptions {
-    /// Whether to try combine key events into key combinations (defaults true).
+    /// Whether to try combine key events into key combinations.
     /// This changes the behavior of the terminal, if it's compatible, then restores
     /// the standard behavior on drop.
     pub combine_keys: bool,
@@ -88,7 +88,7 @@ pub struct EventSource {
 impl Default for EventSourceOptions {
     fn default() -> Self {
         Self {
-            combine_keys: true,
+            combine_keys: false,
             mandate_modifier_for_multiple_keys: true,
             discard_raw_key_events: true,
             discard_mouse_move: true,
@@ -112,7 +112,8 @@ impl EventSource {
         Self::with_options(EventSourceOptions::default())
     }
     /// return true if the source is configured to combine standard keys
-    /// and the terminal supports it.
+    /// and the terminal supports it (it requires the 'kitty keyboard
+    /// protocol').
     ///
     /// If true, you may receive events with multiple non-modifier keys,
     /// eg `ctrl-a-b`. If not, the same sequence of keys will be received

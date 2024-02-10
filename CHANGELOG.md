@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.29.1"></a>
+### v0.29.1 - 2024-02-10
+- event source's `combining` now `false` by default
+
 <a name="v0.29.0"></a>
 ### v0.29.0 - 2024-01-29
 - list items are now by default indented as blocks. It's possible to revert to the old rendering (only the first line indented) with the list_items_identation_mod field of the skin - Fix #21

@@ -241,7 +241,7 @@ mod wrap_tests {
         let skin = crate::get_default_skin();
         let src = FmtComposite::from(Composite::from_inline("syntax coloring"), skin);
         println!("input:\n{:?}", &src);
-        let wrapped = hard_wrap_composite(&src, 8, &skin).unwrap();
+        let wrapped = hard_wrap_composite(&src, 8, skin).unwrap();
         println!("wrapped: {:?}", &wrapped);
         assert_eq!(wrapped.len(), 2);
     }
