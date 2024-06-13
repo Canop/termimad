@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.29.3"></a>
+### v0.29.3 - 2024-06-13
+- `ask!` macro doesn't need separate imports anymore
+
 <a name="v0.29.2"></a>
 ### v0.29.2 - 2024-04-24
 - update Crokey to 1.0.0

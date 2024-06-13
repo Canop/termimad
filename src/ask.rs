@@ -102,16 +102,27 @@ impl Question {
 /// ask the user to choose among proposed answers.
 ///
 /// This macro makes it possible to propose several choices, with
-/// an optional default ones, to execute blocks, to optionaly return
+/// an optional default one, to execute blocks, to optionaly return
 /// a value.
 ///
-/// Example:
+/// Example of a simple confirmation::
+///
+/// ```no_run
+/// let confirmed = termimad::ask!(
+///     termimad::get_default_skin(),
+///     "Do you want to erase the disk ?", ('n') {
+///         ('y', "**Y**es") => { true }
+///         ('n', "**N**o") => { false }
+///     }
+/// );
+/// ```
+///
+/// Example of chained questions:
 ///
 /// ```no_run
 /// use termimad::*;
 ///
 /// let skin = get_default_skin();
-///
 /// let beverage = ask!(skin, "What do I serve you ?", {
 ///     ('b', "**B**eer") => {
 ///         ask!(skin, "Really ? We have wine and orange juice too", (2) {
@@ -139,9 +150,9 @@ macro_rules! ask {
         $question: expr,
         { $(($key: expr, $answer: expr) => $r: block)+ }
     ) => {{
-        let mut question = Question {
+        let mut question = $crate::Question {
             md: Some($question.to_string()),
-            answers: vec![$(Answer { key: $key.to_string(), md: $answer.to_string() }),*],
+            answers: vec![$($crate::Answer { key: $key.to_string(), md: $answer.to_string() }),*],
             default_answer: None,
         };
         let key = question.ask($skin).unwrap();
@@ -159,9 +170,9 @@ macro_rules! ask {
         ($default_answer: expr)
         { $(($key: expr, $answer: expr) => $r: block)+ }
     ) => {{
-        let mut question = Question {
+        let mut question = $crate::Question {
             md: Some($question.to_string()),
-            answers: vec![$(Answer { key: $key.to_string(), md: $answer.to_string() }),*],
+            answers: vec![$($crate::Answer { key: $key.to_string(), md: $answer.to_string() }),*],
             default_answer: Some($default_answer.to_string()),
         };
         if question.has_exotic_default() {

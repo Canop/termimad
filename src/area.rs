@@ -9,10 +9,6 @@ const DEFAULT_TERMINAL_WIDTH: u16 = 50;
 /// A default height which is used when we failed measuring the real terminal width
 const DEFAULT_TERMINAL_HEIGHT: u16 = 20;
 
-pub trait AreaContent {
-    fn height() -> u16;
-}
-
 /// A rectangular part of the screen
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Area {
