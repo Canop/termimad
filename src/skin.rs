@@ -24,7 +24,6 @@ use {
         MAX_HEADER_DEPTH,
     },
     std::{
-        collections::HashMap,
         fmt,
         io::Write,
     },
@@ -57,7 +56,7 @@ pub struct MadSkin {
     /// (comments welcome)
     /// Do not use compounds with a length different than 1.
     #[cfg(feature = "special-renders")]
-    pub special_chars: HashMap<Compound<'static>, StyledChar>,
+    pub special_chars: std::collections::HashMap<Compound<'static>, StyledChar>,
 
 }
 
@@ -92,7 +91,7 @@ impl Default for MadSkin {
             list_items_indentation_mode: Default::default(),
 
             #[cfg(feature = "special-renders")]
-            special_chars: HashMap::new(),
+            special_chars: std::collections::HashMap::new(),
         };
         skin.code_block.set_fgbg(gray(17), gray(3));
         for h in &mut skin.headers {
@@ -128,7 +127,7 @@ impl MadSkin {
             ellipsis: CompoundStyle::default(),
             list_items_indentation_mode: Default::default(),
             #[cfg(feature = "special-renders")]
-            special_chars: HashMap::new(),
+            special_chars: std::collections::HashMap::new(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
         }
     }
@@ -562,7 +561,7 @@ impl MadSkin {
             }
         }
         #[cfg(not(feature = "special-renders"))]
-        for c in &fc.composite.compounds {
+        for c in &fc.compounds {
             let os = self.compound_style(ls, c);
             write!(f, "{}", os.apply_to(c.as_str()))?;
         }
