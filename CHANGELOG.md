@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.29.4"></a>
+### v0.29.4 - 2024-06-17
+- fix compilation with `default-features = false` - Fix #62
+
 <a name="v0.29.3"></a>
 ### v0.29.3 - 2024-06-13
 - `ask!` macro doesn't need separate imports anymore
