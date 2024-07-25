@@ -67,7 +67,7 @@ impl View {
     }
     pub fn apply_key_event(&mut self, key: KeyEvent) -> bool {
         let input = &mut self.input;
-        match key {
+        match key.into() {
             key!(ctrl-c) => clipboard::copy_from_input(input),
             key!(ctrl-x) => clipboard::cut_from_input(input),
             key!(ctrl-v) => clipboard::paste_into_input(input),
@@ -80,11 +80,12 @@ impl View {
         // The line below allows mouse selection and wheel scrolling.
         self.input.apply_mouse_event(mouse_event, double_click)
     }
-    pub fn apply_timed_event(&mut self, timed_event: TimedEvent) -> bool {
+    pub fn apply_timed_event(&mut self, timed_event: &TimedEvent) -> bool {
         match timed_event.event {
             Event::Key(key) => self.apply_key_event(key),
             Event::Mouse(me) => self.apply_mouse_event(me, timed_event.double_click),
             Event::Resize(w, h) => self.resize(Area::new(0, 0, w, h)),
+            _ => false, // accomodate for new crossterm events
         }
     }
     /// Draw the view (not flushing)

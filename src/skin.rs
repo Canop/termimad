@@ -1,47 +1,38 @@
 use {
     crate::{
-        area::{terminal_size, Area},
-        color::*,
-        composite::FmtComposite,
-        compound_style::CompoundStyle,
+        *,
+        crossterm::{
+            queue,
+            style::{
+                Attribute,
+                Color,
+                Print,
+            },
+        },
         errors::Result,
-        inline::FmtInline,
-        line::FmtLine,
-        line_style::LineStyle,
-        scrollbar_style::ScrollBarStyle,
-        spacing::Spacing,
-        styled_char::StyledChar,
-        tbl::*,
-        text::FmtText,
-        views::TextView,
         table_border_chars::*,
-    },
-    crossterm::{
-        queue,
-        style::{Attribute, Color, Print},
+        tbl::*,
     },
     minimad::{
         Alignment,
         Composite,
-        CompositeStyle,
         Compound,
         Line,
-        MAX_HEADER_DEPTH,
         OwningTemplateExpander,
         TextTemplate,
         TextTemplateExpander,
+        MAX_HEADER_DEPTH,
     },
     std::{
         fmt,
         io::Write,
-        collections::HashMap,
     },
     unicode_width::UnicodeWidthStr,
 };
 
 /// A skin defining how a parsed markdown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct MadSkin {
     pub paragraph: LineStyle,
     pub bold: CompoundStyle,
@@ -57,14 +48,15 @@ pub struct MadSkin {
     pub horizontal_rule: StyledChar,
     pub ellipsis: CompoundStyle,
     pub table_border_chars: &'static TableBorderChars,
+    pub list_items_indentation_mode: ListItemsIndentationMode,
 
     /// compounds which should be replaced with special
     /// renders.
     /// Experimental. This API will probably change
     /// (comments welcome)
     /// Do not use compounds with a length different than 1.
-    #[cfg(feature="special-renders")]
-    pub special_chars: HashMap<Compound<'static>, StyledChar>,
+    #[cfg(feature = "special-renders")]
+    pub special_chars: std::collections::HashMap<Compound<'static>, StyledChar>,
 
 }
 
@@ -87,10 +79,7 @@ impl Default for MadSkin {
             code_block: LineStyle::default(),
             headers: Default::default(),
             scrollbar: ScrollBarStyle::new(),
-            table: LineStyle {
-                compound_style: CompoundStyle::with_fg(gray(7)),
-                align: Alignment::Unspecified,
-            },
+            table: CompoundStyle::with_fg(gray(7)).into(),
             bullet: StyledChar::from_fg_char(gray(8), '•'),
             quote_mark: StyledChar::new(
                 CompoundStyle::new(Some(gray(12)), None, Attribute::Bold.into()),
@@ -99,8 +88,10 @@ impl Default for MadSkin {
             horizontal_rule: StyledChar::from_fg_char(gray(6), '―'),
             ellipsis: CompoundStyle::default(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
-            #[cfg(feature="special-renders")]
-            special_chars: HashMap::new(),
+            list_items_indentation_mode: Default::default(),
+
+            #[cfg(feature = "special-renders")]
+            special_chars: std::collections::HashMap::new(),
         };
         skin.code_block.set_fgbg(gray(17), gray(3));
         for h in &mut skin.headers {
@@ -113,7 +104,6 @@ impl Default for MadSkin {
 }
 
 impl MadSkin {
-
     /// Build a customizable skin with no style, most useful
     /// when your application must run in no-color mode, for
     /// example when piped to a file.
@@ -135,8 +125,9 @@ impl MadSkin {
             quote_mark: StyledChar::nude('▐'),
             horizontal_rule: StyledChar::nude('―'),
             ellipsis: CompoundStyle::default(),
-            #[cfg(feature="special-renders")]
-            special_chars: HashMap::new(),
+            list_items_indentation_mode: Default::default(),
+            #[cfg(feature = "special-renders")]
+            special_chars: std::collections::HashMap::new(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
         }
     }
@@ -218,7 +209,7 @@ impl MadSkin {
         self.quote_mark.set_fg(fg);
         self.horizontal_rule.set_fg(fg);
         self.ellipsis.set_fg(fg);
-        #[cfg(feature="special-renders")]
+        #[cfg(feature = "special-renders")]
         {
             for (_, sc) in self.special_chars.iter_mut() {
                 sc.set_fg(fg);
@@ -244,7 +235,7 @@ impl MadSkin {
         self.horizontal_rule.set_bg(bg);
         self.ellipsis.set_bg(bg);
         self.scrollbar.set_bg(bg);
-        #[cfg(feature="special-renders")]
+        #[cfg(feature = "special-renders")]
         {
             for (_, sc) in self.special_chars.iter_mut() {
                 sc.set_bg(bg);
@@ -280,32 +271,38 @@ impl MadSkin {
         self.horizontal_rule.set_bg(c);
     }
 
-    /// Return the number of visible chars in a composite
-    pub fn visible_composite_length(&self, composite: &Composite<'_>) -> usize {
-        let compounds_width: usize = composite.compounds
-            .iter()
-            .map(|c| c.src.width())
-            .sum();
-        (match composite.style {
-            CompositeStyle::ListItem(depth) => 2 + depth as usize, // space and bullet
-            CompositeStyle::Quote => 2,    // space of the quoting char
+    /// Return the number of visible cells
+    pub fn visible_composite_length(
+        &self,
+        kind: CompositeKind,
+        compounds: &[Compound<'_>],
+    ) -> usize {
+        let compounds_width: usize = compounds.iter().map(|c| c.src.width()).sum();
+        (match kind {
+            CompositeKind::ListItem(depth) => 2 + depth as usize, // space and bullet
+            CompositeKind::ListItemFollowUp(depth) => match self.list_items_indentation_mode {
+                ListItemsIndentationMode::FirstLineOnly => 0,
+                ListItemsIndentationMode::Block => 2 + depth as usize, // spaces
+            },
+            CompositeKind::Quote => 2, // space of the quoting char
             _ => 0,
         }) + compounds_width
     }
 
+    // FIXME deprecate ?
     pub fn visible_line_length(&self, line: &Line<'_>) -> usize {
         match line {
-            Line::Normal(composite) => self.visible_composite_length(composite),
+            Line::Normal(composite) => self.visible_composite_length(composite.style.into(), &composite.compounds),
             _ => 0, // FIXME implement
         }
     }
 
     /// return the style to apply to a given line
-    const fn line_style(&self, style: &CompositeStyle) -> &LineStyle {
-        match style {
-            CompositeStyle::Code => &self.code_block,
-            CompositeStyle::Header(level) if *level <= MAX_HEADER_DEPTH as u8 => {
-                &self.headers[*level as usize - 1]
+    pub const fn line_style(&self, kind: CompositeKind) -> &LineStyle {
+        match kind {
+            CompositeKind::Code => &self.code_block,
+            CompositeKind::Header(level) if level <= MAX_HEADER_DEPTH as u8 => {
+                &self.headers[level as usize - 1]
             }
             _ => &self.paragraph,
         }
@@ -376,12 +373,7 @@ impl MadSkin {
     }
 
     /// queue the rendered markdown in the specified area, without flush
-    pub fn write_in_area_on<W: Write>(
-        &self,
-        w: &mut W,
-        markdown: &str,
-        area: &Area,
-    ) -> Result<()> {
+    pub fn write_in_area_on<W: Write>(&self, w: &mut W, markdown: &str, area: &Area) -> Result<()> {
         let text = self.area_text(markdown, area);
         let mut view = TextView::from(area, &text);
         view.show_scrollbar = false;
@@ -437,20 +429,26 @@ impl MadSkin {
     }
 
     pub fn print_composite(&self, composite: Composite<'_>) {
-        print!("{}", FmtInline{
-            skin: self,
-            composite: FmtComposite::from(composite, self),
-        });
+        print!(
+            "{}",
+            FmtInline {
+                skin: self,
+                composite: FmtComposite::from(composite, self),
+            }
+        );
     }
 
     pub fn write_composite<W>(&self, w: &mut W, composite: Composite<'_>) -> Result<()>
     where
         W: std::io::Write,
     {
-        Ok(queue!(w, Print(FmtInline{
-            skin: self,
-            composite: FmtComposite::from(composite, self),
-        }))?)
+        Ok(queue!(
+            w,
+            Print(FmtInline {
+                skin: self,
+                composite: FmtComposite::from(composite, self),
+            })
+        )?)
     }
 
     /// write a composite filling the given width
@@ -470,10 +468,13 @@ impl MadSkin {
     {
         let mut fc = FmtComposite::from(composite, self);
         fc.fill_width(width, align, self);
-        Ok(queue!(w, Print(FmtInline{
-            skin: self,
-            composite: fc,
-        }))?)
+        Ok(queue!(
+            w,
+            Print(FmtInline {
+                skin: self,
+                composite: fc,
+            })
+        )?)
     }
 
     /// parse the given src as a markdown snippet and write it on
@@ -507,33 +508,51 @@ impl MadSkin {
     /// Write a composite.
     ///
     /// This function is internally used and normally not needed outside
-    ///  of Termimad's implementation.
+    ///  of Termimad's implementation. Its arguments may change.
     pub fn write_fmt_composite(
         &self,
         f: &mut fmt::Formatter<'_>,
         fc: &FmtComposite<'_>,
         outer_width: Option<usize>,
         with_right_completion: bool,
+        with_margins: bool,
     ) -> fmt::Result {
-        let ls = self.line_style(&fc.composite.style);
+        let ls = self.line_style(fc.kind);
+        let (left_margin, right_margin) = if with_margins {
+            ls.margins_in(outer_width)
+        } else {
+            (0, 0)
+        };
         let (lpi, rpi) = fc.completions(); // inner completion
         let inner_width = fc.spacing.map_or(fc.visible_length, |sp| sp.width);
-        let (lpo, rpo) = Spacing::optional_completions(ls.align, inner_width, outer_width);
-        self.paragraph.repeat_space(f, lpo)?;
+        let (lpo, rpo) = Spacing::optional_completions(
+            ls.align,
+            inner_width + left_margin + right_margin,
+            outer_width,
+        );
+        self.paragraph.repeat_space(f, lpo + left_margin)?;
         ls.compound_style.repeat_space(f, lpi)?;
-        if let CompositeStyle::ListItem(depth) = fc.composite.style {
+        if let CompositeKind::ListItem(depth) = fc.kind {
             for _ in 0..depth {
                 write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
             }
             write!(f, "{}", self.bullet)?;
             write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
-        if fc.composite.is_quote() {
+        if self.list_items_indentation_mode == ListItemsIndentationMode::Block {
+            if let CompositeKind::ListItemFollowUp(depth) = fc.kind {
+                for _ in 0..depth+1 {
+                    write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+                }
+                write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+            }
+        }
+        if fc.kind == CompositeKind::Quote {
             write!(f, "{}", self.quote_mark)?;
             write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
         }
-        #[cfg(feature="special-renders")]
-        for c in &fc.composite.compounds {
+        #[cfg(feature = "special-renders")]
+        for c in &fc.compounds {
             if let Some(replacement) = self.special_chars.get(c) {
                 write!(f, "{}", replacement)?;
             } else {
@@ -541,14 +560,14 @@ impl MadSkin {
                 write!(f, "{}", os.apply_to(c.as_str()))?;
             }
         }
-        #[cfg(not(feature="special-renders"))]
-        for c in &fc.composite.compounds {
+        #[cfg(not(feature = "special-renders"))]
+        for c in &fc.compounds {
             let os = self.compound_style(ls, c);
             write!(f, "{}", os.apply_to(c.as_str()))?;
         }
         ls.compound_style.repeat_space(f, rpi)?;
         if with_right_completion {
-            self.paragraph.repeat_space(f, rpo)?;
+            self.paragraph.repeat_space(f, rpo + right_margin)?;
         }
         Ok(())
     }
@@ -570,7 +589,7 @@ impl MadSkin {
         let tbc = &self.table_border_chars;
         match line {
             FmtLine::Normal(fc) => {
-                self.write_fmt_composite(f, fc, width, with_right_completion)?;
+                self.write_fmt_composite(f, fc, width, with_right_completion, true)?;
             }
             FmtLine::TableRow(FmtTableRow { cells }) => {
                 let tbl_width = 1 + cells.iter().fold(0, |sum, cell| {
@@ -584,7 +603,7 @@ impl MadSkin {
                 self.paragraph.repeat_space(f, lpo)?;
                 for cell in cells {
                     write!(f, "{}", self.table.compound_style.apply_to(tbc.vertical))?;
-                    self.write_fmt_composite(f, cell, None, false)?;
+                    self.write_fmt_composite(f, cell, None, false, false)?;
                 }
                 write!(f, "{}", self.table.compound_style.apply_to(tbc.vertical))?;
                 if with_right_completion {

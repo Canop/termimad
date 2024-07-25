@@ -78,7 +78,12 @@ struct Table {
 
 #[allow(clippy::needless_range_loop)]
 impl Table {
-    pub fn fix_columns(&mut self, lines: &mut Vec<FmtLine<'_>>, width: usize) {
+    pub fn fix_columns(
+        &mut self,
+        lines: &mut Vec<FmtLine<'_>>,
+        width: usize,
+        skin: &MadSkin,
+    ) {
         let mut nbcols = self.nbcols;
         if nbcols == 0 || width == 0 {
             return;
@@ -133,7 +138,7 @@ impl Table {
                     cells_to_add.push(Vec::new());
                     if cells[ic].visible_length > widths[ic] {
                         // we must wrap the cell over several lines
-                        let mut composites = wrap::hard_wrap_composite(&cells[ic], widths[ic])
+                        let mut composites = wrap::hard_wrap_composite(&cells[ic], widths[ic], skin)
                             .expect("tbl fitter guaranteed all columns to be wide enough");
                         // the first composite replaces the cell, while the other
                         // ones go to cells_to_add
@@ -244,8 +249,12 @@ fn find_tables(lines: &[FmtLine<'_>]) -> Vec<Table> {
 ///
 /// Some lines may be added to the table in the process, which means any
 ///  precedent indexing might be invalid.
-pub fn fix_all_tables(lines: &mut Vec<FmtLine<'_>>, width: usize) {
+pub fn fix_all_tables(
+    lines: &mut Vec<FmtLine<'_>>,
+    width: usize,
+    skin: &MadSkin,
+) {
     for tbl in find_tables(lines).iter_mut().rev() {
-        tbl.fix_columns(lines, width);
+        tbl.fix_columns(lines, width, skin);
     }
 }

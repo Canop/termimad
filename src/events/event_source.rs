@@ -5,21 +5,22 @@ use {
     },
     crate::{
         errors::Error,
-    },
-    crossbeam::channel::{bounded, unbounded, Receiver, Sender},
-    crossterm::{
-        self,
-        event::{
-            Event,
-            KeyCode,
-            KeyEvent,
-            KeyModifiers,
-            MouseButton,
-            MouseEvent,
-            MouseEventKind,
+        crossterm::{
+            self,
+            event::{
+                Event,
+                KeyCode,
+                KeyEvent,
+                KeyModifiers,
+                MouseButton,
+                MouseEvent,
+                MouseEventKind,
+            },
+            terminal,
         },
-        terminal,
     },
+    crokey::Combiner,
+    crossbeam::channel::{bounded, unbounded, Receiver, Sender},
     std::{
         sync::{
             atomic::{AtomicUsize, Ordering},
@@ -40,6 +41,23 @@ struct TimedClick {
 }
 
 pub struct EventSourceOptions {
+    /// Whether to try combine key events into key combinations.
+    /// This changes the behavior of the terminal, if it's compatible, then restores
+    /// the standard behavior on drop.
+    pub combine_keys: bool,
+    /// When combining is enabled, you may either want "simple" keys
+    /// (i.e. without modifier or space) to be handled on key press,
+    /// or to wait for a key release so that maybe they may
+    /// be part of a combination like 'a-b'.
+    /// If combinations without modifier or space are unlikely in your
+    /// application, you may make it feel snappier by setting this to true.
+    ///
+    /// This setting has no effect when combining isn't enabled.
+    pub mandate_modifier_for_multiple_keys: bool,
+    /// Whether to filter out raw key events (default true)
+    /// (if you want to manage repeat, press, release, specifically, you're probably
+    /// not interested in combining keys)
+    pub discard_raw_key_events: bool,
     /// whether to filter out simple mouse moves (default true)
     pub discard_mouse_move: bool,
     /// whether to filter out mouse drag (default false)
@@ -47,6 +65,9 @@ pub struct EventSourceOptions {
 }
 
 /// a thread backed event listener emmiting events on a channel.
+///
+/// The event source enables the terminal's raw mode and restores
+///  it on drop
 ///
 /// Additionnally to emmitting events, this source updates a
 ///  sharable event count, protected by an Arc. This makes
@@ -56,6 +77,7 @@ pub struct EventSourceOptions {
 /// The event source isn't tick based. It makes it possible to
 /// built TUI with no CPU consumption while idle.
 pub struct EventSource {
+    is_combining_keys: bool,
     rx_events: Receiver<TimedEvent>,
     rx_seqs: Receiver<EscapeSequence>,
     tx_quit: Sender<bool>,
@@ -66,10 +88,20 @@ pub struct EventSource {
 impl Default for EventSourceOptions {
     fn default() -> Self {
         Self {
+            combine_keys: false,
+            mandate_modifier_for_multiple_keys: true,
+            discard_raw_key_events: true,
             discard_mouse_move: true,
             discard_mouse_drag: false,
         }
     }
+}
+
+fn is_seq_start(key: KeyEvent) -> bool {
+    key.code == KeyCode::Char('_') && key.modifiers == KeyModifiers::ALT
+}
+fn is_seq_end(key: KeyEvent) -> bool {
+    key.code == KeyCode::Char('\\') && key.modifiers == KeyModifiers::ALT
 }
 
 impl EventSource {
@@ -79,25 +111,37 @@ impl EventSource {
     pub fn new() -> Result<Self, Error> {
         Self::with_options(EventSourceOptions::default())
     }
-
+    /// return true if the source is configured to combine standard keys
+    /// and the terminal supports it (it requires the 'kitty keyboard
+    /// protocol').
+    ///
+    /// If true, you may receive events with multiple non-modifier keys,
+    /// eg `ctrl-a-b`. If not, the same sequence of keys will be received
+    /// as two successive combinations: `ctrl-a` and `ctrl-b`.
+    ///
+    /// Combining is not delay-based: you receive the combination as soon
+    /// as the keys are released (or as soon as the key is pressed in
+    /// most cases when `mandate_modifier_for_multiple_keys` is true).
+    pub fn supports_multi_key_combinations(&self) -> bool {
+        self.is_combining_keys
+    }
     /// create a new source
     ///
     /// If desired, mouse support must be enabled and disabled in crossterm.
     pub fn with_options(options: EventSourceOptions) -> Result<Self, Error> {
+        let mut combiner = Combiner::default();
+        terminal::enable_raw_mode()?;
+        let is_combining_keys = if options.combine_keys {
+            combiner.enable_combining()?
+        } else {
+            false
+        };
+        combiner.set_mandate_modifier_for_multiple_keys(options.mandate_modifier_for_multiple_keys);
         let (tx_events, rx_events) = unbounded();
         let (tx_seqs, rx_seqs) = bounded(ESCAPE_SEQUENCE_CHANNEL_SIZE);
         let (tx_quit, rx_quit) = unbounded();
         let event_count = Arc::new(AtomicUsize::new(0));
         let internal_event_count = Arc::clone(&event_count);
-        terminal::enable_raw_mode()?;
-        let seq_start = KeyEvent {
-            code: KeyCode::Char('_'),
-            modifiers: KeyModifiers::ALT,
-        };
-        let seq_end = KeyEvent {
-            code: KeyCode::Char('\\'),
-            modifiers: KeyModifiers::ALT,
-        };
         thread::spawn(move || {
             let mut last_up: Option<TimedClick> = None;
             let mut current_escape_sequence: Option<EscapeSequence> = None;
@@ -121,7 +165,7 @@ impl EventSource {
                 let in_seq = current_escape_sequence.is_some();
                 if in_seq {
                     if let crossterm::event::Event::Key(key) = ct_event {
-                        if key == seq_end {
+                        if is_seq_end(key) {
                             // it's a proper sequence ending, we send it as such
                             let mut seq = current_escape_sequence.take().unwrap();
                             seq.keys.push(key);
@@ -140,13 +184,18 @@ impl EventSource {
                     // we send all previous events independently before sending this one
                     let seq = current_escape_sequence.take().unwrap();
                     for key in seq.keys {
-                        if send_and_wait(TimedEvent::new(Event::Key(key))) {
+                        let mut timed_event = TimedEvent::new(Event::Key(key));
+                        timed_event.key_combination = combiner.transform(key);
+                        if options.discard_raw_key_events && timed_event.key_combination.is_none() {
+                            continue;
+                        }
+                        if send_and_wait(timed_event) {
                             return;
                         }
                     }
                     // the current event will be sent normally
                 } else if let crossterm::event::Event::Key(key) = ct_event {
-                    if key == seq_start {
+                    if is_seq_start(key) {
                         // starting a new sequence
                         current_escape_sequence = Some(EscapeSequence { keys: vec![key] });
                         continue;
@@ -161,6 +210,12 @@ impl EventSource {
                     }
                 }
                 let mut timed_event = TimedEvent::new(ct_event);
+                if let Event::Key(key) = &timed_event.event {
+                    timed_event.key_combination = combiner.transform(*key);
+                    if options.discard_raw_key_events && timed_event.key_combination.is_none() {
+                        continue;
+                    }
+                }
                 if let Event::Mouse(MouseEvent { kind, column, row, .. }) = timed_event.event {
                     if matches!(
                         kind,
@@ -190,6 +245,7 @@ impl EventSource {
             }
         });
         Ok(EventSource {
+            is_combining_keys,
             rx_events,
             rx_seqs,
             tx_quit,

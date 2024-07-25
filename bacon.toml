@@ -9,6 +9,10 @@ default_job = "check-all"
 command = ["cargo", "check", "--color", "always"]
 need_stdout = false
 
+[jobs.check-no-features]
+command = ["cargo", "check", "--no-default-features", "--color", "always"]
+need_stdout = false
+
 [jobs.check-all]
 command = ["cargo", "check", "--all-targets", "--color", "always"]
 need_stdout = false

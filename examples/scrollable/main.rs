@@ -86,19 +86,19 @@ Use any other key to quit the application.
 
 ## What's shown
 
-* an **area** fitting the screen (with some side margin to be prettier)
+* an **area** fitting the screen (with a max width of 120, to be prettier)
 * a markdown text
  * **parsed**,
  * **skinned**,
- * **wrapped** to fit the width
+ * and **wrapped** to fit the width
 * a **scrollable** view in *raw terminal mode*
 
 ## Area
 
-The area specifies the part of the screen where we'll display our markdown. The margin in this example is just here to show that wrapping is handled:
+The area specifies the part of the screen where we'll display our markdown.
 
     let mut area = Area::full_screen();
-    area.pad(2, 1); // let's add some margin
+    area.pad_for_max_width(120); // we don't want a too wide text column
 
 *(yes the code block centering in this example is a little too much, it's just here to show what's possible)*
 

@@ -19,7 +19,7 @@ pub use {
     tbl_fit::*,
 };
 use {
-    crossterm::{
+    crate::crossterm::{
         style::{Color, SetBackgroundColor},
         QueueableCommand,
     },

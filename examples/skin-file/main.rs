@@ -70,13 +70,32 @@ The first encountered color is the foreground color. If you want no foreground c
 
 Line styles are "paragraph", "code-block", and "table".
 
-They're defined like inline styles but accept an optional alignment (`left`, `right`, or `center`).
+They're defined like inline styles but accept an optional alignment (`left`, `right`, or `center`) and optional left and right margins.
 
 ### Styled chars
 
-Styled chars are "bullet", "quote", "scrollbar", and "horizontal-rule".
+Styled chars are "bullet", "quote", and "horizontal-rule".
 
 They're defined by a character (which must be one character wide and long), and foreground and background colors. All parts are optional.
+
+### Scrolled bar
+
+It's defined either by
+* a char, a fg color and a bg color, all parts optional
+* a struct with two styled chars named `track` and `thumb`
+
+Examples:
+
+```Hjson
+scrollbar: white
+```
+
+```Hjson
+scrollbar: {
+    track: | darkblue black
+    thumb: | lightblue black bold
+}
+```
 
 ### Headers:
 

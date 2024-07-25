@@ -51,11 +51,11 @@ impl<'k, 's> FmtText<'k, 's> {
             .drain(..)
             .map(|mline| FmtLine::from(mline, skin))
             .collect();
-        tbl::fix_all_tables(&mut lines, width.unwrap_or(usize::MAX));
+        tbl::fix_all_tables(&mut lines, width.unwrap_or(usize::MAX), skin);
         code::justify_blocks(&mut lines);
         if let Some(width) = width {
             if width >= 3 {
-                lines = wrap::hard_wrap_lines(lines, width)
+                lines = wrap::hard_wrap_lines(lines, width, skin)
                     .expect("width should be wide enough");
             }
         }

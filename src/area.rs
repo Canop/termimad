@@ -1,5 +1,5 @@
 use {
-    crossterm::terminal,
+    crate::crossterm::terminal,
     std::convert::{TryFrom, TryInto},
 };
 

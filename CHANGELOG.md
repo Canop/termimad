@@ -1,5 +1,57 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.29.4"></a>
+### v0.29.4 - 2024-06-17
+- fix compilation with `default-features = false` - Fix #62
+
+<a name="v0.29.3"></a>
+### v0.29.3 - 2024-06-13
+- `ask!` macro doesn't need separate imports anymore
+
+<a name="v0.29.2"></a>
+### v0.29.2 - 2024-04-24
+- update Crokey to 1.0.0
+
+<a name="v0.29.1"></a>
+### v0.29.1 - 2024-02-10
+- event source's `combining` now `false` by default
+
+<a name="v0.29.0"></a>
+### v0.29.0 - 2024-01-29
+- list items are now by default indented as blocks. It's possible to revert to the old rendering (only the first line indented) with the list_items_identation_mod field of the skin - Fix #21
+
+<a name="v0.28.2"></a>
+### v0.28.2 - 2024-01-26
+- Better support of repeated keys in EventSource
+
+<a name="v0.28.1"></a>
+### v0.28.1 - 2024-01-20
+- EventSource by default mandates modifier (or space) for combinations with multiple simple keys. This can be changed with an option
+
+<a name="v0.28.0"></a>
+### v0.28.0 - 2024-01-18
+- Major change: termimad and its coolor and crokey dependencies now use the version 0.27 of Crossterm, which brings many breaking changes but allows new capabilities in key events handling. Termimad's EventSource now outputs key combinations along crossterm events.
+
+<a name="v0.27.0"></a>
+### v0.27.0 - 2024-01-08
+- paragraphs, code blocks, headers, and tables can be given a left_margin and a right_margin - Fix #11
+
+<a name="v0.26.1"></a>
+### v0.26.1 - 2023-11-05
+- can_move_left and can_move_right functions on InputField
+
+<a name="v0.26.0"></a>
+### v0.26.0 - 2023-11-03
+- MadSkin and other structs now implement serde::Serialize - Fix #19
+
+<a name="v0.25.7"></a>
+### v0.25.7 - 2023-10-31
+- upgrade coolor, removing the ansi_colours dependency, fixing a license incompatibility - Fix #51
+
+<a name="v0.25.6"></a>
+### v0.25.6 - 2023-10-31
+- upgrade terminal-clipboard due to RUSTSEC-2021-0019 in its X11 dependency
+
 <a name="v0.25.5"></a>
 ### v0.25.5 - 2023-10-16
 - dependency version updated

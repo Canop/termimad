@@ -5,8 +5,8 @@ bold: "#fb0 bold"
 italic: dim italic
 strikeout: crossedout red
 bullet: ○ yellow bold
-paragraph: gray(20) 4 4
-code_block: gray(2) gray(15) 4
+paragraph: gray(20)
+code_block: gray(2) gray(15) center
 headers: [
     yellow bold center
     yellow underlined

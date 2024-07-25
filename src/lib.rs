@@ -109,6 +109,7 @@ mod ask;
 mod code;
 mod color;
 mod composite;
+mod composite_kind;
 mod compound_style;
 mod displayable_line;
 mod errors;
@@ -117,6 +118,7 @@ mod fit;
 mod inline;
 mod line;
 mod line_style;
+mod list_indentation;
 mod macros;
 mod parse;
 mod rect;
@@ -131,16 +133,13 @@ mod text;
 mod tokens;
 mod views;
 
-pub mod crossterm {
-    pub use crossterm::*;
-}
-
 pub use {
     area::{compute_scrollbar, terminal_size, Area},
     ask::*,
     color::*,
     composite::FmtComposite,
     compound_style::*,
+    composite_kind::*,
     displayable_line::DisplayableLine,
     errors::Error,
     events::{TimedEvent, EventSource, EventSourceOptions},
@@ -148,6 +147,7 @@ pub use {
     inline::FmtInline,
     line::FmtLine,
     line_style::LineStyle,
+    list_indentation::*,
     minimad::Alignment,
     parse::*,
     rect::*,
@@ -163,6 +163,7 @@ pub use {
     },
 };
 pub use coolor;
+pub use crokey::crossterm;
 pub use minimad;
 
 use tokens::*;

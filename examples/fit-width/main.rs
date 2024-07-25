@@ -8,7 +8,7 @@ use {
         cursor::{self, Hide, Show},
         event::{self, Event},
         ExecutableCommand,
-        terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
+        terminal::{self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
         style::Color::*,
     },
     termimad::*,
@@ -75,9 +75,14 @@ fn run_app(skin: &MadSkin) -> Result<(), Error> {
             Ok(Event::Key(_)) => {
                 break;
             }
-            Ok(Event::Resize(w, h)) => {
-                width = w;
-                height = h;
+            Ok(Event::Resize(new_width, new_height)) => {
+                width = new_width;
+                height = new_height;
+                cli_log::debug!("Resized to width: {}, height: {}", width, height);
+                // To fix a bug in Kitty, which rewrites the terminal on resize and
+                // thus writes characters below the "height" limit, we clear
+                // the whole terminal.
+                w.execute(Clear(ClearType::All))?;
             }
             _ => {}
         }
@@ -100,6 +105,7 @@ fn make_skin() -> MadSkin {
 }
 
 fn main() -> Result<(), Error> {
+    cli_log::init_cli_log!();
     let skin = make_skin();
     run_app(&skin)
 }
