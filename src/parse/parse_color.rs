@@ -31,62 +31,46 @@ pub fn parse_color(s: &str) -> Result<Color, ParseColorError> {
             u8::from_str_radix(s, 16)
         }
     }
-    if let Some((_, value)) = regex_captures!(r"^ansi\((?P<value>\d+)\)$"i, s) {
-        let value = value.parse();
-        if let Ok(value) = value {
-            return Ok(ansi(value)); // all ANSI values are ok
-        } else {
-            return Err(ParseColorError::Unrecognized);
+    regex_switch!(s,
+        r"^ansi\((?<value>\d+)\)$"i => {
+            let value = value.parse().map_err(|_| ParseColorError::Unrecognized)?;
+            ansi(value)
         }
-    }
-
-    if let Some((_, level)) = regex_captures!(r"^gr[ae]y(?:scale)?\((?P<level>\d+)\)$"i, s) {
-        let level = level.parse();
-        if let Ok(level) = level {
+        r"^gr[ae]y(?:scale)?\((?<level>\d+)\)$"i => {
+            let level = level.parse().map_err(|_| ParseColorError::Unrecognized)?;
             if level > 23 {
                 return Err(ParseColorError::InvalidGreyLevel { level });
             }
-            return Ok(gray(level));
-        } else {
-            return Err(ParseColorError::Unrecognized);
+            gray(level)
         }
-    }
-
-    if let Some((_, r, g, b)) = regex_captures!(r"^rgb\((?P<r>\d+),\s*(?P<g>\d+),\s*(?P<b>\d+)\)$"i, s) {
-        if let (Ok(r), Ok(g), Ok(b)) = (r.parse(), g.parse(), b.parse()) {
-            return Ok(rgb(r, g, b));
-        } else {
-            return Err(ParseColorError::Unrecognized);
+        r"^rgb\((?<r>\d+),\s*(?<g>\d+),\s*(?<b>\d+)\)$"i => {
+            let (Ok(r), Ok(g), Ok(b)) = (r.parse(), g.parse(), b.parse()) else {
+                return Err(ParseColorError::Unrecognized);
+            };
+            rgb(r, g, b)
         }
-    }
-
-    if let Some((_, r, g, b)) = regex_captures!(r"^#([\da-f]{1,2})([\da-f]{1,2})([\da-f]{1,2})$"i, s) {
-        if let (Ok(r), Ok(g), Ok(b)) = (hex(r), hex(g), hex(b)) {
-            return Ok(rgb(r, g, b));
-        } else {
-            return Err(ParseColorError::Unrecognized);
+        r"^#(?<r>[\da-f]{1,2})(?<g>[\da-f]{1,2})(?<b>[\da-f]{1,2})$"i => {
+            let (Ok(r), Ok(g), Ok(b)) = (hex(r), hex(g), hex(b)) else {
+                return Err(ParseColorError::Unrecognized);
+            };
+            rgb(r, g, b)
         }
-    }
-
-    let s = s.to_lowercase();
-    match s.as_str() {
-        "black" => Ok(Color::AnsiValue(16)),
-        "blue" => Ok(Color::Blue),
-        "cyan" => Ok(Color::Cyan),
-        "darkblue" => Ok(Color::DarkBlue),
-        "darkcyan" => Ok(Color::DarkCyan),
-        "darkgreen" => Ok(Color::DarkGreen),
-        "darkmagenta" => Ok(Color::DarkMagenta),
-        "darkred" => Ok(Color::DarkRed),
-        "green" => Ok(Color::Green),
-        "grey" => Ok(Color::Grey),
-        "magenta" => Ok(Color::Magenta),
-        "red" => Ok(Color::Red),
-        "yellow" => Ok(Color::Yellow),
-        "darkyellow" => Ok(Color::DarkYellow),
-        "white" => Ok(Color::AnsiValue(231)),
-        _ => Err(ParseColorError::Unrecognized),
-    }
+        "black"i => Color::AnsiValue(16),
+        "blue"i => Color::Blue,
+        "cyan"i => Color::Cyan,
+        "darkblue"i => Color::DarkBlue,
+        "darkcyan"i => Color::DarkCyan,
+        "darkgreen"i => Color::DarkGreen,
+        "darkmagenta"i => Color::DarkMagenta,
+        "darkred"i => Color::DarkRed,
+        "green"i => Color::Green,
+        "grey"i => Color::Grey,
+        "magenta"i => Color::Magenta,
+        "red"i => Color::Red,
+        "yellow"i => Color::Yellow,
+        "darkyellow"i => Color::DarkYellow,
+        "white"i => Color::AnsiValue(231),
+    ).ok_or(ParseColorError::Unrecognized)
 }
 
 #[test]
@@ -107,5 +91,7 @@ fn test_parse_color() {
         parse_color("gray(11)").unwrap(),
         parse_color("GREY(11)").unwrap(),
     );
+    assert_eq!(parse_color("Green").unwrap(), Color::Green);
+    assert_eq!(parse_color("ansi(11)").unwrap(), Color::AnsiValue(11));
 }
 

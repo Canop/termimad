@@ -21,7 +21,7 @@ minimad = "0.13.0"
 coolor = { version="0.7.0", features=["crossterm"] }
 crossterm = "=0.23.2"
 crossbeam = "0.8"
-lazy-regex = "3"
+lazy-regex = "3.2"
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 unicode-width = "0.1.10"
@@ -39,3 +39,4 @@ terminal-clipboard = ">=0.3.1"
 # crossterm = { path = "../crossterm" }
 # minimad = { path = "../minimad" }
 # terminal-clipboard = { path = "../terminal-clipboard" }
+# lazy-regex = { path = "../lazy-regex" }

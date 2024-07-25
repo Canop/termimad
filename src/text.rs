@@ -51,7 +51,7 @@ impl<'k, 's> FmtText<'k, 's> {
             .drain(..)
             .map(|mline| FmtLine::from(mline, skin))
             .collect();
-        tbl::fix_all_tables(&mut lines, width.unwrap_or(std::usize::MAX));
+        tbl::fix_all_tables(&mut lines, width.unwrap_or(usize::MAX));
         code::justify_blocks(&mut lines);
         if let Some(width) = width {
             if width >= 3 {
