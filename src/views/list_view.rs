@@ -58,8 +58,8 @@ struct Row<T> {
 ///
 /// Notes:
 /// * another version will allow more than one style per cell
-/// (i.e. make the cells composites rather than compounds). Shout
-/// out if you need that now.
+///   (i.e. make the cells composites rather than compounds). Shout
+///   out if you need that now.
 /// * this version doesn't allow cell wrapping
 #[allow(clippy::type_complexity)]
 pub struct ListView<'t, T> {

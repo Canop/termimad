@@ -18,8 +18,7 @@ use {
 /// A user event based on a crossterm event, decorated
 /// - with time
 /// - with a double_click flag
-/// - with a KeyCombination, if the event is a key ending
-/// a combination (which may be a simple key)
+/// - with a KeyCombination, if the event is a key ending a combination (which may be a simple key)
 ///
 /// You normally don't build this yourself, but rather use
 /// the [EventSource].

@@ -26,8 +26,7 @@ skin.strikeout = CompoundStyle::new(Some(Red), None, Bold.into());
 ```
 
 **Beware:**
-* you may define colors in full [`rgb`](fn.rgb.html) but this will limit compatibility with old
-terminals. It's recommended to stick to [Ansi colors](fn.ansi.html), [gray levels](fn.gray.html), or [Crossterm predefined values](https://docs.rs/crossterm/0.9.6/crossterm/enum.Color.html).
+* you may define colors in full [`rgb`](fn.rgb.html) but this will limit compatibility with old terminals. It's recommended to stick to [Ansi colors](fn.ansi.html), [gray levels](fn.gray.html), or [Crossterm predefined values](https://docs.rs/crossterm/0.9.6/crossterm/enum.Color.html).
 * styles are composed. For example a word may very well be italic, bold and striked out. It might not be wise to have them differ only by their background color for example.
 
 # Display a simple inline snippet

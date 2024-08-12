@@ -1,6 +1,6 @@
 [package]
 name = "termimad"
-version = "0.29.4"
+version = "0.30.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 repository = "https://github.com/Canop/termimad"
 description = "Markdown Renderer for the Terminal"
@@ -17,8 +17,8 @@ special-renders = []
 default = ["special-renders"]
 
 [dependencies]
-coolor = { version="0.9.0", features=["crossterm"] }
-crokey = "1.0.0"
+coolor = { version="1.0.0", features=["crossterm"] }
+crokey = "1.1.0"
 crossbeam = "0.8"
 lazy-regex = "3.2"
 minimad = "0.13.0"
