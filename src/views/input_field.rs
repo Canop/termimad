@@ -4,24 +4,14 @@ use {
         crossterm::{
             cursor,
             event::{
-                Event,
-                KeyCode,
-                KeyEvent,
-                KeyModifiers,
-                MouseButton,
-                MouseEvent,
-                MouseEventKind,
+                Event, KeyCode, KeyEvent, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
             },
             queue,
-            style::{
-                Attribute,
-                Color,
-                SetBackgroundColor,
-            },
+            style::{Attribute, Color, SetBackgroundColor},
         },
         *,
     },
-    crokey::{OneToThree, KeyCombination, key},
+    crokey::{key, KeyCombination, OneToThree},
     std::io::Write,
 };
 
@@ -69,7 +59,7 @@ macro_rules! wrap_content_fun {
 
 impl InputField {
     pub const ENTER: KeyCombination = key!(enter);
-    pub const ALT_ENTER: KeyCombination = key!(alt-enter);
+    pub const ALT_ENTER: KeyCombination = key!(alt - enter);
 
     pub fn new(area: Area) -> Self {
         let focused_style = CompoundStyle::default();
@@ -282,10 +272,7 @@ impl InputField {
     /// of the input. If you want to totally handle events, you
     /// may call function like `put_char` and `del_char_left`
     /// directly.
-    pub fn apply_key_combination<K: Into<KeyCombination>>(
-        &mut self,
-        key: K,
-    ) -> bool {
+    pub fn apply_key_combination<K: Into<KeyCombination>>(&mut self, key: K) -> bool {
         if !self.focused {
             return false;
         }
@@ -431,7 +418,9 @@ impl InputField {
     pub fn apply_event(&mut self, event: &Event, is_double_click: bool) -> bool {
         match event {
             Event::Mouse(mouse_event) => self.apply_mouse_event(*mouse_event, is_double_click),
-            Event::Key(KeyEvent { code, modifiers, .. }) if self.focused => {
+            Event::Key(KeyEvent {
+                code, modifiers, ..
+            }) if self.focused => {
                 if modifiers.is_empty() {
                     self.apply_keycode_event(*code, false)
                 } else if *modifiers == KeyModifiers::SHIFT {
@@ -543,9 +532,13 @@ impl InputField {
     /// All rendering must be explicitely called, no rendering is
     /// done on functions changing the state.
     ///
+    /// This function also returns the cursor position in the form
+    /// `Ok(Some((left, top)))` if the terminal cursor is rendered.
+    /// Otherwise, this function returns `Ok(None)`.
+    ///
     /// w is typically either stderr or stdout. This function doesn't
     /// flush by itself (useful to avoid flickering)
-    pub fn display_on<W: Write>(&self, w: &mut W) -> Result<(), Error> {
+    pub fn display_on<W: Write>(&self, w: &mut W) -> Result<Option<(u16, u16)>, Error> {
         let normal_style = if self.focused {
             &self.focused_style
         } else {
@@ -554,6 +547,7 @@ impl InputField {
 
         let mut width = self.area.width as usize;
         let pos = self.content.cursor_pos();
+        let mut terminal_cursor_pos = None;
         let scrollbar = self
             .area
             .scrollbar(self.scroll.y as u16, self.content.line_count() as u16);
@@ -609,19 +603,29 @@ impl InputField {
                         if !is_last || displayed_width + char_width > width {
                             if self.focused && selection.contains(i, y) {
                                 self.cursor_style.queue(w, fit::ELLIPSIS)?;
+                                displayed_width += 1;
+                                // set terminal cursor position
+                                terminal_cursor_pos = Some((
+                                    self.area.left + displayed_width as u16,
+                                    self.area.top + j,
+                                ));
                             } else {
                                 normal_style.queue(w, fit::ELLIPSIS)?;
+                                displayed_width += 1;
                             }
-                            displayed_width += 1;
                             break;
                         }
                     }
                     if self.focused && selection.contains(i, y) {
                         self.cursor_style.queue(w, c)?;
+                        displayed_width += char_width;
+                        // set terminal cursor position
+                        terminal_cursor_pos =
+                            Some((self.area.left + displayed_width as u16, self.area.top + j));
                     } else {
+                        displayed_width += char_width;
                         normal_style.queue(w, c)?;
                     }
-                    displayed_width += char_width;
                     if displayed_width >= width {
                         break;
                     }
@@ -629,6 +633,9 @@ impl InputField {
                 if displayed_width < width && cursor_at_end {
                     self.cursor_style.queue(w, ' ')?;
                     displayed_width += 1;
+                    // set terminal cursor position
+                    terminal_cursor_pos =
+                        Some((self.area.left + displayed_width as u16, self.area.top + j));
                 }
                 while displayed_width < width {
                     normal_style.queue(w, ' ')?;
@@ -646,14 +653,14 @@ impl InputField {
                 }
             }
         }
-        Ok(())
+        Ok(terminal_cursor_pos)
     }
 
     /// render the input field on stdout
-    pub fn display(&self) -> Result<(), Error> {
+    pub fn display(&self) -> Result<Option<(u16, u16)>, Error> {
         let mut w = std::io::stdout();
-        self.display_on(&mut w)?;
+        let pos = self.display_on(&mut w)?;
         w.flush()?;
-        Ok(())
+        Ok(pos)
     }
 }
