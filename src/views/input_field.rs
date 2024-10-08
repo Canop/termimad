@@ -603,7 +603,6 @@ impl InputField {
                         if !is_last || displayed_width + char_width > width {
                             if self.focused && selection.contains(i, y) {
                                 self.cursor_style.queue(w, fit::ELLIPSIS)?;
-                                displayed_width += 1;
                                 // set terminal cursor position
                                 terminal_cursor_pos = Some((
                                     self.area.left + displayed_width as u16,
@@ -611,31 +610,30 @@ impl InputField {
                                 ));
                             } else {
                                 normal_style.queue(w, fit::ELLIPSIS)?;
-                                displayed_width += 1;
                             }
+                            displayed_width += 1;
                             break;
                         }
                     }
                     if self.focused && selection.contains(i, y) {
                         self.cursor_style.queue(w, c)?;
-                        displayed_width += char_width;
                         // set terminal cursor position
                         terminal_cursor_pos =
                             Some((self.area.left + displayed_width as u16, self.area.top + j));
                     } else {
-                        displayed_width += char_width;
                         normal_style.queue(w, c)?;
                     }
+                    displayed_width += char_width;
                     if displayed_width >= width {
                         break;
                     }
                 }
                 if displayed_width < width && cursor_at_end {
                     self.cursor_style.queue(w, ' ')?;
-                    displayed_width += 1;
                     // set terminal cursor position
                     terminal_cursor_pos =
                         Some((self.area.left + displayed_width as u16, self.area.top + j));
+                    displayed_width += 1;
                 }
                 while displayed_width < width {
                     normal_style.queue(w, ' ')?;
