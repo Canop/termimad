@@ -666,6 +666,8 @@ impl InputField {
     }
 
     /// render the input field on stdout
+    ///
+    /// Return the input field position if the cursor is displayed
     pub fn display(&self) -> Result<Option<(u16, u16)>, Error> {
         let mut w = std::io::stdout();
         let pos = self.display_on(&mut w)?;
