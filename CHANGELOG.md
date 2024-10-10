@@ -1,6 +1,7 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-### next
+<a name="v0.30.1"></a>
+### v0.30.1 - 2024-10-10
 - input_field#display returns the curstor position if it's rendered - experimental - Thanks @xubaiwang
 
 <a name="v0.30.0"></a>
