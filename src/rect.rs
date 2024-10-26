@@ -4,9 +4,9 @@ use {
             cursor,
             QueueableCommand,
         },
+        errors::Result,
         Area,
         CompoundStyle,
-        errors::Result,
         SPACE_FILLING,
     },
     std::io::Write,
@@ -104,7 +104,7 @@ impl<'s> Rect<'s> {
         w.queue(cursor::MoveTo(area.left, y))?;
         cs.queue(w, bs.top_left)?;
         if area.width > 2 {
-            for _ in 0..area.width-2 {
+            for _ in 0..area.width - 2 {
                 cs.queue(w, bs.top)?;
             }
         }
@@ -126,7 +126,7 @@ impl<'s> Rect<'s> {
         w.queue(cursor::MoveTo(area.left, area.bottom() - 1))?;
         cs.queue(w, bs.bottom_left)?;
         if area.width > 2 {
-            for _ in 0..area.width-2 {
+            for _ in 0..area.width - 2 {
                 cs.queue(w, bs.bottom)?;
             }
         }

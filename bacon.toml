@@ -24,6 +24,7 @@ command = [
     "--",
     "-A", "clippy::match_like_matches_macro",
     "-A", "clippy::manual_range_contains",
+    "-A", "clippy::new_without_default",
 ]
 need_stdout = false
 watch = ["tests", "benches", "examples"]

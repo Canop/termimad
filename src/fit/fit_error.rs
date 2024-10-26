@@ -1,6 +1,4 @@
-use {
-    std::fmt,
-};
+use std::fmt;
 
 /// Error thrown when fitting isn't possible
 #[derive(thiserror::Error, Debug)]

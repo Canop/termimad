@@ -9,6 +9,16 @@ mod str_fit;
 mod tbl_fit;
 pub mod wrap;
 
+use {
+    crate::crossterm::{
+        style::{
+            Color,
+            SetBackgroundColor,
+        },
+        QueueableCommand,
+    },
+    minimad::once_cell::sync::Lazy,
+};
 pub use {
     crate::Error,
     composite_fit::*,
@@ -18,23 +28,12 @@ pub use {
     str_fit::*,
     tbl_fit::*,
 };
-use {
-    crate::crossterm::{
-        style::{Color, SetBackgroundColor},
-        QueueableCommand,
-    },
-    minimad::once_cell::sync::Lazy,
-};
 
 pub static DEFAULT_TAB_REPLACEMENT: &str = "  ";
 
-pub static SPACE_FILLING: Lazy<Filling> = Lazy::new(|| { Filling::from_char(' ') });
+pub static SPACE_FILLING: Lazy<Filling> = Lazy::new(|| Filling::from_char(' '));
 
-pub fn fill_bg<W>(
-    w: &mut W,
-    len: usize,
-    bg: Color,
-) -> Result<(), Error>
+pub fn fill_bg<W>(w: &mut W, len: usize, bg: Color) -> Result<(), Error>
 where
     W: std::io::Write,
 {

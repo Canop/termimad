@@ -1,8 +1,17 @@
-use minimad::{Line, TableRule};
+use minimad::{
+    Line,
+    TableRule,
+};
 
-use crate::composite::FmtComposite;
-use crate::skin::MadSkin;
-use crate::tbl::{FmtTableRow, FmtTableRule, RelativePosition};
+use crate::{
+    composite::FmtComposite,
+    skin::MadSkin,
+    tbl::{
+        FmtTableRow,
+        FmtTableRule,
+        RelativePosition,
+    },
+};
 
 /// A line in a text. This structure should normally not be
 /// used outside of the lib.

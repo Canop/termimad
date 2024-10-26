@@ -1,6 +1,5 @@
 use {
     crate::{
-        *,
         crossterm::{
             queue,
             style::{
@@ -12,6 +11,7 @@ use {
         errors::Result,
         table_border_chars::*,
         tbl::*,
+        *,
     },
     minimad::{
         Alignment,
@@ -57,7 +57,6 @@ pub struct MadSkin {
     /// Do not use compounds with a length different than 1.
     #[cfg(feature = "special-renders")]
     pub special_chars: std::collections::HashMap<Compound<'static>, StyledChar>,
-
 }
 
 impl Default for MadSkin {
@@ -292,7 +291,9 @@ impl MadSkin {
     // FIXME deprecate ?
     pub fn visible_line_length(&self, line: &Line<'_>) -> usize {
         match line {
-            Line::Normal(composite) => self.visible_composite_length(composite.style.into(), &composite.compounds),
+            Line::Normal(composite) => {
+                self.visible_composite_length(composite.style.into(), &composite.compounds)
+            }
             _ => 0, // FIXME implement
         }
     }
@@ -541,7 +542,7 @@ impl MadSkin {
         }
         if self.list_items_indentation_mode == ListItemsIndentationMode::Block {
             if let CompositeKind::ListItemFollowUp(depth) = fc.kind {
-                for _ in 0..depth+1 {
+                for _ in 0..depth + 1 {
                     write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
                 }
                 write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;

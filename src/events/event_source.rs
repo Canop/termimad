@@ -1,10 +1,9 @@
 use {
     super::{
-        TimedEvent,
         EscapeSequence,
+        TimedEvent,
     },
     crate::{
-        errors::Error,
         crossterm::{
             self,
             event::{
@@ -18,17 +17,29 @@ use {
             },
             terminal,
         },
+        errors::Error,
     },
     crokey::Combiner,
-    crossbeam::channel::{bounded, unbounded, Receiver, Sender},
+    crossbeam::channel::{
+        bounded,
+        unbounded,
+        Receiver,
+        Sender,
+    },
     std::{
         sync::{
-            atomic::{AtomicUsize, Ordering},
+            atomic::{
+                AtomicUsize,
+                Ordering,
+            },
             Arc,
         },
         thread,
-        time::{Duration, Instant},
-    }
+        time::{
+            Duration,
+            Instant,
+        },
+    },
 };
 
 const DOUBLE_CLICK_MAX_DURATION: Duration = Duration::from_millis(700);
@@ -83,7 +94,6 @@ pub struct EventSource {
     tx_quit: Sender<bool>,
     event_count: Arc<AtomicUsize>,
 }
-
 
 impl Default for EventSourceOptions {
     fn default() -> Self {
@@ -160,7 +170,9 @@ impl EventSource {
             loop {
                 let ct_event = match crossterm::event::read() {
                     Ok(e) => e,
-                    _ => { continue; }
+                    _ => {
+                        continue;
+                    }
                 };
                 let in_seq = current_escape_sequence.is_some();
                 if in_seq {
@@ -174,7 +186,10 @@ impl EventSource {
                                 // this zero size bounded channel
                             }
                             continue;
-                        } else if !key.modifiers.intersects(KeyModifiers::ALT | KeyModifiers::CONTROL) {
+                        } else if !key
+                            .modifiers
+                            .intersects(KeyModifiers::ALT | KeyModifiers::CONTROL)
+                        {
                             // adding to the current escape sequence
                             current_escape_sequence.as_mut().unwrap().keys.push(key);
                             continue;
@@ -205,7 +220,9 @@ impl EventSource {
                     if options.discard_mouse_move && mouse_event.kind == MouseEventKind::Moved {
                         continue;
                     }
-                    if options.discard_mouse_drag && matches!(mouse_event.kind, MouseEventKind::Drag(_)) {
+                    if options.discard_mouse_drag
+                        && matches!(mouse_event.kind, MouseEventKind::Drag(_))
+                    {
                         continue;
                     }
                 }
@@ -216,14 +233,18 @@ impl EventSource {
                         continue;
                     }
                 }
-                if let Event::Mouse(MouseEvent { kind, column, row, .. }) = timed_event.event {
+                if let Event::Mouse(MouseEvent {
+                    kind, column, row, ..
+                }) = timed_event.event
+                {
                     if matches!(
                         kind,
-                        MouseEventKind::Down(MouseButton::Left) | MouseEventKind::Up(MouseButton::Left)
+                        MouseEventKind::Down(MouseButton::Left)
+                            | MouseEventKind::Up(MouseButton::Left)
                     ) {
                         if let Some(TimedClick { time, x, y }) = last_up {
-                            if
-                                column == x && row == y
+                            if column == x
+                                && row == y
                                 && timed_event.time - time < DOUBLE_CLICK_MAX_DURATION
                             {
                                 timed_event.double_click = true;
@@ -286,4 +307,3 @@ impl Drop for EventSource {
         terminal::disable_raw_mode().unwrap();
     }
 }
-

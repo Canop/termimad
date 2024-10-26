@@ -4,15 +4,13 @@ use {
         event::{
             Event,
             KeyModifiers,
-            MouseButton, MouseEvent, MouseEventKind,
+            MouseButton,
+            MouseEvent,
+            MouseEventKind,
         },
     },
-    crokey::{
-        KeyCombination,
-    },
-    std::{
-        time::Instant,
-    }
+    crokey::KeyCombination,
+    std::time::Instant,
 };
 
 /// A user event based on a crossterm event, decorated
@@ -24,7 +22,6 @@ use {
 /// the [EventSource].
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TimedEvent {
-
     pub time: Instant,
 
     pub event: crossterm::event::Event,
@@ -44,7 +41,6 @@ pub struct TimedEvent {
 }
 
 impl TimedEvent {
-
     /// Wrap a crossterm event into a timed one, with time.
     ///
     /// You should normally not need to use this function, but rather obtain
@@ -64,7 +60,10 @@ impl TimedEvent {
     pub fn as_click(&self) -> Option<(u16, u16)> {
         match self.event {
             Event::Mouse(MouseEvent {
-                kind: MouseEventKind::Up(MouseButton::Left), column, row, modifiers: KeyModifiers::NONE,
+                kind: MouseEventKind::Up(MouseButton::Left),
+                column,
+                row,
+                modifiers: KeyModifiers::NONE,
             }) if !self.double_click => Some((column, row)),
             _ => None,
         }
@@ -84,5 +83,3 @@ impl TimedEvent {
         false
     }
 }
-
-

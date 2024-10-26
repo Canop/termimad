@@ -1,10 +1,14 @@
 use {
     crate::{
-        CompoundStyle,
-        parse_compound_style,
         parse::PushStyleTokens,
+        parse_compound_style,
+        CompoundStyle,
     },
-    serde::{de, Serialize, Serializer},
+    serde::{
+        de,
+        Serialize,
+        Serializer,
+    },
 };
 
 impl<'de> de::Deserialize<'de> for CompoundStyle {

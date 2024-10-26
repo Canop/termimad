@@ -1,9 +1,10 @@
-
 use {
-    crate::*,
-    crate::crossterm::{
-        QueueableCommand,
-        style::Print,
+    crate::{
+        crossterm::{
+            style::Print,
+            QueueableCommand,
+        },
+        *,
     },
     std::io::Write,
 };
@@ -28,11 +29,7 @@ impl Filling {
             char_size,
         }
     }
-    pub fn queue_unstyled<W: Write>(
-        &self,
-        w: &mut W,
-        mut len: usize,
-    ) -> Result<(), Error> {
+    pub fn queue_unstyled<W: Write>(&self, w: &mut W, mut len: usize) -> Result<(), Error> {
         while len > 0 {
             let sl = len.min(FILLING_STRING_CHAR_LEN);
             w.queue(Print(&self.filling_string[0..sl * self.char_size]))?;

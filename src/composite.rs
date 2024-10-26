@@ -1,6 +1,9 @@
 use {
     crate::*,
-    minimad::{Composite, Compound},
+    minimad::{
+        Composite,
+        Compound,
+    },
     unicode_width::UnicodeWidthStr,
 };
 
@@ -8,7 +11,6 @@ use {
 /// termimad specific information
 #[derive(Debug, Clone)]
 pub struct FmtComposite<'s> {
-
     pub kind: CompositeKind,
 
     pub compounds: Vec<Compound<'s>>,
@@ -17,7 +19,6 @@ pub struct FmtComposite<'s> {
     pub visible_length: usize,
 
     pub spacing: Option<Spacing>,
-
 }
 
 impl<'s> FmtComposite<'s> {

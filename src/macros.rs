@@ -1,5 +1,3 @@
-
-
 /// print a markdown template, with other arguments taking `$0` to `$9` places in the template.
 ///
 /// Example:
@@ -67,6 +65,3 @@ macro_rules! mad_write_inline {
         $skin.write_composite($w, composite)
     }};
 }
-
-
-

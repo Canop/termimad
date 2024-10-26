@@ -1,10 +1,14 @@
 use {
     crate::{
-        StyledChar,
-        parse_styled_char,
         parse::PushStyleTokens,
+        parse_styled_char,
+        StyledChar,
     },
-    serde::{de, Serialize, Serializer},
+    serde::{
+        de,
+        Serialize,
+        Serializer,
+    },
 };
 
 impl<'de> de::Deserialize<'de> for StyledChar {

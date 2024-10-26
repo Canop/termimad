@@ -95,7 +95,8 @@ pub fn parse_color(s: &str) -> Result<Color, ParseColorError> {
         "yellow"i => Color::Yellow,
         "darkyellow"i => Color::DarkYellow,
         "white"i => Color::AnsiValue(231),
-    ).ok_or(ParseColorError::Unrecognized)
+    )
+    .ok_or(ParseColorError::Unrecognized)
 }
 
 #[test]

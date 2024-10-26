@@ -9,16 +9,22 @@ use {
                 KeyModifiers,
             },
             queue,
-            QueueableCommand,
             style::Print,
+            QueueableCommand,
         },
         displayable_line::DisplayableLine,
         errors::Result,
         text::FmtText,
         SPACE_FILLING,
     },
-    crokey::{OneToThree, KeyCombination},
-    std::io::{stdout, Write},
+    crokey::{
+        KeyCombination,
+        OneToThree,
+    },
+    std::io::{
+        stdout,
+        Write,
+    },
 };
 
 /// A scrollable text, in a specific area.
@@ -57,7 +63,6 @@ pub struct TextView<'a, 't> {
 }
 
 impl<'a, 't> TextView<'a, 't> {
-
     /// make a displayed text, that is a text in an area
     pub const fn from(area: &'a Area, text: &'t FmtText<'_, '_>) -> TextView<'a, 't> {
         TextView {
@@ -78,10 +83,8 @@ impl<'a, 't> TextView<'a, 't> {
     ///  the available space (or if show_scrollbar is false).
     pub fn scrollbar(&self) -> Option<(u16, u16)> {
         if self.show_scrollbar {
-            self.area.scrollbar(
-                self.scroll as u16,
-                self.content_height() as u16,
-            )
+            self.area
+                .scrollbar(self.scroll as u16, self.content_height() as u16)
         } else {
             None
         }
@@ -107,11 +110,7 @@ impl<'a, 't> TextView<'a, 't> {
             let y = self.area.top + j;
             w.queue(MoveTo(self.area.left, y))?;
             if let Some(line) = lines.next() {
-                let dl = DisplayableLine::new(
-                    self.text.skin,
-                    line,
-                    Some(width),
-                );
+                let dl = DisplayableLine::new(self.text.skin, line, Some(width));
                 queue!(w, Print(&dl))?;
             } else {
                 SPACE_FILLING.queue_styled(w, &self.text.skin.paragraph.compound_style, width)?;
@@ -145,7 +144,7 @@ impl<'a, 't> TextView<'a, 't> {
     pub fn try_scroll_lines(&mut self, lines_count: i32) {
         if lines_count < 0 {
             let lines_count = -lines_count as usize;
-                self.scroll = if lines_count >= self.scroll {
+            self.scroll = if lines_count >= self.scroll {
                 0
             } else {
                 self.scroll - lines_count

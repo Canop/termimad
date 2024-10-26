@@ -1,10 +1,14 @@
 use {
     crate::{
-        LineStyle,
-        parse_line_style,
         parse::PushStyleTokens,
+        parse_line_style,
+        LineStyle,
     },
-    serde::{de, Serialize, Serializer},
+    serde::{
+        de,
+        Serialize,
+        Serializer,
+    },
 };
 
 impl<'de> de::Deserialize<'de> for LineStyle {

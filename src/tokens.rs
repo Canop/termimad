@@ -57,5 +57,3 @@ pub(crate) fn tokenize<'s, 'c>(
     }
     tokens
 }
-
-

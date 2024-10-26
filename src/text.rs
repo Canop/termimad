@@ -1,12 +1,16 @@
 use {
     crate::{
         code,
+        fit::wrap,
         line::FmtLine,
         skin::MadSkin,
         tbl,
-        fit::wrap,
     },
-    minimad::{parse_text, Options, Text},
+    minimad::{
+        parse_text,
+        Options,
+        Text,
+    },
     std::fmt,
 };
 
@@ -45,7 +49,11 @@ impl<'k, 's> FmtText<'k, 's> {
     }
 
     /// build a fmt_text from a minimad text
-    pub fn from_text(skin: &'k MadSkin, mut text: Text<'s>, width: Option<usize>) -> FmtText<'k, 's> {
+    pub fn from_text(
+        skin: &'k MadSkin,
+        mut text: Text<'s>,
+        width: Option<usize>,
+    ) -> FmtText<'k, 's> {
         let mut lines = text
             .lines
             .drain(..)
@@ -55,8 +63,8 @@ impl<'k, 's> FmtText<'k, 's> {
         code::justify_blocks(&mut lines);
         if let Some(width) = width {
             if width >= 3 {
-                lines = wrap::hard_wrap_lines(lines, width, skin)
-                    .expect("width should be wide enough");
+                lines =
+                    wrap::hard_wrap_lines(lines, width, skin).expect("width should be wide enough");
             }
         }
         FmtText { skin, lines, width }

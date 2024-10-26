@@ -112,14 +112,16 @@ impl Zone {
     }
     /// make a zone from each compound large enough
     fn compounds(compounds: &[Compound], min_removable_width: usize) -> Vec<Zone> {
-        compounds.iter()
+        compounds
+            .iter()
             .enumerate()
             .filter_map(|(compound_idx, compound)| {
                 let char_infos = str_char_infos(compound.src);
                 if char_infos.len() < 2 + min_removable_width {
                     return None;
                 }
-                let removable = &compound.src[char_infos[1].byte_idx..char_infos[char_infos.len()-1].byte_idx];
+                let removable = &compound.src
+                    [char_infos[1].byte_idx..char_infos[char_infos.len() - 1].byte_idx];
                 let removable_width = removable.width();
                 if removable_width < min_removable_width {
                     None
@@ -151,7 +153,7 @@ impl Zone {
         let mut removed_width = 0;
         loop {
             // we alternatively grow left and right
-            if (end_char_idx-start_char_idx)%2 == 0 {
+            if (end_char_idx - start_char_idx) % 2 == 0 {
                 if end_char_idx + 1 >= len {
                     break;
                 }
@@ -174,15 +176,14 @@ impl Zone {
         let head = compound.sub(0, start_byte_idx);
         let tail = compound.tail(end_byte_idx);
         compounds[self.compound_idx] = head;
-        compounds.insert(self.compound_idx+1, Compound::raw_str(ELLIPSIS));
-        compounds.insert(self.compound_idx+2, tail);
+        compounds.insert(self.compound_idx + 1, Compound::raw_str(ELLIPSIS));
+        compounds.insert(self.compound_idx + 2, tail);
 
         removed_width - 1
     }
 }
 
 impl Fitter {
-
     /// create a fitter for when you want a specific alignment.
     ///
     /// You may still change the mid_token_ellision and mid_compound_ellision
@@ -198,12 +199,7 @@ impl Fitter {
 
     /// ensure the composite fits the max_width, by replacing some parts
     /// with ellisions
-    pub fn fit(
-        self,
-        fc: &mut FmtComposite<'_>,
-        max_width: usize,
-        skin: &MadSkin
-    ) {
+    pub fn fit(self, fc: &mut FmtComposite<'_>, max_width: usize, skin: &MadSkin) {
         // some special cases because they're hard to check after
         if fc.visible_length <= max_width {
             return;
@@ -263,7 +259,7 @@ impl Fitter {
         // increased accordingly we increase
         let (mut excess_left, mut excess_right) = match self.align {
             Alignment::Right => (excess + 1, 0),
-            Alignment::Left | Alignment:: Unspecified => (0, excess + 1),
+            Alignment::Left | Alignment::Unspecified => (0, excess + 1),
             Alignment::Center => {
                 let left = excess / 2;
                 let right = excess - left;
@@ -272,7 +268,7 @@ impl Fitter {
                 } else {
                     (0, right + 1)
                 }
-            },
+            }
         };
 
         if excess_left > 0 {
@@ -284,18 +280,19 @@ impl Fitter {
                 let mut removed_width = 0;
                 loop {
                     removed_width += char_infos[last_removed_char_idx].width;
-                    if removed_width >= excess_left || last_removed_char_idx + 1 == char_infos.len() {
+                    if removed_width >= excess_left || last_removed_char_idx + 1 == char_infos.len()
+                    {
                         break;
                     }
                     last_removed_char_idx += 1;
                 }
-                if last_removed_char_idx  + 1 == char_infos.len() {
+                if last_removed_char_idx + 1 == char_infos.len() {
                     // we remove the whole compound
                     compounds.remove(0);
                     excess_left -= removed_width.min(excess_left);
                 } else {
                     // we cut the left part
-                    compound.src = &compound.src[char_infos[last_removed_char_idx+1].byte_idx..];
+                    compound.src = &compound.src[char_infos[last_removed_char_idx + 1].byte_idx..];
                     excess_left = 0;
                 }
             }
@@ -305,7 +302,7 @@ impl Fitter {
         if excess_right > 0 {
             // right truncating
             while excess_right > 0 && !compounds.is_empty() {
-                let last_idx = compounds.len()-1;
+                let last_idx = compounds.len() - 1;
                 let compound = &mut compounds[last_idx];
                 let char_infos = str_char_infos(compound.src);
                 let mut removed_width = 0;
@@ -332,7 +329,6 @@ impl Fitter {
 
         fc.recompute_width(skin);
     }
-
 }
 
 /// Tests of fitting, that is cutting the composite at best to make it
@@ -344,13 +340,15 @@ impl Fitter {
 #[cfg(test)]
 mod fit_tests {
 
-    use minimad::{
-        Alignment,
-        Composite,
-    };
-    use crate::{
-        Fitter,
-        FmtComposite,
+    use {
+        crate::{
+            Fitter,
+            FmtComposite,
+        },
+        minimad::{
+            Alignment,
+            Composite,
+        },
     };
 
     fn check_fit_align(src: &str, target_width: usize, align: Alignment) {
@@ -372,7 +370,6 @@ mod fit_tests {
 
     #[test]
     fn test_fit() {
-
         let sentence = "This sentence has **short** and **much longer** parts, and some Korean: *一曰道，二曰天*.";
         check_fit(sentence, 60);
         check_fit(sentence, 40);
@@ -385,5 +382,4 @@ mod fit_tests {
         check_fit(status, 17);
         check_fit(status, 2);
     }
-
 }

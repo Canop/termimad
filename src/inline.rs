@@ -1,7 +1,9 @@
 use std::fmt;
 
-use crate::composite::FmtComposite;
-use crate::skin::MadSkin;
+use crate::{
+    composite::FmtComposite,
+    skin::MadSkin,
+};
 
 /// A directly printable markdown snippet, complete
 ///  with the reference to a skin so that it can
@@ -16,6 +18,7 @@ pub struct FmtInline<'k, 's> {
 
 impl fmt::Display for FmtInline<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.skin.write_fmt_composite(f, &self.composite, None, false, true)
+        self.skin
+            .write_fmt_composite(f, &self.composite, None, false, true)
     }
 }

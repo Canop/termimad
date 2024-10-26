@@ -1,9 +1,10 @@
 use {
-    super::{Pos, Range},
-    crate::TAB_REPLACEMENT,
-    std::{
-        fmt,
+    super::{
+        Pos,
+        Range,
     },
+    crate::TAB_REPLACEMENT,
+    std::fmt,
     unicode_width::UnicodeWidthChar,
 };
 
@@ -111,12 +112,16 @@ impl Line {
         None
     }
     pub fn char_idx_to_col(&self, idx: usize) -> usize {
-        self.chars[0..idx].iter()
+        self.chars[0..idx]
+            .iter()
             .map(|&c| InputFieldContent::char_width(c))
             .sum()
     }
     pub fn width(&self) -> usize {
-        self.chars.iter().map(|&c| InputFieldContent::char_width(c)).sum()
+        self.chars
+            .iter()
+            .map(|&c| InputFieldContent::char_width(c))
+            .sum()
     }
 }
 
@@ -128,8 +133,9 @@ impl InputFieldContent {
         self.lines.get(y)
     }
     pub fn line_saturating(&self, y: usize) -> &Line {
-        self.lines.get(y)
-            .unwrap_or(&self.lines[self.lines.len()-1])
+        self.lines
+            .get(y)
+            .unwrap_or(&self.lines[self.lines.len() - 1])
     }
     pub fn current_line(&self) -> &Line {
         self.lines
@@ -192,12 +198,21 @@ impl InputFieldContent {
     pub fn selection(&self) -> Range {
         if let Some(sel_tail) = self.selection_tail {
             if sel_tail < self.pos {
-                Range { min: sel_tail, max: self.pos }
+                Range {
+                    min: sel_tail,
+                    max: self.pos,
+                }
             } else {
-                Range { min: self.pos, max: sel_tail }
+                Range {
+                    min: self.pos,
+                    max: sel_tail,
+                }
             }
         } else {
-            Range { min: self.pos, max: self.pos }
+            Range {
+                min: self.pos,
+                max: self.pos,
+            }
         }
     }
     /// return an iterator over the characters of the
@@ -223,13 +238,17 @@ impl InputFieldContent {
         self.selection_tail.is_some()
     }
     pub fn has_wide_selection(&self) -> bool {
-        self.selection_tail.map_or(false, |sel_tail| sel_tail != self.pos)
+        self.selection_tail
+            .map_or(false, |sel_tail| sel_tail != self.pos)
     }
     /// return the position on end, where the cursor should be put
     /// initially
     pub fn end(&self) -> Pos {
         let y = self.lines.len() - 1;
-        Pos { x:self.lines[y].chars.len(), y }
+        Pos {
+            x: self.lines[y].chars.len(),
+            y,
+        }
     }
     fn last_line(&mut self) -> &mut Line {
         let y = self.lines.len() - 1;
@@ -293,9 +312,13 @@ impl InputFieldContent {
         let mut ib = s.chars();
         loop {
             match (ia.next(), ib.next()) {
-                (Some(a), Some(b)) if a == b => { continue }
-                (None, None) => { return true; }
-                _ => { return false; }
+                (Some(a), Some(b)) if a == b => continue,
+                (None, None) => {
+                    return true;
+                }
+                _ => {
+                    return false;
+                }
             }
         }
     }
@@ -338,11 +361,11 @@ impl InputFieldContent {
         if start >= chars.len() || !is_word_char(chars[start]) {
             return false;
         }
-        while start > 0 && is_word_char(chars[start-1]) {
+        while start > 0 && is_word_char(chars[start - 1]) {
             start -= 1;
         }
         let mut end = self.pos.x;
-        while end + 1 < chars.len() && is_word_char(chars[end+1]) {
+        while end + 1 < chars.len() && is_word_char(chars[end + 1]) {
             end += 1;
         }
         self.selection_tail = Some(Pos::new(start, self.pos.y));
@@ -386,7 +409,7 @@ impl InputFieldContent {
             if max.x == self.lines[min.y].chars.len() {
                 if min.x == 0 {
                     // we remove the whole line
-                    self.lines.drain(min.y..min.y+1);
+                    self.lines.drain(min.y..min.y + 1);
                     if self.lines.is_empty() {
                         self.lines.push(Line::default());
                     }
@@ -394,7 +417,7 @@ impl InputFieldContent {
                     self.lines[min.y].chars.drain(min.x..);
                 }
             } else {
-                self.lines[min.y].chars.drain(min.x..max.x+1);
+                self.lines[min.y].chars.drain(min.x..max.x + 1);
             }
         } else {
             let min_y = if min.x > 0 {
@@ -410,7 +433,7 @@ impl InputFieldContent {
                 max.y
             };
             if max_y > min_y {
-                self.lines.drain(min_y..(max_y+1).min(self.lines.len()));
+                self.lines.drain(min_y..(max_y + 1).min(self.lines.len()));
                 if self.lines.is_empty() {
                     self.lines.push(Line::default());
                 }
@@ -456,8 +479,7 @@ impl InputFieldContent {
     /// Tell whether it's possible to move the cursor to the
     /// right (or to the next line)
     pub fn can_move_right(&self) -> bool {
-        self.pos.x < self.lines[self.pos.y].chars.len()
-            || self.pos.y < self.lines.len() - 1
+        self.pos.x < self.lines[self.pos.y].chars.len() || self.pos.y < self.lines.len() - 1
     }
 
     /// Move the cursor to the right (or to the line below
@@ -560,7 +582,7 @@ impl InputFieldContent {
             let chars = &self.lines[self.pos.y].chars;
             loop {
                 self.pos.x -= 1;
-                if self.pos.x == 0 || !chars[self.pos.x-1].is_alphanumeric() {
+                if self.pos.x == 0 || !chars[self.pos.x - 1].is_alphanumeric() {
                     break;
                 }
             }
@@ -574,7 +596,7 @@ impl InputFieldContent {
             let chars = &self.lines[self.pos.y].chars;
             loop {
                 self.pos.x += 1;
-                if self.pos.x +1 >= chars.len() || !chars[self.pos.x+1].is_alphanumeric() {
+                if self.pos.x + 1 >= chars.len() || !chars[self.pos.x + 1].is_alphanumeric() {
                     break;
                 }
             }
@@ -589,7 +611,7 @@ impl InputFieldContent {
             loop {
                 self.pos.x -= 1;
                 chars.remove(self.pos.x);
-                if self.pos.x == 0 || !chars[self.pos.x-1].is_alphanumeric() {
+                if self.pos.x == 0 || !chars[self.pos.x - 1].is_alphanumeric() {
                     break;
                 }
             }
@@ -638,17 +660,11 @@ impl InputFieldContent {
             _ => UnicodeWidthChar::width(c).unwrap_or(0),
         }
     }
-
 }
 
 #[test]
 fn test_char_iterator() {
-    let texts = vec![
-        "this has\nthree lines\n",
-        "",
-        "123",
-        "\n\n",
-    ];
+    let texts = vec!["this has\nthree lines\n", "", "123", "\n\n"];
     for text in texts {
         assert!(InputFieldContent::from(text).is_str(text));
     }
@@ -669,7 +685,7 @@ mod input_content_edit_monoline_tests {
     fn make_content(value: &str, cursor_pos: &str) -> InputFieldContent {
         let mut content = InputFieldContent::from(value);
         content.pos = Pos {
-            x: cursor_pos.chars().position(|c| c=='^').unwrap(),
+            x: cursor_pos.chars().position(|c| c == '^').unwrap(),
             y: 0,
         };
         content
@@ -683,16 +699,9 @@ mod input_content_edit_monoline_tests {
     /// test the behavior of new line insertion
     #[test]
     fn test_new_line() {
-        let mut con = make_content(
-            "12345",
-            "  ^  "
-        );
+        let mut con = make_content("12345", "  ^  ");
         con.insert_char('6');
-        check(
-            &con,
-            "126345",
-            "   ^  ",
-        );
+        check(&con, "126345", "   ^  ");
         con.insert_new_line();
         assert!(con.is_str("126\n345"));
         let mut con = InputFieldContent::default();
@@ -707,72 +716,30 @@ mod input_content_edit_monoline_tests {
     /// test the behavior of del_word_right
     #[test]
     fn test_del_word_right() {
-        let mut con = make_content(
-            "aaa bbb ccc",
-            "     ^     ",
-        );
+        let mut con = make_content("aaa bbb ccc", "     ^     ");
         con.del_word_right();
-        check(
-            &con,
-            "aaa bccc",
-            "     ^  ",
-        );
+        check(&con, "aaa bccc", "     ^  ");
         con.del_word_right();
-        check(
-            &con,
-            "aaa b",
-            "    ^",
-        );
+        check(&con, "aaa b", "    ^");
         con.del_word_right();
-        check(
-            &con,
-            "aaa ",
-            "   ^",
-        );
+        check(&con, "aaa ", "   ^");
         con.del_word_right();
-        check(
-            &con,
-            "aaa",
-            "   ^",
-        );
+        check(&con, "aaa", "   ^");
         con.del_word_right();
-        check(
-            &con,
-            "aaa",
-            "  ^",
-        );
+        check(&con, "aaa", "  ^");
         con.del_word_right();
-        check(
-            &con,
-            "aa",
-            " ^",
-        );
+        check(&con, "aa", " ^");
         con.del_word_right();
-        check(
-            &con,
-            "a",
-            "^",
-        );
+        check(&con, "a", "^");
         con.del_word_right();
-        check(
-            &con,
-            "",
-            "^",
-        );
+        check(&con, "", "^");
         con.del_word_right();
-        check(
-            &con,
-            "",
-            "^",
-        );
+        check(&con, "", "^");
     }
     /// test wide_select->clear->del_selection
     #[test]
     fn test_select_clear_del_selection() {
-        let mut con = make_content(
-            "aaa bbb ccc",
-            "     ^     ",
-        );
+        let mut con = make_content("aaa bbb ccc", "     ^     ");
         con.set_selection_tail(con.end());
         con.clear();
         con.del_selection();
@@ -780,13 +747,9 @@ mod input_content_edit_monoline_tests {
     /// test wide_select->del_char_left->del_selection
     #[test]
     fn test_select_del_char_left_del_selection() {
-        let mut con = make_content(
-            "aaa bbb ccc",
-            "     ^     ",
-        );
+        let mut con = make_content("aaa bbb ccc", "     ^     ");
         con.set_selection_tail(con.end());
         con.del_char_left();
         con.del_selection();
     }
 }
-

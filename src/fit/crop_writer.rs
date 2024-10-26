@@ -1,6 +1,11 @@
 use {
-    crate::*,
-    crate::crossterm::{style::Print, QueueableCommand},
+    crate::{
+        crossterm::{
+            style::Print,
+            QueueableCommand,
+        },
+        *,
+    },
     std::borrow::Cow,
     unicode_width::UnicodeWidthChar,
 };
@@ -138,7 +143,11 @@ where
         self.allowed -= len;
         filling.queue_styled(self.w, cs, len)
     }
-    pub fn repeat_unstyled(&mut self, filling: &'static Filling, mut len: usize) -> Result<(), Error> {
+    pub fn repeat_unstyled(
+        &mut self,
+        filling: &'static Filling,
+        mut len: usize,
+    ) -> Result<(), Error> {
         len = len.min(self.allowed);
         self.allowed -= len;
         filling.queue_unstyled(self.w, len)

@@ -1,5 +1,3 @@
-
-
 /// Describe how list items are indented when the item has to be
 /// wrapped: either only the first line (the one with the bullet)
 /// or the whole item as a block.

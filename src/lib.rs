@@ -133,21 +133,37 @@ mod tokens;
 mod views;
 
 pub use {
-    area::{compute_scrollbar, terminal_size, Area},
+    area::{
+        compute_scrollbar,
+        terminal_size,
+        Area,
+    },
     ask::*,
     color::*,
     composite::FmtComposite,
-    compound_style::*,
     composite_kind::*,
+    compound_style::*,
+    coolor,
+    crokey::crossterm,
+    crossbeam,
     displayable_line::DisplayableLine,
     errors::Error,
-    events::{TimedEvent, EventSource, EventSourceOptions},
+    events::{
+        EventSource,
+        EventSourceOptions,
+        TickBeamId,
+        Ticker,
+        TimedEvent,
+    },
     fit::*,
     inline::FmtInline,
     line::FmtLine,
     line_style::LineStyle,
     list_indentation::*,
-    minimad::Alignment,
+    minimad::{
+        self,
+        Alignment,
+    },
     parse::*,
     rect::*,
     scrollbar_style::ScrollBarStyle,
@@ -157,13 +173,15 @@ pub use {
     table_border_chars::*,
     text::FmtText,
     views::{
-        InputField, ListView, ListViewCell, ListViewColumn,
-        MadView, ProgressBar, TextView,
+        InputField,
+        ListView,
+        ListViewCell,
+        ListViewColumn,
+        MadView,
+        ProgressBar,
+        TextView,
     },
 };
-pub use coolor;
-pub use crokey::crossterm;
-pub use minimad;
 
 use tokens::*;
 

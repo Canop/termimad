@@ -1,8 +1,6 @@
 use {
     crate::InsufficientWidthError,
-    std::{
-        cmp,
-    },
+    std::cmp,
 };
 
 /// A fitter, accumulating data about the table which must fit into
@@ -61,7 +59,7 @@ impl TblFit {
     ///
     /// available_width: total available width, including external borders
     pub fn new(cols_count: usize, available_width: usize) -> Result<Self, InsufficientWidthError> {
-        if available_width < cols_count*4 + 1 {
+        if available_width < cols_count * 4 + 1 {
             return Err(InsufficientWidthError { available_width });
         }
         let cols = vec![ColData::default(); cols_count];
@@ -102,9 +100,11 @@ impl TblFit {
             idx: usize,       // index of the col
             std_width: usize, // col internal max width
             avg_width: usize, // col internal average width
-            width: usize, // final width
+            width: usize,     // final width
         }
-        let mut fits: Vec<ColFit> = self.cols.iter()
+        let mut fits: Vec<ColFit> = self
+            .cols
+            .iter()
             .enumerate()
             .map(|(idx, c)| ColFit {
                 idx,
@@ -127,16 +127,19 @@ impl TblFit {
         // Step 1
         // We do a first reduction, if possible, on columns wider
         // than 5, and trying to keep above the average width
-        let potential_uncut_gain_1 = fits.iter()
+        let potential_uncut_gain_1 = fits
+            .iter()
             .filter(|c| c.width > 4 && c.width > c.avg_width + 1)
             .map(|c| (c.width - c.avg_width).min(4))
             .sum::<usize>();
-        let potential_cut_gain_1 = potential_uncut_gain_1
-            .min(excess);
+        let potential_cut_gain_1 = potential_uncut_gain_1.min(excess);
         if potential_cut_gain_1 > 0 {
             for c in fits.iter_mut() {
                 if c.std_width > 4 && c.std_width > c.avg_width {
-                    let gain_1 = div_ceil((c.width - c.avg_width) * potential_cut_gain_1, potential_uncut_gain_1);
+                    let gain_1 = div_ceil(
+                        (c.width - c.avg_width) * potential_cut_gain_1,
+                        potential_uncut_gain_1,
+                    );
                     let gain_1 = gain_1.min(excess).min(c.width - 4);
                     c.width -= gain_1;
                     excess -= gain_1;
@@ -150,10 +153,8 @@ impl TblFit {
         // Step 2
         // We remove excess proportionnally
         if excess > 0 {
-            let potential_total_gain_2 = fits.iter()
-                .map(|c| c.width - 3)
-                .sum::<usize>()
-                .min(excess);
+            let potential_total_gain_2 =
+                fits.iter().map(|c| c.width - 3).sum::<usize>().min(excess);
             let excess_before_2 = excess;
             for c in fits.iter_mut() {
                 let gain_2 = div_ceil((c.width - 3) * excess_before_2, potential_total_gain_2);
@@ -178,8 +179,8 @@ impl TblFit {
 
 /// divide, rounding to the top
 const fn div_ceil(q: usize, r: usize) -> usize {
-    let mut res =  q / r;
-    if q%r != 0 {
+    let mut res = q / r;
+    if q % r != 0 {
         res += 1;
     }
     res

@@ -1,5 +1,6 @@
-use {
-    std::cmp::{Ord, PartialOrd},
+use std::cmp::{
+    Ord,
+    PartialOrd,
 };
 
 // Implementation note: the order of fields matters here
@@ -11,7 +12,6 @@ pub struct Pos {
     pub y: usize,
     pub x: usize,
 }
-
 
 /// A range made of two positions, both included
 /// (they may be equal, in which case the range is one character long).

@@ -1,4 +1,3 @@
-
 /// The set of characters to use to render table borders
 #[derive(Debug, Clone, PartialEq)]
 pub struct TableBorderChars {
@@ -91,4 +90,3 @@ pub static ROUNDED_TABLE_BORDER_CHARS: &TableBorderChars = &TableBorderChars {
     left_junction: '├',
     cross: '┼',
 };
-

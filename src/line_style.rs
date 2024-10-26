@@ -1,7 +1,10 @@
 use {
     crate::{
         compound_style::CompoundStyle,
-        crossterm::style::{Attribute, Color},
+        crossterm::style::{
+            Attribute,
+            Color,
+        },
     },
     minimad::Alignment,
     std::fmt,
@@ -21,7 +24,6 @@ pub struct LineStyle {
 }
 
 impl LineStyle {
-
     /// Return a (left_margin, right_margin) tupple, with both values
     /// being zeroed when they wouldn't let a width of at least 3 otherwise.
     pub fn margins_in(&self, available_width: Option<usize>) -> (usize, usize) {
@@ -33,10 +35,7 @@ impl LineStyle {
         (self.left_margin, self.right_margin)
     }
 
-    pub fn new(
-        compound_style: CompoundStyle,
-        align: Alignment,
-    ) -> Self {
+    pub fn new(compound_style: CompoundStyle, align: Alignment) -> Self {
         Self {
             compound_style,
             align,

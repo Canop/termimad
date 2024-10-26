@@ -1,6 +1,6 @@
 use {
-    unicode_width::UnicodeWidthChar,
     std::borrow::Cow,
+    unicode_width::UnicodeWidthChar,
 };
 
 pub static TAB_REPLACEMENT: &str = "  ";
@@ -29,11 +29,13 @@ impl StrFit {
         let mut has_tab = false;
         for (idx, c) in s.char_indices() {
             let char_width: i32 = match c {
-                '\t' => { // tab
+                '\t' => {
+                    // tab
                     has_tab = true;
                     TAB_REPLACEMENT.len() as i32
                 }
-                '\x08' => { // backspace
+                '\x08' => {
+                    // backspace
                     -1
                 }
                 _ => UnicodeWidthChar::width(c).map(|w| w as i32).unwrap_or(0),
@@ -120,4 +122,3 @@ mod fitting_count_tests {
         assert_eq!(StrFit::count_fitting(ja, 5), (6, 4));
     }
 }
-

@@ -1,8 +1,6 @@
 use {
     crate::{
-        errors::Result,
         crossterm::{
-            QueueableCommand,
             style::{
                 Attribute,
                 Attributes,
@@ -13,11 +11,19 @@ use {
                 SetForegroundColor,
                 StyledContent,
             },
-            terminal::{Clear, ClearType},
+            terminal::{
+                Clear,
+                ClearType,
+            },
+            QueueableCommand,
         },
+        errors::Result,
         styled_char::StyledChar,
     },
-    std::fmt::{self, Display},
+    std::fmt::{
+        self,
+        Display,
+    },
 };
 
 /// The attributes which are often supported
@@ -31,7 +37,6 @@ pub static ATTRIBUTES: &[Attribute] = &[
     Attribute::Encircled,
     Attribute::OverLined,
 ];
-
 
 /// A style which may be applied to a compound
 #[derive(Default, Clone, Debug, PartialEq)]
@@ -75,7 +80,7 @@ impl CompoundStyle {
     ///
     /// The `dest` color can be for example a [crossterm] color or a [coolor] one.
     pub fn blend_with<C: Into<coolor::Color>>(&mut self, dest: C, weight: f32) {
-        debug_assert!(weight>=0.0 && weight<=1.0);
+        debug_assert!(weight >= 0.0 && weight <= 1.0);
         let dest: coolor::Color = dest.into();
         if let Some(fg) = self.object_style.foreground_color.as_mut() {
             let src: coolor::Color = (*fg).into();
@@ -89,29 +94,17 @@ impl CompoundStyle {
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_fgbg(fg: Color, bg: Color) -> Self {
-        Self::new(
-            Some(fg),
-            Some(bg),
-            Attributes::default(),
-        )
+        Self::new(Some(fg), Some(bg), Attributes::default())
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_fg(fg: Color) -> Self {
-        Self::new(
-            Some(fg),
-            None,
-            Attributes::default(),
-        )
+        Self::new(Some(fg), None, Attributes::default())
     }
 
     /// Get an new instance of `CompoundStyle`
     pub fn with_bg(bg: Color) -> Self {
-        Self::new(
-            None,
-            Some(bg),
-            Attributes::default(),
-        )
+        Self::new(None, Some(bg), Attributes::default())
     }
 
     /// Get an new instance of `CompoundStyle`
@@ -180,12 +173,7 @@ impl CompoundStyle {
 
     /// Write a char several times with the line compound style
     #[inline(always)]
-    pub fn repeat_char(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-        c: char,
-        count: usize,
-    ) -> fmt::Result {
+    pub fn repeat_char(&self, f: &mut fmt::Formatter<'_>, c: char, count: usize) -> fmt::Result {
         if count > 0 {
             let s = std::iter::repeat(c).take(count).collect::<String>();
             write!(f, "{}", self.apply_to(s))?;

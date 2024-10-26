@@ -12,16 +12,27 @@
 [s4]: https://miaou.dystroy.org/static/shields/room.svg
 [l4]: https://miaou.dystroy.org/3
 
-A CLI utilities library leveraging Markdown to format terminal rendering, allowing separation of structure, data and skin.
+## Introduction
 
-Based on [crossterm](#crossterm-compatibility) so works on most terminals (even on windows).
+Termimad is a set of cross-platform utilities dedicated to CLI and TUI apps,
+- leveraging Markdown to format terminal rendering, allowing separation of structure, data and skin,
+- using [crossterm](https://github.com/crossterm-rs/crossterm) as backend for styling and event,
+- based on [crokey](https://docs.rs/crokey/latest/crokey/) for key combinations support
+- with a focus on total control and performances, with no active loop,
+- using [crossbeam](https://docs.rs/crossbeam/latest/crossbeam/) for event passing,
+- striving to be correct, even on Unicode and wide characters
+
+Termimad is **not**
+- a TUI framework: Unless you have serious performance concerns or want precise control, you'll find it much easier and faster, when building a TUI application, to just use one of the TUI frameworks of the Rust ecosystem
+- a generic Markdown renderer
+- consistent or complete in any way
+
+## Markdown in Termimad
 
 ![text](doc/text.png)
 
 The goal isn't to display any markdown text with its various extensions (a terminal isn't really fit for that).
 The goal is rather to improve the display of texts in a terminal application when we want both the text and the skin to be easily configured.
-
-Termimad also includes a few utilities helping efficient managing of events and user input in a multithread application.
 
 **Wrapping**, table balancing, and **scrolling** are essential features of Termimad.
 
@@ -285,6 +296,10 @@ scrollbar: "#fb0 gray(11) |"
 ```
 
 Execute `cargo run --example skin-file` for an example and explanations.
+
+## Events and inputs
+
+Termimad also includes a few utilities helping efficient managing of events and user input in a multithread application.
 
 ## Advices to get started
 

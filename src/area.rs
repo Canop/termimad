@@ -1,6 +1,9 @@
 use {
     crate::crossterm::terminal,
-    std::convert::{TryFrom, TryInto},
+    std::convert::{
+        TryFrom,
+        TryInto,
+    },
 };
 
 /// A default width which is used when we failed measuring the real terminal width
@@ -67,10 +70,7 @@ impl Area {
 
     /// tell whether the char at (x,y) is in the area
     pub const fn contains(&self, x: u16, y: u16) -> bool {
-        x >= self.left
-            && x < self.left + self.width
-            && y >= self.top
-            && y < self.top + self.height
+        x >= self.left && x < self.left + self.width && y >= self.top && y < self.top + self.height
     }
 
     /// shrink the area
@@ -101,7 +101,8 @@ impl Area {
         scroll: U, // number of lines hidden on top
         content_height: U,
     ) -> Option<(u16, u16)>
-    where U: Into<usize>
+    where
+        U: Into<usize>,
     {
         compute_scrollbar(scroll, content_height, self.height, self.top)
     }

@@ -33,11 +33,7 @@ impl From<&ScrollBarStyle> for ScrollBarStyleDef {
             && sc.thumb.get_bg().is_none();
         if simple {
             Self::Simple(StyledChar::new(
-                CompoundStyle::new(
-                    sc.thumb.get_fg(),
-                    sc.track.get_fg(),
-                    Default::default(),
-                ),
+                CompoundStyle::new(sc.thumb.get_fg(), sc.track.get_fg(), Default::default()),
                 sc.track.nude_char(),
             ))
         } else {
@@ -53,7 +49,7 @@ impl ScrollBarStyleDef {
     pub fn into_scrollbar_style(self) -> ScrollBarStyle {
         match self {
             Self::Simple(sc) => sc.into(),
-            Self::Rich{ track, thumb } => ScrollBarStyle { track, thumb },
+            Self::Rich { track, thumb } => ScrollBarStyle { track, thumb },
         }
     }
 }

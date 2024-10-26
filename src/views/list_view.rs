@@ -1,5 +1,6 @@
 use {
     crate::{
+        compute_scrollbar,
         crossterm::{
             cursor::MoveTo,
             queue,
@@ -12,7 +13,6 @@ use {
                 ClearType,
             },
         },
-        compute_scrollbar,
         errors::Result,
         gray,
         Alignment,

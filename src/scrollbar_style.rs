@@ -1,9 +1,7 @@
-use {
-    crate::{
-        color::*,
-        crossterm::style::Color,
-        styled_char::StyledChar,
-    },
+use crate::{
+    color::*,
+    crossterm::style::Color,
+    styled_char::StyledChar,
 };
 
 /// A scrollbar style defined by two styled chars, one
@@ -41,14 +39,8 @@ impl From<StyledChar> for ScrollBarStyle {
     fn from(sc: StyledChar) -> Self {
         let char = sc.nude_char();
         Self {
-            track: StyledChar::from_fg_char(
-                sc.get_bg().unwrap_or(gray(5)),
-                char,
-            ),
-            thumb: StyledChar::from_fg_char(
-                sc.get_fg().unwrap_or(gray(21)),
-                char,
-            ),
+            track: StyledChar::from_fg_char(sc.get_bg().unwrap_or(gray(5)), char),
+            thumb: StyledChar::from_fg_char(sc.get_fg().unwrap_or(gray(21)), char),
         }
     }
 }

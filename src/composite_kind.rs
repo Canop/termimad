@@ -14,7 +14,6 @@ pub enum CompositeKind {
     Quote,
 }
 
-
 impl From<CompositeStyle> for CompositeKind {
     fn from(ty: CompositeStyle) -> Self {
         match ty {

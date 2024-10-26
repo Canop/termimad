@@ -1,6 +1,4 @@
-use {
-    crate::crossterm::style::Color,
-};
+use crate::crossterm::style::Color;
 
 /// Build a RGB color
 ///
@@ -21,4 +19,3 @@ pub fn gray(mut level: u8) -> Color {
 pub const fn ansi(level: u8) -> Color {
     Color::AnsiValue(level)
 }
-
