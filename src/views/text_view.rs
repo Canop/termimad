@@ -156,8 +156,15 @@ impl<'a, 't> TextView<'a, 't> {
 
     /// change the scroll position
     /// pages_count can be negative
-    pub fn try_scroll_pages(&mut self, pages_count: i32) {
-        self.try_scroll_lines(pages_count * i32::from(self.area.height))
+    pub fn try_scroll_pages<C: Into<f64>>(&mut self, pages_count: C) {
+        let pages_count: f64 = pages_count.into();
+        let lines: f64 = pages_count * f64::from(self.area.height);
+        let lines = if lines < 0.0 {
+            lines.floor()
+        } else {
+            lines.ceil()
+        };
+        self.try_scroll_lines(lines as i32);
     }
 
     pub fn line_up(&mut self) -> bool {
