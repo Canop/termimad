@@ -278,7 +278,7 @@ impl InputField {
         self.apply_key_combination(key)
     }
 
-    /// apply a key combination
+    /// apply a key combination, returning true if the event is consumed
     ///
     ///
     /// This function handles a few events like deleting a
