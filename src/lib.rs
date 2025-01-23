@@ -172,6 +172,7 @@ pub use {
     styled_char::StyledChar,
     table_border_chars::*,
     text::FmtText,
+    tbl::*,
     views::{
         InputField,
         ListView,
