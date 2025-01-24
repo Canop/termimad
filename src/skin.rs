@@ -311,7 +311,7 @@ impl MadSkin {
 
     /// return the style appliable to a given compound.
     /// It's a composition of the various appliable base styles.
-    fn compound_style(&self, line_style: &LineStyle, compound: &Compound<'_>) -> CompoundStyle {
+    pub fn compound_style(&self, line_style: &LineStyle, compound: &Compound<'_>) -> CompoundStyle {
         if *compound.src == *crate::fit::ELLIPSIS {
             return self.ellipsis.clone();
         }
