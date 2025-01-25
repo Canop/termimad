@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.31.2"></a>
+### v0.31.2 - 2025-01-25
+- tbl and MadSkin::compound_style now public
+
 <a name="v0.31.1"></a>
 ### v0.31.1 - 2024-11-17
 - TextView::try_scroll_pages now accepts float values (anything `Into<f64>`)
