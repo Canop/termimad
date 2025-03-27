@@ -145,7 +145,7 @@ pub use {
     compound_style::*,
     coolor,
     crokey::crossterm,
-    crossbeam,
+    crossbeam_channel,
     displayable_line::DisplayableLine,
     errors::Error,
     events::{

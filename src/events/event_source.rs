@@ -20,7 +20,7 @@ use {
         errors::Error,
     },
     crokey::Combiner,
-    crossbeam::channel::{
+    crossbeam_channel::{
         bounded,
         unbounded,
         Receiver,

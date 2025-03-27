@@ -1,5 +1,5 @@
 use {
-    crossbeam::channel::{
+    crossbeam_channel::{
         Receiver,
         Sender,
     },
@@ -46,7 +46,7 @@ impl TickBeamHandle {
 
 impl<P> Ticker<P> {
     pub fn new() -> Self {
-        let (tick_sender, tick_receiver) = crossbeam::channel::unbounded();
+        let (tick_sender, tick_receiver) = crossbeam_channel::unbounded();
         Self {
             next_id: 0,
             beams: Vec::new(),
@@ -76,7 +76,7 @@ impl<P: Copy + Send + 'static> Ticker<P> {
     pub fn start_beam(&mut self, mission: TickBeam<P>) -> TickBeamId {
         let id = self.next_id;
         self.next_id += 1;
-        let (interrupt_sender, interrupt_receiver) = crossbeam::channel::bounded(1);
+        let (interrupt_sender, interrupt_receiver) = crossbeam_channel::bounded(1);
         let tick_sender = self.tick_sender.clone();
         thread::spawn(move || {
             let mut remaining_count = mission.remaining_count;
