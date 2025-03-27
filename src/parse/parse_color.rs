@@ -11,7 +11,7 @@ use {
 
 #[derive(thiserror::Error, Debug)]
 pub enum ParseColorError {
-    #[error("'not a recognized color")]
+    #[error("not a recognized color")]
     Unrecognized,
     #[error("grey level must be between 0 and 23 (got {level})")]
     InvalidGreyLevel { level: u8 },
