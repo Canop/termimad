@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.31.3"></a>
+### v0.31.3 - 2025-04-16
+- dependency update
+
 <a name="v0.31.2"></a>
 ### v0.31.2 - 2025-01-25
 - tbl and MadSkin::compound_style now public
