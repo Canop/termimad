@@ -1,5 +1,11 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.32.0"></a>
+### v0.32.0 - 2025-05-09
+- update crokey to 1.2
+- update coolor to 1.1
+- update crossterm to 0.29
+
 <a name="v0.31.3"></a>
 ### v0.31.3 - 2025-04-16
 - dependency update
