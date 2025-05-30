@@ -373,6 +373,25 @@ impl InputFieldContent {
         true
     }
 
+    /// make all the non-space characters around the current pos, if any, the current selection
+    pub fn select_non_space_around(&mut self) -> bool {
+        let chars = &self.lines[self.pos.y].chars;
+        let mut start = self.pos.x;
+        if start >= chars.len() || !is_non_space_char(chars[start]) {
+            return false;
+        }
+        while start > 0 && is_non_space_char(chars[start - 1]) {
+            start -= 1;
+        }
+        let mut end = self.pos.x;
+        while end + 1 < chars.len() && is_non_space_char(chars[end + 1]) {
+            end += 1;
+        }
+        self.selection_tail = Some(Pos::new(start, self.pos.y));
+        self.pos.x = end;
+        true
+    }
+
     /// Remove the char at cursor position, if any.
     ///
     /// Cursor position is unchanged
@@ -672,6 +691,9 @@ fn test_char_iterator() {
 
 fn is_word_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_'
+}
+fn is_non_space_char(c: char) -> bool {
+    !c.is_whitespace()
 }
 
 #[cfg(test)]

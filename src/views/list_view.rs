@@ -350,22 +350,14 @@ impl<'t, T> ListView<'t, T> {
     /// ensure the last line is visible
     pub fn scroll_to_bottom(&mut self) {
         let body_height = self.tbody_height() as usize;
-        self.scroll = if self.displayed_rows_count > body_height {
-            self.displayed_rows_count - body_height
-        } else {
-            0
-        }
+        self.scroll = self.displayed_rows_count.saturating_sub(body_height);
     }
     /// set the scroll amount.
     /// lines_count can be negative
     pub fn try_scroll_lines(&mut self, lines_count: i32) {
         if lines_count < 0 {
             let lines_count = -lines_count as usize;
-            self.scroll = if lines_count >= self.scroll {
-                0
-            } else {
-                self.scroll - lines_count
-            };
+            self.scroll = self.scroll.saturating_sub(lines_count);
         } else {
             self.scroll = (self.scroll + lines_count as usize)
                 .min(self.displayed_rows_count - self.tbody_height() as usize + 1);
@@ -435,7 +427,7 @@ impl<'t, T> ListView<'t, T> {
         }
         if let Some(sel) = self.selection {
             if sel <= self.scroll {
-                self.scroll = if sel > 2 { sel - 2 } else { 0 };
+                self.scroll = sel.saturating_sub(2);
             } else if sel + 1 >= self.scroll + tbody_height {
                 self.scroll = sel - tbody_height + 2;
             }

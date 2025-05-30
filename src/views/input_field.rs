@@ -247,6 +247,7 @@ impl InputField {
     wrap_content_fun!(move_current_line_up);
     wrap_content_fun!(move_current_line_down);
     wrap_content_fun!(select_word_around);
+    wrap_content_fun!(select_non_space_around);
 
     pub fn page_up(&mut self) -> bool {
         if self.content.move_lines_up(self.area.height as usize) {
@@ -372,6 +373,34 @@ impl InputField {
         }
     }
 
+    /// Get the position in the input field from row, column
+    pub fn get_pos(&self, row: u16, column: u16) -> Option<Pos> {
+        if self.area.contains(column, row) {
+            let y = ((row - self.area.top) as usize + self.scroll.y)
+                .min(self.content.line_count() - 1);
+            let line = &self.content.lines()[y];
+            let x = line
+                .col_to_char_idx((column - self.area.left) as usize + self.scroll.x)
+                .unwrap_or(line.chars.len());
+            Some(Pos { x, y })
+        } else {
+            None
+        }
+    }
+
+    /// Set the cursor position in the input field
+    ///
+    /// The position set may be different to ensure consistency
+    /// (for example if it's after the end, it will be set back).
+    pub fn set_cursor_pos(&mut self, pos: Pos) {
+        self.content.set_cursor_pos(pos);
+    }
+
+    /// Get the position in the input field from a mouse event
+    pub fn get_mouse_event_pos(&self, mouse_event: MouseEvent) -> Option<Pos> {
+        self.get_pos(mouse_event.row, mouse_event.column)
+    }
+
     /// Apply a mouse event
     pub fn apply_mouse_event(&mut self, mouse_event: MouseEvent, is_double_click: bool) -> bool {
         let MouseEvent {
@@ -380,50 +409,43 @@ impl InputField {
             row,
             modifiers,
         } = mouse_event;
-        if self.area.contains(column, row) {
-            if self.focused {
-                let y = ((row - self.area.top) as usize + self.scroll.y)
-                    .min(self.content.line_count() - 1);
-                let line = &self.content.lines()[y];
-                let x = line
-                    .col_to_char_idx((column - self.area.left) as usize + self.scroll.x)
-                    .unwrap_or(line.chars.len());
-                // We handle the selection click on down, so that it's set at the
-                // start of drag.
-                match kind {
-                    MouseEventKind::Down(MouseButton::Left) => {
-                        // FIXME Crossterm doesn't seem to send shift modifier
-                        // with up or down mouse events
-                        if modifiers == KeyModifiers::SHIFT {
-                            self.content.make_selection();
-                        } else {
-                            self.content.unselect();
-                        }
-                        self.content.set_cursor_pos(Pos { x, y });
-                    }
-                    MouseEventKind::Up(MouseButton::Left) if is_double_click => {
-                        self.content.set_cursor_pos(Pos { x, y });
-                        self.content.select_word_around();
-                    }
-                    MouseEventKind::Drag(MouseButton::Left) => {
+        let Some(Pos { x, y }) = self.get_pos(row, column) else {
+            return false;
+        };
+        if self.focused {
+            // We handle the selection click on down, so that it's set at the
+            // start of drag.
+            match kind {
+                MouseEventKind::Down(MouseButton::Left) => {
+                    // FIXME Crossterm doesn't seem to send shift modifier
+                    // with up or down mouse events
+                    if modifiers == KeyModifiers::SHIFT {
                         self.content.make_selection();
-                        self.content.set_cursor_pos(Pos { x, y });
+                    } else {
+                        self.content.unselect();
                     }
-                    MouseEventKind::ScrollDown => {
-                        self.scroll_down();
-                    }
-                    MouseEventKind::ScrollUp => {
-                        self.scroll_up();
-                    }
-                    _ => {}
+                    self.content.set_cursor_pos(Pos { x, y });
                 }
-            } else if matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
-                self.focused = true;
+                MouseEventKind::Up(MouseButton::Left) if is_double_click => {
+                    self.content.set_cursor_pos(Pos { x, y });
+                    self.content.select_word_around();
+                }
+                MouseEventKind::Drag(MouseButton::Left) => {
+                    self.content.make_selection();
+                    self.content.set_cursor_pos(Pos { x, y });
+                }
+                MouseEventKind::ScrollDown => {
+                    self.scroll_down();
+                }
+                MouseEventKind::ScrollUp => {
+                    self.scroll_up();
+                }
+                _ => {}
             }
-            true
-        } else {
-            false
+        } else if matches!(kind, MouseEventKind::Down(MouseButton::Left)) {
+            self.focused = true;
         }
+        true
     }
 
     /// apply the event to change the state (content, cursor)

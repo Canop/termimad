@@ -144,11 +144,7 @@ impl<'a, 't> TextView<'a, 't> {
     pub fn try_scroll_lines(&mut self, lines_count: i32) {
         if lines_count < 0 {
             let lines_count = -lines_count as usize;
-            self.scroll = if lines_count >= self.scroll {
-                0
-            } else {
-                self.scroll - lines_count
-            };
+            self.scroll = self.scroll.saturating_sub(lines_count);
         } else {
             self.set_scroll(self.scroll + lines_count as usize);
         }

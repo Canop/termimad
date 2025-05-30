@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.33.0"></a>
+### v0.33.0 - 2025-05-30
+- InputField: select_non_space_around, get_pos, set_cursor_pos, get_mouse_event_pos
+
 <a name="v0.32.0"></a>
 ### v0.32.0 - 2025-05-09
 - update crokey to 1.2
