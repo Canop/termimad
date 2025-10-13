@@ -161,18 +161,15 @@ impl CompoundStyle {
             .extend(other.object_style.attributes);
     }
 
-    #[inline(always)]
     pub const fn get_fg(&self) -> Option<Color> {
         self.object_style.foreground_color
     }
 
-    #[inline(always)]
     pub const fn get_bg(&self) -> Option<Color> {
         self.object_style.background_color
     }
 
     /// Write a char several times with the line compound style
-    #[inline(always)]
     pub fn repeat_char(&self, f: &mut fmt::Formatter<'_>, c: char, count: usize) -> fmt::Result {
         if count > 0 {
             let s = std::iter::repeat(c).take(count).collect::<String>();
@@ -184,7 +181,6 @@ impl CompoundStyle {
     /// Write a string several times with the line compound style
     ///
     /// Implementation Note: performances here are critical
-    #[inline(always)]
     pub fn repeat_string(&self, f: &mut fmt::Formatter<'_>, s: &str, count: usize) -> fmt::Result {
         if count > 0 {
             write!(f, "{}", self.apply_to(s.repeat(count)))
@@ -194,7 +190,6 @@ impl CompoundStyle {
     }
 
     /// Write 0 or more spaces with the line's compound style
-    #[inline(always)]
     pub fn repeat_space(&self, f: &mut fmt::Formatter<'_>, count: usize) -> fmt::Result {
         self.repeat_string(f, " ", count)
     }
@@ -210,8 +205,7 @@ impl CompoundStyle {
         Ok(())
     }
 
-    /// write the string with this style on the given
-    /// writer
+    /// write the string with this style on the given writer
     pub fn queue_str<W, S: Into<String>>(&self, w: &mut W, s: S) -> Result<()>
     where
         W: std::io::Write,

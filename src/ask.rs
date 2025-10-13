@@ -6,7 +6,7 @@ use {
 /// a question that can be asked to the user, requiring
 /// him to type the key of the desired answer
 ///
-/// A question can be built using [Question::new] or with
+/// A question can be built using [`Question::new`] or with
 /// the [ask!] macro
 pub struct Question {
     pub md: Option<String>,
@@ -105,7 +105,7 @@ impl Question {
 /// an optional default one, to execute blocks, to optionaly return
 /// a value.
 ///
-/// Example of a simple confirmation::
+/// Example of a simple `confirmation`:
 ///
 /// ```no_run
 /// let confirmed = termimad::ask!(

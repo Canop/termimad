@@ -51,6 +51,7 @@ struct TimedClick {
     y: u16,
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct EventSourceOptions {
     /// Whether to try combine key events into key combinations.
     /// This changes the behavior of the terminal, if it's compatible, then restores

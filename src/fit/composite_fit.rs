@@ -186,8 +186,7 @@ impl Zone {
 impl Fitter {
     /// create a fitter for when you want a specific alignment.
     ///
-    /// You may still change the mid_token_ellision and mid_compound_ellision
-    /// later
+    /// You may still change the `mid_token_ellision` and `mid_compound_ellision` later
     pub fn for_align(align: Alignment) -> Self {
         let internal_ellision = align == Alignment::Unspecified;
         Self {
@@ -197,8 +196,7 @@ impl Fitter {
         }
     }
 
-    /// ensure the composite fits the max_width, by replacing some parts
-    /// with ellisions
+    /// ensure the composite fits the `max_width`, by replacing some parts with ellisions
     pub fn fit(self, fc: &mut FmtComposite<'_>, max_width: usize, skin: &MadSkin) {
         // some special cases because they're hard to check after
         if fc.visible_length <= max_width {

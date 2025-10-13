@@ -46,7 +46,6 @@ impl<'s> FmtComposite<'s> {
     }
     /// Return the number of characters (usually spaces) to insert both
     /// sides of the composite
-    #[inline(always)]
     pub const fn completions(&self) -> (usize, usize) {
         match &self.spacing {
             Some(spacing) => spacing.completions_for(self.visible_length),
@@ -54,16 +53,15 @@ impl<'s> FmtComposite<'s> {
         }
     }
     /// Add a compound and modifies `visible_length` accordingly
-    #[inline(always)]
     pub fn add_compound(&mut self, compound: Compound<'s>) {
         self.visible_length += compound.src.width();
         self.compounds.push(compound);
     }
-    /// Ensure the cached visible_length is correct.
+    /// Ensure the cached `visible_length` is correct.
     ///
     /// It's normally not necessary to call it, but
     /// this must be called if compounds are added,
-    /// removed or modified without using the FmtComposite API
+    /// removed or modified without using the `FmtComposite` API
     pub fn recompute_width(&mut self, skin: &MadSkin) {
         self.visible_length = skin.visible_composite_length(self.kind, &self.compounds);
     }

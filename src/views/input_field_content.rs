@@ -312,7 +312,7 @@ impl InputFieldContent {
         let mut ib = s.chars();
         loop {
             match (ia.next(), ib.next()) {
-                (Some(a), Some(b)) if a == b => continue,
+                (Some(a), Some(b)) if a == b => {}
                 (None, None) => {
                     return true;
                 }

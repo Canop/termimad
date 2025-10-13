@@ -155,7 +155,7 @@ where
 
 /// Return a (width, height) with the dimensions of the available
 /// terminal in characters.
-///
+#[must_use]
 pub fn terminal_size() -> (u16, u16) {
     let size = terminal::size();
     size.unwrap_or((DEFAULT_TERMINAL_WIDTH, DEFAULT_TERMINAL_HEIGHT))

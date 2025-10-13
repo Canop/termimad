@@ -10,7 +10,7 @@ pub struct TblFit {
     available_sum_width: usize,
 }
 
-/// Information observed with calls to see_cell
+/// Information observed with calls to `see_cell`
 #[derive(Debug, Clone, Copy)]
 struct ColData {
     sum_widths: usize,
@@ -49,7 +49,7 @@ pub struct TblFitResult {
     pub reduced: bool,
 
     /// the widths of all columns, so that they're guaranteed to fit
-    /// into the available_width (taking the borders into account)
+    /// into the `available_width` (taking the borders into account)
     pub col_widths: Vec<usize>,
 }
 
@@ -57,7 +57,7 @@ impl TblFit {
     /// Build a new fitter, or return an error if the width isn't enough
     /// for the given number of columns.
     ///
-    /// available_width: total available width, including external borders
+    /// `available_width`: total available width, including external borders
     pub fn new(cols_count: usize, available_width: usize) -> Result<Self, InsufficientWidthError> {
         if available_width < cols_count * 4 + 1 {
             return Err(InsufficientWidthError { available_width });

@@ -32,6 +32,7 @@ fn follow_up_composite<'s>(fc: &FmtComposite<'s>, skin: &MadSkin) -> FmtComposit
 
 /// return the inherent widths related to the kind, the one of the first line (for
 /// example with a bullet) and the ones for the next lines (for example with quotes)
+#[must_use]
 pub fn composite_kind_widths(composite_kind: CompositeKind, skin: &MadSkin) -> (usize, usize) {
     match composite_kind {
         CompositeKind::Paragraph => (0, 0),
