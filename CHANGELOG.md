@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.34.1"></a>
+### v0.34.1 - 2025-11-24
+- new skin functions taking a Write as argument: write_expander, write_owning_expander and write_owning_expander_md
+
 <a name="v0.34.0"></a>
 ### v0.34.0 - 2025-08-28
 - Key combinations can include the "Cmd" modifier ("Command" key, also called "Super", "Apple", or "Windows")

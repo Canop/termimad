@@ -403,6 +403,18 @@ impl MadSkin {
         print!("{}", fmt_text);
     }
 
+    /// do a `print!` of the given expander
+    pub fn write_expander<W: Write>(
+        &self,
+        w: &mut W,
+        expander: TextTemplateExpander<'_, '_>,
+    ) -> std::io::Result<()> {
+        let (width, _) = terminal_size();
+        let text = expander.expand();
+        let fmt_text = FmtText::from_text(self, text, Some(width as usize));
+        write!(w, "{}", fmt_text)
+    }
+
     /// do a `print!` of the given owning expander
     pub fn print_owning_expander(
         &self,
@@ -413,6 +425,19 @@ impl MadSkin {
         let text = expander.expand(template);
         let fmt_text = FmtText::from_text(self, text, Some(width as usize));
         print!("{}", fmt_text);
+    }
+
+    /// do a `print!` of the given owning expander
+    pub fn write_owning_expander<W: Write>(
+        &self,
+        w: &mut W,
+        expander: &OwningTemplateExpander<'_>,
+        template: &TextTemplate<'_>,
+    ) -> std::io::Result<()> {
+        let (width, _) = terminal_size();
+        let text = expander.expand(template);
+        let fmt_text = FmtText::from_text(self, text, Some(width as usize));
+        write!(w, "{}", fmt_text)
     }
 
     /// do a `print!` of the given owning expander
@@ -427,6 +452,21 @@ impl MadSkin {
         let text = expander.expand(&template);
         let fmt_text = FmtText::from_text(self, text, Some(width as usize));
         print!("{}", fmt_text);
+    }
+
+    /// do a `print!` of the given owning expander
+    pub fn write_owning_expander_md<T: Into<String>, W: Write>(
+        &self,
+        w: &mut W,
+        expander: &OwningTemplateExpander<'_>,
+        template: T,
+    ) -> std::io::Result<()> {
+        let (width, _) = terminal_size();
+        let template_md: String = template.into();
+        let template = TextTemplate::from(&*template_md);
+        let text = expander.expand(&template);
+        let fmt_text = FmtText::from_text(self, text, Some(width as usize));
+        write!( w, "{}", fmt_text)
     }
 
     pub fn print_composite(&self, composite: Composite<'_>) {
