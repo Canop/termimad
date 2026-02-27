@@ -19,6 +19,10 @@ pub struct FmtComposite<'s> {
     pub visible_length: usize,
 
     pub spacing: Option<Spacing>,
+
+    /// Language tag from a preceding fenced code block (e.g. "lua").
+    /// Only set for composites with `CompositeKind::Code`.
+    pub code_lang: Option<String>,
 }
 
 impl<'s> FmtComposite<'s> {
@@ -28,6 +32,7 @@ impl<'s> FmtComposite<'s> {
             compounds: Vec::new(),
             visible_length: 0,
             spacing: None,
+            code_lang: None,
         }
     }
     pub fn from(composite: Composite<'s>, skin: &MadSkin) -> Self {
@@ -37,6 +42,7 @@ impl<'s> FmtComposite<'s> {
             kind,
             compounds: composite.compounds,
             spacing: None,
+            code_lang: None,
         }
     }
     pub fn from_compound(compound: Compound<'s>) -> Self {

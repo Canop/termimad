@@ -107,6 +107,7 @@ mod area;
 mod ask;
 mod code;
 mod color;
+mod highlighter;
 mod composite;
 mod composite_kind;
 mod compound_style;
@@ -138,6 +139,7 @@ pub use {
         terminal_size,
         Area,
     },
+    highlighter::CodeHighlighter,
     ask::*,
     color::*,
     composite::FmtComposite,
@@ -157,7 +159,7 @@ pub use {
     },
     fit::*,
     inline::FmtInline,
-    line::FmtLine,
+    line::{FmtLine, HighlightedCodeLine},
     line_style::LineStyle,
     list_indentation::*,
     minimad::{
