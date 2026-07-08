@@ -5,6 +5,7 @@ mod parse_attribute;
 mod parse_color;
 mod parse_compound_style;
 mod parse_line_style;
+mod parse_ordered_item_style;
 mod parse_styled_char;
 
 pub use {
@@ -13,6 +14,7 @@ pub use {
     parse_color::*,
     parse_compound_style::*,
     parse_line_style::*,
+    parse_ordered_item_style::*,
     parse_styled_char::*,
 };
 
@@ -144,7 +146,7 @@ pub fn parse_style_token(s: &str) -> Result<StyleToken, ParseStyleTokenError> {
 
 pub fn parse_style_tokens(s: &str) -> Result<Vec<StyleToken>, ParseStyleTokenError> {
     let mut tokens = Vec::new();
-    for m in regex!(r#"[^\s()]+(\([\w,\s]+\))?"#).find_iter(s) {
+    for m in regex!(r#"[^\s()]+(\([\w,\s]+\))?|\S"#).find_iter(s) {
         tokens.push(parse_style_token(m.as_str())?);
     }
     Ok(tokens)

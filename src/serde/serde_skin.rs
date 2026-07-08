@@ -7,6 +7,7 @@ use {
         parse_styled_char,
         LineStyle,
         MadSkin,
+        OrderedItemStyle,
         TableBorderChars,
         ATTRIBUTES,
     },
@@ -137,6 +138,17 @@ impl<'de> de::Deserialize<'de> for MadSkin {
                             }
                         },
 
+                        // ordered list item style
+                        "ordered_items" | "ordered-items" => {
+                            let styles = map.next_value::<Vec<OrderedItemStyle>>()?;
+                            for (lvl, style) in styles.into_iter().enumerate() {
+                                if let Some(skin_style) = skin.ordered_item_styles.get_mut(lvl) {
+                                    *skin_style = style;
+                                }
+                            }
+
+                        }
+
                         // table border chars
                         // There's currently no way to allow custom table border
                         // chars. It would require a change in MadSkin: either
@@ -193,6 +205,9 @@ impl Serialize for MadSkin {
 
         // headers
         skin.serialize_entry("headers", &self.headers)?;
+
+        // ordered list item style
+        skin.serialize_entry("ordered_items", &self.ordered_item_styles)?;
 
         // table border chars
         // There's currently no way to allow custom

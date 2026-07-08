@@ -12,6 +12,10 @@ headers: [
     yellow underlined
     yellow
 ]
+ordered-items: [
+    green bold ) yellow none
+    green
+]
 quote: > red
 horizontal-rule: "~ #00cafe"
 table: "#540 center"

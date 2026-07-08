@@ -17,7 +17,6 @@ use {
         Alignment,
         Composite,
         Compound,
-        Line,
         OwningTemplateExpander,
         TextTemplate,
         TextTemplateExpander,
@@ -29,6 +28,10 @@ use {
     },
     unicode_width::UnicodeWidthStr,
 };
+
+/// The depth of ordered lists to which we can define specific styles.
+/// Ordered lists can be deeper, but the style will be the same as for the last depth.
+pub const MAX_ORDERED_LIST_DEPTH: usize = 4;
 
 /// A skin defining how a parsed markdown appears on the terminal
 /// (fg and bg colors, bold, italic, underline, etc.)
@@ -44,6 +47,7 @@ pub struct MadSkin {
     pub scrollbar: ScrollBarStyle,
     pub table: LineStyle, // the compound style is for border chars
     pub bullet: StyledChar,
+    pub ordered_item_styles: [OrderedItemStyle; MAX_ORDERED_LIST_DEPTH],
     pub quote_mark: StyledChar,
     pub horizontal_rule: StyledChar,
     pub ellipsis: CompoundStyle,
@@ -80,6 +84,7 @@ impl Default for MadSkin {
             scrollbar: ScrollBarStyle::new(),
             table: CompoundStyle::with_fg(gray(7)).into(),
             bullet: StyledChar::from_fg_char(gray(8), '•'),
+            ordered_item_styles: Default::default(),
             quote_mark: StyledChar::new(
                 CompoundStyle::new(Some(gray(12)), None, Attribute::Bold.into()),
                 '▐',
@@ -121,6 +126,7 @@ impl MadSkin {
             scrollbar: ScrollBarStyle::new(),
             table: LineStyle::default(),
             bullet: StyledChar::nude('•'),
+            ordered_item_styles: [OrderedItemStyle::no_style(); MAX_ORDERED_LIST_DEPTH],
             quote_mark: StyledChar::nude('▐'),
             horizontal_rule: StyledChar::nude('―'),
             ellipsis: CompoundStyle::default(),
@@ -187,9 +193,22 @@ impl MadSkin {
             h.blend_with(color, weight);
         }
         self.bullet.blend_with(color, weight);
+        for ois in &mut self.ordered_item_styles {
+            ois.blend_with(color, weight);
+        }
         self.quote_mark.blend_with(color, weight);
         self.horizontal_rule.blend_with(color, weight);
         self.ellipsis.blend_with(color, weight);
+    }
+
+    /// Return the style to apply to an ordered list item at the given level (depth).
+    pub fn ordered_item_style(&self, level: u8) -> &OrderedItemStyle {
+        &self.ordered_item_styles[(level as usize).min(MAX_ORDERED_LIST_DEPTH - 1)]
+    }
+
+    /// Modify the style to apply to an ordered list item at the given level (depth).
+    pub fn ordered_item_style_mut(&mut self, level: u8) -> Option<&mut OrderedItemStyle> {
+        self.ordered_item_styles.get_mut(level as usize)
     }
 
     /// Change the foreground of most styles (the ones which commonly
@@ -283,19 +302,20 @@ impl MadSkin {
                 ListItemsIndentationMode::FirstLineOnly => 0,
                 ListItemsIndentationMode::Block => 2 + depth as usize, // spaces
             },
+            CompositeKind::OrderedListItem { level, index } => {
+                ordered_item_indent(level, index)
+            }
+            CompositeKind::OrderedListItemFollowUp { level, index } => {
+                match self.list_items_indentation_mode {
+                    ListItemsIndentationMode::FirstLineOnly => 0,
+                    ListItemsIndentationMode::Block => {
+                        ordered_item_indent(level, index)
+                    }
+                }
+            }
             CompositeKind::Quote => 2, // space of the quoting char
             _ => 0,
         }) + compounds_width
-    }
-
-    // FIXME deprecate ?
-    pub fn visible_line_length(&self, line: &Line<'_>) -> usize {
-        match line {
-            Line::Normal(composite) => {
-                self.visible_composite_length(composite.style.into(), &composite.compounds)
-            }
-            _ => 0, // FIXME implement
-        }
     }
 
     /// return the style to apply to a given line
@@ -313,9 +333,9 @@ impl MadSkin {
     /// It's a composition of the various appliable base styles.
     pub fn compound_style(&self, line_style: &LineStyle, compound: &Compound<'_>) -> CompoundStyle {
         if *compound.src == *crate::fit::ELLIPSIS {
-            return self.ellipsis.clone();
+            return self.ellipsis;
         }
-        let mut os = line_style.compound_style.clone();
+        let mut os = line_style.compound_style;
         if compound.italic {
             os.overwrite_with(&self.italic);
         }
@@ -466,7 +486,7 @@ impl MadSkin {
         let template = TextTemplate::from(&*template_md);
         let text = expander.expand(&template);
         let fmt_text = FmtText::from_text(self, text, Some(width as usize));
-        write!( w, "{}", fmt_text)
+        write!(w, "{}", fmt_text)
     }
 
     pub fn print_composite(&self, composite: Composite<'_>) {
@@ -573,24 +593,52 @@ impl MadSkin {
         );
         self.paragraph.repeat_space(f, lpo + left_margin)?;
         ls.compound_style.repeat_space(f, lpi)?;
-        if let CompositeKind::ListItem(depth) = fc.kind {
-            for _ in 0..depth {
-                write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
-            }
-            write!(f, "{}", self.bullet)?;
-            write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
-        }
-        if self.list_items_indentation_mode == ListItemsIndentationMode::Block {
-            if let CompositeKind::ListItemFollowUp(depth) = fc.kind {
-                for _ in 0..depth + 1 {
+        let block = self.list_items_indentation_mode == ListItemsIndentationMode::Block;
+        match fc.kind {
+            CompositeKind::ListItem(depth) => {
+                for _ in 0..depth {
                     write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
                 }
-                write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+                write!(
+                    f,
+                    "{}{}",
+                    self.bullet,
+                    self.paragraph.compound_style.apply_to(' ')
+                )?;
             }
-        }
-        if fc.kind == CompositeKind::Quote {
-            write!(f, "{}", self.quote_mark)?;
-            write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+            CompositeKind::OrderedListItem { level, index } => {
+                for _ in 0..level {
+                    write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+                }
+                let ois = self.ordered_item_style(level);
+                write!(
+                    f,
+                    "{}{}{}",
+                    ois.index_style.apply_to(index.to_string()),
+                    ois.index_suffix,
+                    self.paragraph.compound_style.apply_to(' ')
+                )?;
+            }
+            CompositeKind::ListItemFollowUp(depth) if block => {
+                for _ in 0..depth + 2 {
+                    write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+                }
+            }
+            CompositeKind::OrderedListItemFollowUp { level, index } if block => {
+                let indent = ordered_item_indent(level, index);
+                for _ in 0..indent {
+                    write!(f, "{}", self.paragraph.compound_style.apply_to(' '))?;
+                }
+            }
+            CompositeKind::Quote => {
+                write!(
+                    f,
+                    "{}{}",
+                    self.quote_mark,
+                    self.paragraph.compound_style.apply_to(' ')
+                )?;
+            }
+            _ => {}
         }
         #[cfg(feature = "special-renders")]
         for c in &fc.compounds {

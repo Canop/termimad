@@ -19,10 +19,10 @@ static TEMPLATE: &str = r#"
 
 ## What this example demonstrates
 
-* read a skin from the skin file in the example directory
-* print this text with the skin just deserialized
-* a simple template
-* ~~animated style transitions~~
+1. read a skin from the skin file in the example directory
+2. print this text with the skin just deserialized
+3. a simple template
+4. ~~animated style transitions~~
 
 ## How it works
 

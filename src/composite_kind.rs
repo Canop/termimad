@@ -10,6 +10,14 @@ pub enum CompositeKind {
     Header(u8),
     ListItem(u8),
     ListItemFollowUp(u8),
+    OrderedListItem {
+        level: u8,
+        index: u32,
+    },
+    OrderedListItemFollowUp {
+        level: u8,
+        index: u32,
+    },
     Code,
     Quote,
 }
@@ -20,8 +28,10 @@ impl From<CompositeStyle> for CompositeKind {
             CompositeStyle::Paragraph => Self::Paragraph,
             CompositeStyle::Header(level) => Self::Header(level),
             CompositeStyle::ListItem(level) => Self::ListItem(level),
+            CompositeStyle::OrderedListItem { level, index } => Self::OrderedListItem { level, index },
             CompositeStyle::Code => Self::Code,
             CompositeStyle::Quote => Self::Quote,
         }
     }
 }
+

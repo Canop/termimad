@@ -11,6 +11,7 @@ use {
 fn follow_up_composite<'s>(fc: &FmtComposite<'s>, skin: &MadSkin) -> FmtComposite<'s> {
     let kind = match fc.kind {
         CompositeKind::ListItem(l) => CompositeKind::ListItemFollowUp(l),
+        CompositeKind::OrderedListItem { level, index } => CompositeKind::OrderedListItemFollowUp { level, index },
         k => k,
     };
     let visible_length = match kind {
@@ -18,6 +19,11 @@ fn follow_up_composite<'s>(fc: &FmtComposite<'s>, skin: &MadSkin) -> FmtComposit
             if skin.list_items_indentation_mode == ListItemsIndentationMode::Block =>
         {
             2 + l as usize
+        }
+        CompositeKind::OrderedListItemFollowUp { level, index }
+            if skin.list_items_indentation_mode == ListItemsIndentationMode::Block =>
+        {
+            ordered_item_indent(level, index)
         }
         CompositeKind::Quote => 2,
         _ => 0,
@@ -33,7 +39,10 @@ fn follow_up_composite<'s>(fc: &FmtComposite<'s>, skin: &MadSkin) -> FmtComposit
 /// return the inherent widths related to the kind, the one of the first line (for
 /// example with a bullet) and the ones for the next lines (for example with quotes)
 #[must_use]
-pub fn composite_kind_widths(composite_kind: CompositeKind, skin: &MadSkin) -> (usize, usize) {
+pub fn composite_kind_widths(
+    composite_kind: CompositeKind,
+    skin: &MadSkin,
+) -> (usize, usize) {
     match composite_kind {
         CompositeKind::Paragraph => (0, 0),
         CompositeKind::Header(_) => (0, 0),
@@ -48,6 +57,20 @@ pub fn composite_kind_widths(composite_kind: CompositeKind, skin: &MadSkin) -> (
             let indent = 2 + depth as usize;
             match skin.list_items_indentation_mode {
                 ListItemsIndentationMode::FirstLineOnly => (0, 0),
+                ListItemsIndentationMode::Block => (indent, indent),
+            }
+        }
+        CompositeKind::OrderedListItem { level, index } => {
+            let indent = ordered_item_indent(level, index);
+            match skin.list_items_indentation_mode {
+                ListItemsIndentationMode::FirstLineOnly => (indent, 0),
+                ListItemsIndentationMode::Block => (indent, indent),
+            }
+        }
+        CompositeKind::OrderedListItemFollowUp { level, index } => {
+            let indent = ordered_item_indent(level, index);
+            match skin.list_items_indentation_mode {
+                ListItemsIndentationMode::FirstLineOnly => (indent, 0),
                 ListItemsIndentationMode::Block => (indent, indent),
             }
         }

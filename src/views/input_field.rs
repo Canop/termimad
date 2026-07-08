@@ -78,7 +78,7 @@ impl InputField {
     pub fn new(area: Area) -> Self {
         let focused_style = CompoundStyle::default();
         let unfocused_style = CompoundStyle::default();
-        let mut cursor_style = focused_style.clone();
+        let mut cursor_style = focused_style;
         cursor_style.add_attr(Attribute::Reverse);
         Self {
             content: InputFieldContent::default(),
@@ -153,7 +153,7 @@ impl InputField {
     }
     pub fn set_normal_style(&mut self, style: CompoundStyle) {
         self.focused_style = style;
-        self.cursor_style = self.focused_style.clone();
+        self.cursor_style = self.focused_style;
         self.cursor_style.add_attr(Attribute::Reverse);
     }
     pub fn set_unfocused_style(&mut self, style: CompoundStyle) {

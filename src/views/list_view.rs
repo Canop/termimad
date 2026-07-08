@@ -310,7 +310,7 @@ impl<'t, T> ListView<'t, T> {
                         }
                         let cell = (col.extract)(&self.rows[row_idx].data);
                         if selected {
-                            let mut style = cell.style.clone();
+                            let mut style = *cell.style;
                             style.set_bg(self.selection_background);
                             col.spacing
                                 .write_counted_str(w, &cell.con, cell.width, &style)?;
