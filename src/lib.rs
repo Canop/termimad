@@ -119,6 +119,7 @@ mod line;
 mod line_style;
 mod list_indentation;
 mod macros;
+mod ordered_item_style;
 mod parse;
 mod rect;
 mod scrollbar_style;
@@ -164,6 +165,7 @@ pub use {
         self,
         Alignment,
     },
+    ordered_item_style::*,
     parse::*,
     rect::*,
     scrollbar_style::ScrollBarStyle,

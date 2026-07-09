@@ -16,7 +16,7 @@ use {
 ///
 /// You should not use this enum unless you're writing
 /// your own skin type Serialize/Deserialize impls.
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum ScrollBarStyleDef {
     Simple(StyledChar),
@@ -38,8 +38,8 @@ impl From<&ScrollBarStyle> for ScrollBarStyleDef {
             ))
         } else {
             Self::Rich {
-                track: sc.track.clone(),
-                thumb: sc.thumb.clone(),
+                track: sc.track,
+                thumb: sc.thumb,
             }
         }
     }

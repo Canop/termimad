@@ -15,7 +15,7 @@ use {
 /// It's made of
 ///  - the base style of the compounds
 ///  - the alignment
-#[derive(Default, Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq)]
 pub struct LineStyle {
     pub compound_style: CompoundStyle,
     pub align: Alignment,
@@ -85,7 +85,7 @@ impl LineStyle {
         self.repeat_char(f, ' ', count)
     }
 
-    pub fn blend_with<C: Into<coolor::Color>>(&mut self, color: C, weight: f32) {
+    pub fn blend_with<C: Into<coolor::Color> + Copy>(&mut self, color: C, weight: f32) {
         self.compound_style.blend_with(color, weight);
     }
 }

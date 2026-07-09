@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+### next
+- Support for ordered lists, and their depth dependent styling - Fix #75
+- `CompoundStyle`, `LineStyle`, and `StyledChar` are now `Copy`
+
 <a name="v0.34.1"></a>
 ### v0.34.1 - 2025-11-24
 - new skin functions taking a Write as argument: write_expander, write_owning_expander and write_owning_expander_md

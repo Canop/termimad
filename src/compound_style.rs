@@ -39,7 +39,7 @@ pub static ATTRIBUTES: &[Attribute] = &[
 ];
 
 /// A style which may be applied to a compound
-#[derive(Default, Clone, Debug, PartialEq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq)]
 pub struct CompoundStyle {
     pub object_style: ContentStyle, // a crossterm content style
 }
@@ -251,11 +251,11 @@ impl CompoundStyle {
         Ok(())
     }
 
-    pub fn style_char(&self, nude_char: char) -> StyledChar {
-        StyledChar::new(self.clone(), nude_char)
+    pub fn style_char(self, nude_char: char) -> StyledChar {
+        StyledChar::new(self, nude_char)
     }
 
-    pub fn attrs(&self) -> Attributes {
+    pub fn attrs(self) -> Attributes {
         self.object_style.attributes
     }
 }
