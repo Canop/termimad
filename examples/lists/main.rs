@@ -22,7 +22,7 @@ static MD: &str = r#"
  * And that ordered and unordered lists can be mixed, and nested, in any way you want
   1. and you can go deeper than 2 levels, of course
   2. but remember that markdown doesn't allow the "2.1.2" kind of numbering, so it's often a bad idea to go deeper than 2 levels
- * By the way, and you should see that if your terminal is thin enough, default indentation logic is block based, which helps to keep the text readable, but you can also choose to have a fixed indentation, which is more compact and sometimes more readable
+ * By the way, and you should see that if your terminal is thin enough, default indentation logic is block based, which helps to keep the text readable, but you can also choose to have only the first line indented, which is more compact
 
 "#;
 
