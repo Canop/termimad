@@ -2,6 +2,7 @@
 
 ### next
 - Support for ordered lists, and their depth dependent styling - Fix #75
+- Unordered list items can also be created with `-` and `+` and not just `*`
 - `CompoundStyle`, `LineStyle`, and `StyledChar` are now `Copy`
 
 <a name="v0.34.1"></a>

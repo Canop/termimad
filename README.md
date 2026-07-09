@@ -315,19 +315,19 @@ Termimad also includes a few utilities helping efficient managing of events and 
 
 * [broot](https://github.com/Canop/broot) is a file manager and uses termimad for its help screen, status information and event management
 
-* [lfs](https://github.com/Canop/lfs) is a linux utility displaying file systems. Termimad templates are used to show the data in tables
+* [bacon](https://github.com/Canop/bacon) is a background Rust compiler. It uses Termimad for display and event management
+
+* [dysk](https://github.com/Canop/dysk) is a terminal utility displaying file systems. Termimad templates are used to show the data in tables
+
+* [Humility](https://github.com/oxidecomputer/humility) is a debugger for embedded systems. It uses Termimad to print Markdown documentation with the `humility doc` subcommand
 
 * [SafeCloset](https://github.com/Canop/safecloset) is a secret safe. Its TUI uses Termimad a lot, especially inputs
 
 * [Rhit](https://github.com/Canop/rhit) is a nginx log analyzer. Termimad templates are used to show the data in tables
 
-* [bacon](https://github.com/Canop/bacon) is a background Rust compiler. It uses Termimad for display and event management
-
 * [lapin](https://github.com/Canop/lapin) is a terminal game. It uses Termimad for display and event management
 
 * [backdown](https://github.com/Canop/backdown) is a file deduplicator. It uses Termimad to print on screen and ask questions
-
-* [Humility](https://github.com/oxidecomputer/humility) is a debugger for embedded systems. It uses Termimad to print Markdown documentation with the `humility doc` subcommand
 
 If you're the author of another application using Termimad, please tell me.
 
