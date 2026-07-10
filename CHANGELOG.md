@@ -1,6 +1,7 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-### next
+<a name="v0.35.0"></a>
+### v0.35.0 - 2026-07-10
 - Support for ordered lists, and their depth dependent styling - Fix #75
 - Unordered list items can also be created with `-` and `+` and not just `*`
 - `CompoundStyle`, `LineStyle`, and `StyledChar` are now `Copy`
