@@ -2,7 +2,7 @@ use termimad::crossterm::style::{Attribute::*, Color::*};
 use termimad::*;
 
 fn show(skin: &MadSkin, src: &str) {
-    println!(" Raw       : {}", &src);
+    println!(" Raw       : {}", src);
     println!(" Formatted : {}\n", skin.inline(src));
 }
 

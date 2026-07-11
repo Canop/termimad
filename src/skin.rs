@@ -229,7 +229,7 @@ impl MadSkin {
         self.ellipsis.set_fg(fg);
         #[cfg(feature = "special-renders")]
         {
-            for (_, sc) in self.special_chars.iter_mut() {
+            for sc in self.special_chars.values_mut() {
                 sc.set_fg(fg);
             }
         }
@@ -255,7 +255,7 @@ impl MadSkin {
         self.scrollbar.set_bg(bg);
         #[cfg(feature = "special-renders")]
         {
-            for (_, sc) in self.special_chars.iter_mut() {
+            for sc in self.special_chars.values_mut() {
                 sc.set_bg(bg);
             }
         }

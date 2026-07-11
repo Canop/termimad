@@ -223,10 +223,10 @@ mod wrap_tests {
     /// check line lenghts are what is expected
     #[allow(clippy::needless_range_loop)]
     fn check_line_lengths(skin: &MadSkin, src: &str, width: usize, lenghts: Vec<usize>) {
-        println!("====\ninput text:\n{}", &src);
+        println!("====\ninput text:\n{}", src);
         let text = skin.text(src, Some(width));
         assert_eq!(text.lines.len(), lenghts.len(), "same number of lines");
-        println!("====\nwrapped text:\n{}", &text);
+        println!("====\nwrapped text:\n{}", text);
         for i in 0..lenghts.len() {
             assert_eq!(
                 visible_fmt_line_length(skin, &text.lines[i]),
@@ -258,9 +258,9 @@ mod wrap_tests {
     fn check_space_removing() {
         let skin = crate::get_default_skin();
         let src = FmtComposite::from(Composite::from_inline("syntax coloring"), skin);
-        println!("input:\n{:?}", &src);
+        println!("input:\n{:?}", src);
         let wrapped = hard_wrap_composite(&src, 8, skin).unwrap();
-        println!("wrapped: {:?}", &wrapped);
+        println!("wrapped: {:?}", wrapped);
         assert_eq!(wrapped.len(), 2);
     }
 

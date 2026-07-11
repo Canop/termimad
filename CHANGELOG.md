@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.35.1"></a>
+### v0.35.1 - 2026-07-11
+- Fix a panic in some cases of tables with rows having more columns than the header row - Fix #77
+
 <a name="v0.35.0"></a>
 ### v0.35.0 - 2026-07-10
 - Support for ordered lists, and their depth dependent styling - Fix #75

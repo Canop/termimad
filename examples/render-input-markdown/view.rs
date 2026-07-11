@@ -95,7 +95,7 @@ impl View {
             self.input.display_on(w)?;
             let md = self.input.get_content();
             let text = FmtText::from(&self.render_skin, &md, Some(self.render_area.width as usize - 1));
-            debug!("text: {:#?}", &text); // look at termimad.log if you want to check the parsed md
+            debug!("text: {:#?}", text); // look at termimad.log if you want to check the parsed md
             let text_view = TextView::from(&self.render_area, &text);
             text_view.write_on(w)?;
         }
