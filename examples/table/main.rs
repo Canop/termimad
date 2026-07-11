@@ -12,10 +12,10 @@ static MD_TABLE: &str = r#"
 | syntax coloring | no |
 | crossed text |  ~~not yet~~ | wait... now it works `~~like this~~`
 | horizontal rule | yes | Use 3 or more dashes (`---`)
-| lists | yes|* unordered lists supported
-|  | |* ordered lists *not* supported
+| lists | yes|1. unordered lists supported
+|  | |2. ordered lists supported too (since Termimad 0.35)
 | quotes |  yes |> What a wonderful time to be alive!
-| links | no | (but your terminal already handles raw URLs)
+| links | no | (but your terminal already handles raw URLs: try hover https://dystroy.org)
 |-
 *Run this example again in a terminal with a different width*
 "#;
