@@ -130,8 +130,8 @@ impl Table {
                 cells.truncate(nbcols);
                 for ic in 0..nbcols {
                     if cells.len() <= ic {
-                        //FIXME isn't this already done ?
                         cells.push(FmtComposite::new());
+                        cells_to_add.push(Vec::new()); // keep cells_to_add aligned with nbcols
                         continue;
                     }
                     cells_to_add.push(Vec::new());
@@ -253,4 +253,14 @@ pub fn fix_all_tables(lines: &mut Vec<FmtLine<'_>>, width: usize, skin: &MadSkin
     for tbl in find_tables(lines).iter_mut().rev() {
         tbl.fix_columns(lines, width, skin);
     }
+}
+
+#[test]
+fn test_fix_issue_77() {
+    let skin = MadSkin::default();
+    // Header has 2 columns; the data row has 6.
+    let md = "| Key | Value |\n\
+              | --- | --- |\n\
+              | alpha | beta | gamma | delta | epsilon | zeta |\n";
+    let _ = skin.text(md, Some(20)).to_string(); // Panics with Termimad 0.35.0
 }
