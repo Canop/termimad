@@ -1,12 +1,14 @@
 use {
     crate::{
         code,
+        composite_kind::CompositeKind,
         fit::wrap,
         line::FmtLine,
         skin::MadSkin,
         tbl,
     },
     minimad::{
+        Line,
         parse_text,
         Options,
         Text,
@@ -39,7 +41,7 @@ impl<'k, 's> FmtText<'k, 's> {
     /// This can be called directly or using one of the skin helper
     /// method.
     pub fn from(skin: &'k MadSkin, src: &'s str, width: Option<usize>) -> FmtText<'k, 's> {
-        let mt = parse_text(src, Options::default());
+        let mt = parse_text(src, Options::default().keep_code_fences(true));
         Self::from_text(skin, mt, width)
     }
     /// build a text as raw (with no markdown interpretation)
@@ -54,13 +56,37 @@ impl<'k, 's> FmtText<'k, 's> {
         mut text: Text<'s>,
         width: Option<usize>,
     ) -> FmtText<'k, 's> {
-        let mut lines = text
-            .lines
-            .drain(..)
-            .map(|mline| FmtLine::from(mline, skin))
-            .collect();
+        // Manual loop (instead of drain().map()) to track the current code-fence language tag.
+        let mut lines: Vec<FmtLine<'s>> = Vec::with_capacity(text.lines.len());
+        let mut current_code_lang: Option<String> = None;
+        for mline in text.lines.drain(..) {
+            match mline {
+                Line::CodeFence(ref composite) => {
+                    // Opening fence carries the language; closing fence has no compounds → None.
+                    current_code_lang = composite
+                        .compounds
+                        .first()
+                        .map(|c| c.src.to_string())
+                        .filter(|s| !s.is_empty());
+                    // CodeFence lines are not pushed to the output.
+                }
+                other => {
+                    let mut fmt_line = FmtLine::from(other, skin);
+                    // Attach the language tag to Code composites.
+                    if let FmtLine::Normal(ref mut fc) = fmt_line {
+                        if fc.kind == CompositeKind::Code {
+                            fc.code_lang = current_code_lang.clone();
+                        }
+                    }
+                    lines.push(fmt_line);
+                }
+            }
+        }
         tbl::fix_all_tables(&mut lines, width.unwrap_or(usize::MAX), skin);
         code::justify_blocks(&mut lines);
+        // Syntax highlighting replaces Normal(Code) lines with HighlightedCode lines.
+        // This must happen after justify_blocks so block widths are already set.
+        code::highlight_blocks(&mut lines, skin);
         if let Some(width) = width {
             if width >= 3 {
                 lines =

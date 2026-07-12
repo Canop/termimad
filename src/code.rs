@@ -75,3 +75,58 @@ pub fn justify_blocks(lines: &mut [FmtLine<'_>]) {
         b.justify(lines);
     }
 }
+
+/// If the skin has a `code_syntax_highlighter`, replace all `FmtLine::Normal(Code)` blocks
+/// with `FmtLine::HighlightedCode` lines.
+///
+/// This must be called *after* `justify_blocks` so that block widths are already set.
+pub fn highlight_blocks(lines: &mut Vec<FmtLine<'_>>, skin: &MadSkin) {
+    let Some(ref highlighter) = skin.code_syntax_highlighter else {
+        return;
+    };
+
+    let blocks = find_blocks(lines);
+    // Process in reverse so that splice indices remain valid.
+    for block in blocks.into_iter().rev() {
+        // Collect source text and metadata from the block's lines.
+        let mut lang: Option<String> = None;
+        let mut block_width: usize = 0;
+        let code_lines: Vec<String> = lines
+            .iter()
+            .skip(block.start)
+            .take(block.height)
+            .filter_map(|l| {
+                if let FmtLine::Normal(fc) = l {
+                    if lang.is_none() {
+                        lang = fc.code_lang.clone();
+                    }
+                    block_width = block_width
+                        .max(fc.spacing.map(|s| s.width).unwrap_or(fc.visible_length));
+                    Some(fc.compounds.iter().map(|c| c.src).collect::<String>())
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        if code_lines.is_empty() {
+            continue;
+        }
+
+        let highlighted = highlighter.highlight(&code_lines.join("\n"), lang.as_deref());
+
+        let new_lines: Vec<FmtLine<'_>> = highlighted
+            .into_iter()
+            .zip(code_lines.iter())
+            .map(|(ansi_line, raw_line)| {
+                FmtLine::HighlightedCode(HighlightedCodeLine {
+                    content: ansi_line,
+                    visible_len: raw_line.chars().count(),
+                    block_width,
+                })
+            })
+            .collect();
+
+        lines.splice(block.start..block.start + block.height, new_lines);
+    }
+}

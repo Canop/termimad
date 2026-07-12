@@ -13,6 +13,17 @@ use crate::{
     },
 };
 
+/// A syntax-highlighted code line, produced after the highlighting pass.
+#[derive(Debug)]
+pub struct HighlightedCodeLine {
+    /// ANSI-escaped highlighted content for this line
+    pub content: String,
+    /// Visible character width (without ANSI codes)
+    pub visible_len: usize,
+    /// Width of the containing code block (used for right-padding)
+    pub block_width: usize,
+}
+
 /// A line in a text. This structure should normally not be
 /// used outside of the lib.
 #[derive(Debug)]
@@ -21,6 +32,8 @@ pub enum FmtLine<'s> {
     TableRow(FmtTableRow<'s>),
     TableRule(FmtTableRule),
     HorizontalRule,
+    /// A code line that has been replaced by syntax-highlighted output.
+    HighlightedCode(HighlightedCodeLine),
 }
 
 impl<'s> FmtLine<'s> {
@@ -46,6 +59,7 @@ impl<'s> FmtLine<'s> {
             FmtLine::TableRow(row) => row.cells.iter().fold(0, |s, c| s + c.visible_length), // Is that right ? no spacing ?
             FmtLine::TableRule(rule) => 1 + rule.widths.iter().fold(0, |s, w| s + w + 1),
             FmtLine::HorizontalRule => 0, // No intrinsic width
+            FmtLine::HighlightedCode(l) => l.visible_len,
         }
     }
 }

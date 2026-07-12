@@ -54,6 +54,40 @@ pub struct MadSkin {
     pub table_border_chars: &'static TableBorderChars,
     pub list_items_indentation_mode: ListItemsIndentationMode,
 
+    /// Optional syntax highlighter for fenced code blocks.
+    ///
+    /// When set, fenced code blocks are rendered using the highlighter's output
+    /// instead of the default code style.
+    ///
+    /// # Example with syntect
+    ///
+    /// ```rust,ignore
+    /// use std::sync::Arc;
+    /// use syntect::easy::HighlightLines;
+    /// use syntect::highlighting::ThemeSet;
+    /// use syntect::parsing::SyntaxSet;
+    /// use syntect::util::as_24_bit_terminal_escaped;
+    /// use termimad::{CodeHighlighter, MadSkin};
+    ///
+    /// let ps = SyntaxSet::load_defaults_newlines();
+    /// let theme = ThemeSet::load_defaults().themes["base16-ocean.dark"].clone();
+    ///
+    /// let mut skin = MadSkin::default();
+    /// skin.code_syntax_highlighter = Some(CodeHighlighter(Arc::new(move |code, lang| {
+    ///     let syntax = lang
+    ///         .and_then(|l| ps.find_syntax_by_token(l))
+    ///         .unwrap_or_else(|| ps.find_syntax_plain_text());
+    ///     let mut h = HighlightLines::new(syntax, &theme);
+    ///     code.lines()
+    ///         .map(|line| {
+    ///             let ranges = h.highlight_line(line, &ps).unwrap_or_default();
+    ///             as_24_bit_terminal_escaped(&ranges, false)
+    ///         })
+    ///         .collect()
+    /// })));
+    /// ```
+    pub code_syntax_highlighter: Option<CodeHighlighter>,
+
     /// compounds which should be replaced with special
     /// renders.
     /// Experimental. This API will probably change
@@ -93,6 +127,7 @@ impl Default for MadSkin {
             ellipsis: CompoundStyle::default(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
             list_items_indentation_mode: Default::default(),
+            code_syntax_highlighter: None,
 
             #[cfg(feature = "special-renders")]
             special_chars: std::collections::HashMap::new(),
@@ -131,6 +166,7 @@ impl MadSkin {
             horizontal_rule: StyledChar::nude('―'),
             ellipsis: CompoundStyle::default(),
             list_items_indentation_mode: Default::default(),
+            code_syntax_highlighter: None,
             #[cfg(feature = "special-renders")]
             special_chars: std::collections::HashMap::new(),
             table_border_chars: STANDARD_TABLE_BORDER_CHARS,
@@ -742,6 +778,16 @@ impl MadSkin {
             FmtLine::HorizontalRule => {
                 if let Some(w) = width {
                     write!(f, "{}", self.horizontal_rule.repeated(w))?;
+                }
+            }
+            FmtLine::HighlightedCode(hl) => {
+                // Write the ANSI-highlighted content then reset terminal colors.
+                write!(f, "{}", hl.content)?;
+                write!(f, "\x1b[0m")?;
+                // Right-pad to block_width using the code_block background.
+                if with_right_completion {
+                    let padding = hl.block_width.saturating_sub(hl.visible_len);
+                    self.code_block.compound_style.repeat_space(f, padding)?;
                 }
             }
         }

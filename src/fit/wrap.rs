@@ -33,6 +33,7 @@ fn follow_up_composite<'s>(fc: &FmtComposite<'s>, skin: &MadSkin) -> FmtComposit
         compounds: Vec::new(),
         visible_length,
         spacing: fc.spacing,
+        code_lang: None,
     }
 }
 
@@ -100,6 +101,7 @@ pub fn hard_wrap_composite<'s, 'c>(
         compounds: Vec::new(),
         visible_length: first_width,
         spacing: src_composite.spacing,
+        code_lang: None,
     };
 
     // Strategy 1:
