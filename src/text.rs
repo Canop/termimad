@@ -60,13 +60,16 @@ impl<'k, 's> FmtText<'k, 's> {
             .map(|mline| FmtLine::from(mline, skin))
             .collect();
         tbl::fix_all_tables(&mut lines, width.unwrap_or(usize::MAX), skin);
-        code::justify_blocks(&mut lines);
         if let Some(width) = width {
             if width >= 3 {
                 lines =
                     wrap::hard_wrap_lines(lines, width, skin).expect("width should be wide enough");
             }
         }
+        // Justify code blocks *after* wrapping: a code line wider than `width` is
+        // hard-wrapped, so the block must be squared to the widest *wrapped* line to
+        // keep every row within `width`. Squaring before wrapping caused #80.
+        code::justify_blocks(&mut lines);
         FmtText { skin, lines, width }
     }
     /// set the width to render the text to.
