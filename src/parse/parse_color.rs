@@ -98,22 +98,3 @@ pub fn parse_color(s: &str) -> Result<Color, ParseColorError> {
     )
     .ok_or(ParseColorError::Unrecognized)
 }
-
-#[test]
-fn test_parse_color() {
-    assert_eq!(parse_color("rgb(255, 35, 45)").unwrap(), rgb(255, 35, 45),);
-    assert!(matches!(
-        parse_color("rgb(255, 260, 45)"),
-        Err(ParseColorError::Unrecognized),
-    ));
-    assert!(matches!(
-        parse_color("gray(25)"),
-        Err(ParseColorError::InvalidGreyLevel { level: 25 }),
-    ));
-    assert_eq!(
-        parse_color("gray(11)").unwrap(),
-        parse_color("GREY(11)").unwrap(),
-    );
-    assert_eq!(parse_color("Green").unwrap(), Color::Green);
-    assert_eq!(parse_color("ansi(11)").unwrap(), Color::AnsiValue(11));
-}

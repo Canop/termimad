@@ -1,5 +1,8 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+### next
+- fix code blocks overflowing the available width when a line is wider than it, instead of being wrapped - Fix #80 - Thanks @youdie006
+
 <a name="v0.35.1"></a>
 ### v0.35.1 - 2026-07-11
 - Fix a panic in some cases of tables with rows having more columns than the header row - Fix #77

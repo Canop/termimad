@@ -1,10 +1,7 @@
 //! Regression test for https://github.com/Canop/termimad/issues/80
 //!
 //! When a code block contains a line wider than the width passed to
-//! `skin.text`, every rendered row must still fit that width. Before the fix,
-//! `justify_blocks` ran before `hard_wrap_lines`, so each code line's spacing
-//! was squared to the widest *raw* line (e.g. 300) and the rendered rows
-//! overflowed the requested width instead of being wrapped into it.
+//! `skin.text`, every rendered row must still fit that width.
 
 use termimad::MadSkin;
 
@@ -51,8 +48,7 @@ fn code_block_wider_than_width_is_wrapped_not_padded() {
 }
 
 /// A code block that already fits the width must still be justified into a
-/// rectangle: every code row is padded to the same (widest) width. This guards
-/// against a fix that would break uniform justification for fitting blocks.
+/// rectangle: every code row is padded to the same (widest) width.
 #[test]
 fn small_code_block_stays_square() {
     let width = 80;

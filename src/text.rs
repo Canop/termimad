@@ -66,9 +66,6 @@ impl<'k, 's> FmtText<'k, 's> {
                     wrap::hard_wrap_lines(lines, width, skin).expect("width should be wide enough");
             }
         }
-        // Justify code blocks *after* wrapping: a code line wider than `width` is
-        // hard-wrapped, so the block must be squared to the widest *wrapped* line to
-        // keep every row within `width`. Squaring before wrapping caused #80.
         code::justify_blocks(&mut lines);
         FmtText { skin, lines, width }
     }
