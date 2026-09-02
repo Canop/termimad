@@ -61,23 +61,36 @@ where
         self.allowed -= len;
         cs.queue(self.w, string)
     }
+    /// Queue the char if it fits in the remaining width.
+    /// A char which doesn't fit stops all further char writing.
     pub fn queue_char(&mut self, cs: &CompoundStyle, c: char) -> Result<(), Error> {
-        let width = UnicodeWidthChar::width(c).unwrap_or(0);
-        if width < self.allowed {
-            self.allowed -= width;
-            cs.queue(self.w, c)?;
+        if c == '\t' {
+            return self.queue_str(cs, self.tab_replacement);
         }
+        let width = UnicodeWidthChar::width(c).unwrap_or(0);
+        if width > self.allowed {
+            // a following narrower char must not take this char's place
+            self.allowed = 0;
+            return Ok(());
+        }
+        self.allowed -= width;
+        cs.queue(self.w, c)?;
         Ok(())
     }
+    /// Queue the char if it fits in the remaining width.
+    /// A char which doesn't fit stops all further char writing.
     pub fn queue_unstyled_char(&mut self, c: char) -> Result<(), Error> {
         if c == '\t' {
             return self.queue_unstyled_str(self.tab_replacement);
         }
         let width = UnicodeWidthChar::width(c).unwrap_or(0);
-        if width < self.allowed {
-            self.allowed -= width;
-            self.w.queue(Print(c))?;
+        if width > self.allowed {
+            // a following narrower char must not take this char's place
+            self.allowed = 0;
+            return Ok(());
         }
+        self.allowed -= width;
+        self.w.queue(Print(c))?;
         Ok(())
     }
     /// a "g_string" is a "gentle" one: each char takes one column on screen.
@@ -151,5 +164,74 @@ where
         len = len.min(self.allowed);
         self.allowed -= len;
         filling.queue_unstyled(self.w, len)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn written(f: impl Fn(&mut CropWriter<'_, Vec<u8>>)) -> String {
+        let mut buf = Vec::new();
+        let mut cw = CropWriter::new(&mut buf, 5);
+        f(&mut cw);
+        String::from_utf8(buf).unwrap()
+    }
+
+    #[test]
+    fn chars_fill_the_allowed_width() {
+        let s = written(|cw| {
+            for c in "abcdefg".chars() {
+                cw.queue_unstyled_char(c).unwrap();
+            }
+        });
+        assert_eq!(s, "abcde");
+        let s = written(|cw| {
+            for c in "abc".chars() {
+                cw.queue_unstyled_char(c).unwrap();
+            }
+            cw.queue_unstyled_str("defg").unwrap();
+        });
+        assert_eq!(s, "abcde");
+    }
+
+    #[test]
+    fn unfitting_char_stops_the_writing() {
+        // the wide char doesn't fit in the last column, and 'e'
+        // must not take its place
+        let s = written(|cw| {
+            for c in "abcd日e".chars() {
+                cw.queue_unstyled_char(c).unwrap();
+            }
+        });
+        assert_eq!(s, "abcd");
+        let s = written(|cw| {
+            for c in "abc日本".chars() {
+                cw.queue_unstyled_char(c).unwrap();
+            }
+        });
+        assert_eq!(s, "abc日");
+    }
+
+    #[test]
+    fn combining_mark_kept_on_last_column() {
+        let s = written(|cw| {
+            for c in "abcde\u{301}".chars() {
+                cw.queue_unstyled_char(c).unwrap();
+            }
+        });
+        assert_eq!(s, "abcde\u{301}");
+    }
+
+    #[test]
+    fn styled_chars_fill_the_allowed_width() {
+        let cs = CompoundStyle::default();
+        let s = written(|cw| {
+            for c in "abcdefg".chars() {
+                cw.queue_char(&cs, c).unwrap();
+            }
+            cw.fill(&cs, &SPACE_FILLING).unwrap();
+        });
+        assert_eq!(s, "abcde");
     }
 }
