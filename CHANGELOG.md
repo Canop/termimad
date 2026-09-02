@@ -1,6 +1,7 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-### next
+<a name="v0.35.3"></a>
+### v0.35.3 - 2026-09-02
 - fix `CropWriter::queue_char` and `queue_unstyled_char` never writing in the last allowed column
 - `CropWriter::queue_char` replaces tabs like `queue_unstyled_char` does
 - a char which doesn't fit the remaining width stops `CropWriter`'s char-level writing, instead of letting a following narrower char take its column
