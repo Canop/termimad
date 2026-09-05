@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+<a name="v0.35.4"></a>
+### v0.35.4 - 2026-09-05
+- fix `parse_color` returning the light variant for `darkblue`, `darkcyan` and `darkyellow`, and accepting strings merely containing a color name
+
 <a name="v0.35.3"></a>
 ### v0.35.3 - 2026-09-02
 - fix `CropWriter::queue_char` and `queue_unstyled_char` never writing in the last allowed column

@@ -25,6 +25,17 @@ fn test_parse_color() {
     );
     assert_eq!(parse_color("Green").unwrap(), Color::Green);
     assert_eq!(parse_color("ansi(11)").unwrap(), Color::AnsiValue(11));
+    assert_eq!(parse_color("darkblue").unwrap(), Color::DarkBlue);
+    assert_eq!(parse_color("DarkCyan").unwrap(), Color::DarkCyan);
+    assert_eq!(parse_color("DARKYELLOW").unwrap(), Color::DarkYellow);
+    assert!(matches!(
+        parse_color("reddish"),
+        Err(ParseColorError::Unrecognized),
+    ));
+    assert!(matches!(
+        parse_color("dark red"),
+        Err(ParseColorError::Unrecognized),
+    ));
 }
 
 #[test]
