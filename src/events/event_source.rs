@@ -27,6 +27,7 @@ use {
         Sender,
     },
     std::{
+        io,
         sync::{
             atomic::{
                 AtomicUsize,
@@ -44,6 +45,11 @@ use {
 
 const DOUBLE_CLICK_MAX_DURATION: Duration = Duration::from_millis(700);
 const ESCAPE_SEQUENCE_CHANNEL_SIZE: usize = 10;
+/// Number of consecutive read errors after which the terminal is
+/// considered gone and the reader thread stops (which closes the
+/// events channel and lets the application quit)
+const MAX_CONSECUTIVE_READ_ERRORS: usize = 10;
+const READ_ERROR_DELAY: Duration = Duration::from_millis(20);
 
 struct TimedClick {
     time: Instant,
@@ -168,10 +174,22 @@ impl EventSource {
                     }
                 }
             };
+            let mut consecutive_read_errors = 0;
             loop {
                 let ct_event = match crossterm::event::read() {
-                    Ok(e) => e,
-                    _ => {
+                    Ok(e) => {
+                        consecutive_read_errors = 0;
+                        e
+                    }
+                    Err(e) if e.kind() == io::ErrorKind::Interrupted => {
+                        continue;
+                    }
+                    Err(_) => {
+                        consecutive_read_errors += 1;
+                        if consecutive_read_errors >= MAX_CONSECUTIVE_READ_ERRORS {
+                            return; // the terminal is gone
+                        }
+                        thread::sleep(READ_ERROR_DELAY);
                         continue;
                     }
                 };

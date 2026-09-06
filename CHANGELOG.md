@@ -1,5 +1,8 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+### next
+- the event reader thread stops after repeated read errors instead of looping at full CPU when the terminal is gone (eg closed without the process receiving a HUP), so that the application quits
+
 <a name="v0.35.4"></a>
 ### v0.35.4 - 2026-09-05
 - fix `parse_color` returning the light variant for `darkblue`, `darkcyan` and `darkyellow`, and accepting strings merely containing a color name
