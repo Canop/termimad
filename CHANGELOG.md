@@ -1,6 +1,8 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
-### next
+<a name="v0.35.5"></a>
+### v0.35.5 - 2026-09-23
+- InputField: fix wrong routing of key combination, which made some combinations wrongly interpreted when using the kitty keyboard protocol
 - the event reader thread stops after repeated read errors instead of looping at full CPU when the terminal is gone (eg closed without the process receiving a HUP), so that the application quits
 
 <a name="v0.35.4"></a>

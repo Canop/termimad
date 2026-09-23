@@ -470,10 +470,14 @@ impl InputField {
     }
 
     /// apply the event to change the state (content, cursor, focus)
-    ///
+    //
     /// Return true when the event was used.
     pub fn apply_timed_event(&mut self, event: &TimedEvent) -> bool {
-        self.apply_event(&event.event, event.double_click)
+        if let Some(kc) = event.key_combination {
+            self.apply_key_combination(kc)
+        } else {
+            self.apply_event(&event.event, event.double_click)
+        }
     }
 
     pub fn scroll_up(&mut self) -> bool {
