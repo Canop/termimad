@@ -331,8 +331,10 @@ Termimad also includes a few utilities helping efficient managing of events and 
 
 If you're the author of another application using Termimad, please tell me.
 
-## Crossterm compatibility
+## Reexports
 
 [Crossterm](https://github.com/crossterm-rs/crossterm) is a 0.x library which means its API isn't frozen. And it does change sometimes so libraries based on Crossterm can't always use its last version.
 
 Crossterm is reexported by Termimad so you don't have to declare the import yourself. You may use crossterm as `termimad::crossterm`.
+
+unicode_width, which also had a breaking change in a patch version, is reexported too.

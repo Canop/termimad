@@ -1,5 +1,9 @@
 *If you're reading this because you try make sense of some new API or a breaking change, you might also be interested in coming to the chat for explanations or guidance.*
 
+### next
+- unicode-width updated to 0.2.2 - Thanks @hwright
+- unicode_width is reexported, as `termimad::unicode_width`
+
 <a name="v0.35.5"></a>
 ### v0.35.5 - 2026-09-23
 - InputField: fix wrong routing of key combination, which made some combinations wrongly interpreted when using the kitty keyboard protocol

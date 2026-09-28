@@ -175,6 +175,7 @@ pub use {
     table_border_chars::*,
     text::FmtText,
     tbl::*,
+    unicode_width,
     views::{
         InputField,
         ListView,
